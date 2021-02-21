@@ -30,6 +30,7 @@ from sphinx.util.cfamily import (ASTAttributeList, ASTBaseBase, ASTBaseParenExpr
                                  octal_literal_re, verify_description_mode)
 from sphinx.util.docfields import Field, GroupedField, TypedField
 from sphinx.util.docutils import SphinxDirective
+from sphinx.util.inventory import InventoryItemSet
 from sphinx.util.nodes import make_refnode
 from sphinx.util.typing import OptionSpec
 
@@ -39,6 +40,7 @@ T = TypeVar('T')
 DeclarationType = Union[
     "ASTStruct", "ASTUnion", "ASTEnum", "ASTEnumerator",
     "ASTType", "ASTTypeWithInit", "ASTMacro",
+    "ASTIntersphinx_v2",
 ]
 
 # https://en.cppreference.com/w/c/keyword
@@ -1402,6 +1404,28 @@ class ASTEnumerator(ASTBase):
             self.attrs.describe_signature(signode)
         if self.init:
             self.init.describe_signature(signode, 'markType', env, symbol)
+
+
+class ASTIntersphinx_v2(ASTBaseBase):
+    def __init__(self, name: ASTNestedName, data: InventoryItemSet):
+        self.name = name
+        self.data = data
+
+    def _stringify(self, transform: StringifyTransform) -> str:
+        return transform(self.name) + " (has data)"
+
+    def get_id(self, version: int, objectType: str, symbol: "Symbol") -> str:
+        return symbol.get_full_nested_name().get_id(version)
+
+    def describe_signature(self, signode: TextElement, mode: str,
+                           env: "BuildEnvironment", symbol: "Symbol") -> None:
+        raise AssertionError()  # should not happen
+
+    @property
+    def function_params(self):
+        # the v2 data does not contain actual declarations, but just names
+        # so return nothing here
+        return None
 
 
 class ASTDeclaration(ASTBaseBase):
@@ -3795,6 +3819,10 @@ class CDomain(Domain):
         'objects': {},  # fullname -> docname, node_id, objtype
     }
 
+    initial_intersphinx_inventory = {
+        'root_symbol': Symbol(None, None, None, None, None),
+    }
+
     def clear_doc(self, docname: str) -> None:
         if Symbol.debug_show_tree:
             print("clear_doc:", docname)
@@ -3841,9 +3869,10 @@ class CDomain(Domain):
                     ourObjects[fullname] = (fn, id_, objtype)
                 # no need to warn on duplicates, the symbol merge already does that
 
-    def _resolve_xref_inner(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
-                            typ: str, target: str, node: pending_xref,
-                            contnode: Element) -> Tuple[Optional[Element], Optional[str]]:
+    def _resolve_xref_in_tree(self, env: BuildEnvironment, root: Symbol,
+                              softParent: bool,
+                              typ: str, target: str,
+                              node: pending_xref) -> Tuple[Symbol, ASTNestedName]:
         parser = DefinitionParser(target, location=node, config=env.config)
         try:
             name = parser.parse_xref_object()
@@ -3852,19 +3881,32 @@ class CDomain(Domain):
                            location=node)
             return None, None
         parentKey: LookupKey = node.get("c:parent_key", None)
-        rootSymbol = self.data['root_symbol']
         if parentKey:
-            parentSymbol: Symbol = rootSymbol.direct_lookup(parentKey)
+            parentSymbol: Symbol = root.direct_lookup(parentKey)
             if not parentSymbol:
-                print("Target: ", target)
-                print("ParentKey: ", parentKey)
-                print(rootSymbol.dump(1))
-            assert parentSymbol  # should be there
+                if softParent:
+                    parentSymbol = root
+                else:
+                    raise AssertionError(f"Target: {target}\n"
+                                         f"ParentKey: {parentKey}\n"
+                                         f"{root.dump(1)}\n")
         else:
-            parentSymbol = rootSymbol
+            parentSymbol = root
         s = parentSymbol.find_declaration(name, typ,
                                           matchSelf=True, recurseInAnon=True)
         if s is None or s.declaration is None:
+            return None, None
+            # TODO: conditionally warn about xrefs with incorrect tagging?
+        return s, name
+
+    def _resolve_xref_inner(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
+                            typ: str, target: str, node: pending_xref,
+                            contnode: Element) -> Tuple[Element, str]:
+        if Symbol.debug_lookup:
+            print("C._resolve_xref_inner(type={}, target={})".format(typ, target))
+        s, name = self._resolve_xref_in_tree(env, self.data['root_symbol'],
+                                             False, typ, target, node)
+        if s is None:
             return None, None
 
         # TODO: check role type vs. object type
@@ -3907,6 +3949,50 @@ class CDomain(Domain):
             docname = symbol.docname
             newestId = symbol.declaration.get_newest_id()
             yield (name, dispname, objectType, docname, newestId, 1)
+
+    def intersphinx_add_entries_v2(self, store: Dict,
+                                   data: Dict[str, Dict[str, InventoryItemSet]]) -> None:
+        root = store['root_symbol']  # type: Symbol
+        for object_type, per_type_data in data.items():
+            for object_name, item_set in per_type_data.items():
+                parser = DefinitionParser(
+                    object_name, location=('intersphinx', 0), config=self.env.config)
+                try:
+                    ast = parser._parse_nested_name()
+                except DefinitionError as e:
+                    logger.warning("Error in C entry in intersphinx inventory:\n" + str(e))
+                    continue
+                decl = ASTDeclaration(object_type, 'intersphinx',
+                                      ASTIntersphinx_v2(ast, item_set))
+                root.add_declaration(decl, docname="$FakeIntersphinxDoc", line=0)
+
+    def _intersphinx_resolve_xref_inner(self, env: "BuildEnvironment", store: Dict,
+                                        target: str,
+                                        node: pending_xref,
+                                        typ: str) -> Optional[InventoryItemSet]:
+        if Symbol.debug_lookup:
+            print("C._intersphinx_resolve_xref_inner(type={}, target={})".format(typ, target))
+        s, name = self._resolve_xref_in_tree(env, store['root_symbol'],
+                                             True, typ, target, node)
+        if s is None:
+            return None
+        assert s.declaration is not None
+        decl = cast(ASTIntersphinx_v2, s.declaration.declaration)
+        return decl.data
+
+    def intersphinx_resolve_xref(self, env: "BuildEnvironment",
+                                 store: Any,
+                                 typ: str, target: str,
+                                 disabled_object_types: List[str],
+                                 node: pending_xref, contnode: TextElement
+                                 ) -> Optional[InventoryItemSet]:
+        if typ == 'any':
+            with logging.suppress_logging():
+                return self._intersphinx_resolve_xref_inner(
+                    env, store, target, node, typ)
+        else:
+            return self._intersphinx_resolve_xref_inner(
+                env, store, target, node, typ)
 
 
 def setup(app: Sphinx) -> Dict[str, Any]:
