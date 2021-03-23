@@ -15,6 +15,7 @@ Features added
 
 - #10286: C++, support requires clauses not just between the template
   parameter lists and the declaration.
+- #8929: Delegate intersphinx lookup to individual domains.
 
 Bugs fixed
 ----------
