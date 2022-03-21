@@ -1,0 +1,74 @@
+name: QA Themes
+
+on: [push]
+
+jobs:
+  qa:
+    name: ${{ matrix.theme }} (Docutils ${{ matrix.docutils }}; Sphinx ${{ matrix.sphinx }})
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        theme: ["alabaster", "furo", "pydata_sphinx_theme", "sphinx_rtd_theme"]
+        docutils: ["17.1", "18.1"]
+        sphinx: ["4.4", "5.0"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - run: touch requirements.txt
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.9"
+        cache: "pip"
+
+    - name: Install Sphinx (4.4)
+      if: matrix.sphinx == '4.4'
+      run: pip install -U "sphinx==4.4.0"
+    - name: Install Sphinx (5.0)
+      if: matrix.sphinx == '5.0'
+      run: pip install -U "git+https://github.com/sphinx-doc/sphinx.git"
+
+    - name: Install sphinxcontrib-httpdomain
+      run: pip install -U "sphinxcontrib-httpdomain"
+
+    - name: Install ${{ matrix.theme }}
+      run: pip install -U "${{ matrix.theme }}"
+
+    - name: Install Docutils ${{ matrix.docutils }}
+      run: pip install --no-deps --no-warn-conflicts "docutils==0.${{ matrix.docutils }}"
+
+    - name: Update conf.py
+      run: echo "html_theme='${{ matrix.theme }}'" >> qa/demo/conf.py
+
+    - name: Print conf.py
+      run: cat qa/demo/conf.py
+
+    - name: Run Sphinx
+      run: |
+        cd qa
+        python -m sphinx demo sphinx-${{ matrix.sphinx }}_docutils-${{ matrix.docutils }}_theme-${{ matrix.theme }}
+        
+    - name: Store output
+      uses: actions/upload-artifact@v3
+      with:
+        name: themes-qa
+        path: qa/
+
+  pages:
+    needs: qa
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Download builds
+      uses: actions/download-artifact@v3
+      with:
+        name: themes-qa
+        path: qa-out/
+
+    - name: Deploy to GitHub pages
+      uses: JamesIves/github-pages-deploy-action@v4.2.2
+      with:
+        branch: gh-pages
+        folder: qa-out/
+        single-commit: true

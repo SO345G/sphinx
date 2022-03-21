@@ -1,0 +1,11 @@
+<html lang="en">
+  <body>
+    <script>
+    fetch('https://api.github.com/repos/AA-Turner/sphinx/contents/?ref=gh-pages').then(response => response.json()).then(data => {
+        let htmlString = ""
+        for (const file of data) {htmlString += `<li><a href="${file.path}">${file.name}</a></li>`}
+        document.getElementsByTagName('body')[0].innerHTML = '<ul>' + htmlString + '</ul>';
+      })
+    </script>
+  </body>
+</html>
