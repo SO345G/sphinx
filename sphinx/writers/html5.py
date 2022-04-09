@@ -17,8 +17,8 @@ from sphinx import addnodes
 from sphinx.builders import Builder
 from sphinx.locale import _, __, admonitionlabels
 from sphinx.util import logging
+from sphinx.util._image_size import get_image_size
 from sphinx.util.docutils import SphinxTranslator
-from sphinx.util.images import get_image_size
 
 if TYPE_CHECKING:
     from sphinx.builders.html import StandaloneHTMLBuilder

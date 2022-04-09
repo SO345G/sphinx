@@ -2,24 +2,7 @@
 
 import pytest
 
-from sphinx.util.images import (
-    get_image_extension,
-    get_image_size,
-    guess_mimetype,
-    parse_data_uri,
-)
-
-GIF_FILENAME = 'img.gif'
-PNG_FILENAME = 'img.png'
-PDF_FILENAME = 'img.pdf'
-TXT_FILENAME = 'index.txt'
-
-
-def test_get_image_size(rootdir):
-    assert get_image_size(rootdir / 'test-root' / GIF_FILENAME) == (200, 181)
-    assert get_image_size(rootdir / 'test-root' / PNG_FILENAME) == (200, 181)
-    assert get_image_size(rootdir / 'test-root' / PDF_FILENAME) is None
-    assert get_image_size(rootdir / 'test-root' / TXT_FILENAME) is None
+from sphinx.util.images import get_image_extension, guess_mimetype, parse_data_uri
 
 
 @pytest.mark.filterwarnings('ignore:The content argument')

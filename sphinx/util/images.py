@@ -6,15 +6,10 @@ import base64
 from os import path
 from typing import TYPE_CHECKING, NamedTuple, overload
 
-import imagesize
+from sphinx.util._image_size import get_image_size  # NoQA: F401
 
 if TYPE_CHECKING:
     from os import PathLike
-
-try:
-    from PIL import Image
-except ImportError:
-    Image = None
 
 mime_suffixes = {
     '.gif': 'image/gif',
@@ -32,23 +27,6 @@ class DataURI(NamedTuple):
     mimetype: str
     charset: str
     data: bytes
-
-
-def get_image_size(filename: str) -> tuple[int, int] | None:
-    try:
-        size = imagesize.get(filename)
-        if size[0] == -1:
-            size = None
-        elif isinstance(size[0], float) or isinstance(size[1], float):
-            size = (int(size[0]), int(size[1]))
-
-        if size is None and Image:  # fallback to Pillow
-            with Image.open(filename) as im:
-                size = im.size
-
-        return size
-    except Exception:
-        return None
 
 
 @overload
