@@ -1,0 +1,21 @@
+{
+  "srcDir": ".",
+  "srcFiles": [
+    "sphinx/themes/basic/static/doctools.js",
+    "sphinx/themes/basic/static/searchtools.js"
+  ],
+  "specDir": "tests/js",
+  "specFiles": [
+    "*.js"
+  ],
+  "helpers": [
+  ],
+  "env": {
+    "stopSpecOnExpectationFailure": false,
+    "stopOnSpecFailure": false,
+    "random": true
+  },
+  "browser": {
+    "name": "headlessChrome"
+  }
+}

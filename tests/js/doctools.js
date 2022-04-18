@@ -31,8 +31,8 @@ describe('highlightText', function() {
        seems to be necessary, even between different FF versions */
     const expectedSvgString =
       '<svg xmlns="http://www.w3.org/2000/svg" height="50" width="500">'
-      + '<rect x=".*" y=".*" width=".*" height=".*" class="highlighted"/>'
-      + '<rect x=".*" y=".*" width=".*" height=".*" class="highlighted"/>'
+      + '<rect class="highlighted" x=".*" y=".*" width=".*" height=".*"/>'
+      + '<rect class="highlighted" x=".*" y=".*" width=".*" height=".*"/>'
       + '<text x=".*" y=".*">This is the <tspan>шеллы</tspan> and '
       + '<tspan>Gänsefüßchen</tspan> test!</text></svg>';
     expect(new XMLSerializer().serializeToString(highlightTestSvg.firstChild)).toMatch(new RegExp(expectedSvgString));
