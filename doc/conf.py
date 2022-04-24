@@ -41,8 +41,6 @@ epub_uid = 'web-site'
 epub_scheme = 'url'
 epub_identifier = epub_publisher
 epub_pre_files = [('index.xhtml', 'Welcome')]
-epub_post_files = [('usage/installation.xhtml', 'Installing Sphinx'),
-                   ('develop.xhtml', 'Sphinx development')]
 epub_exclude_files = ['_static/opensearch.xml', '_static/doctools.js',
                       '_static/jquery.js', '_static/searchtools.js',
                       '_static/underscore.js', '_static/basic.css',
@@ -91,14 +89,6 @@ extlinks = {'duref': ('https://docutils.sourceforge.io/docs/ref/rst/'
 man_pages = [
     ('contents', 'sphinx-all', 'Sphinx documentation generator system manual',
      'Georg Brandl', 1),
-    ('man/sphinx-build', 'sphinx-build', 'Sphinx documentation generator tool',
-     '', 1),
-    ('man/sphinx-quickstart', 'sphinx-quickstart', 'Sphinx documentation '
-     'template generator', '', 1),
-    ('man/sphinx-apidoc', 'sphinx-apidoc', 'Sphinx API doc generator tool',
-     '', 1),
-    ('man/sphinx-autogen', 'sphinx-autogen', 'Generate autodoc stub pages',
-     '', 1),
 ]
 
 texinfo_documents = [
@@ -184,3 +174,5 @@ def setup(app):
     app.info = lambda *args, **kwargs: logger.info(*args, **kwargs)
     app.warn = lambda *args, **kwargs: logger.warning(*args, **kwargs)
     app.debug = lambda *args, **kwargs: logger.debug(*args, **kwargs)
+
+    return {'parallel_read_safe': True, 'parallel_write_safe': True}
