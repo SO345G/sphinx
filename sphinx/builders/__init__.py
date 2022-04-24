@@ -337,10 +337,7 @@ class Builder:
             docnames = set(docnames) & self.env.found_docs
 
         # determine if we can write in parallel
-        if parallel_available and self.app.parallel > 1 and self.allow_parallel:
-            self.parallel_ok = self.app.is_parallel_allowed('write')
-        else:
-            self.parallel_ok = False
+        self.parallel_ok = self.app.parallel > 1 and self.app.is_parallel_allowed('write')
 
         #  create a task executor to use for misc. "finish-up" tasks
         # if self.parallel_ok:
@@ -399,12 +396,7 @@ class Builder:
         self.events.emit('env-before-read-docs', self.env, docnames)
 
         # check if we should do parallel or serial read
-        if parallel_available and len(docnames) > 5 and self.app.parallel > 1:
-            par_ok = self.app.is_parallel_allowed('read')
-        else:
-            par_ok = False
-
-        if par_ok:
+        if len(docnames) > 5 and self.app.parallel > 1 and self.app.is_parallel_allowed('read'):
             self._read_parallel(docnames, nproc=self.app.parallel)
         else:
             self._read_serial(docnames)
