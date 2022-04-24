@@ -64,7 +64,7 @@ class Builder:
     versioning_method = 'none'
     versioning_compare = False
     #: allow parallel write_doc() calls
-    allow_parallel = False
+    allow_parallel = True
     # support translation
     use_message_catalog = True
 

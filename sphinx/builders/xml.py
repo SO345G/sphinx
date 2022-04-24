@@ -27,7 +27,6 @@ class XMLBuilder(Builder):
     epilog = __('The XML files are in %(outdir)s.')
 
     out_suffix = '.xml'
-    allow_parallel = True
 
     _writer_class: Union[Type[XMLWriter], Type[PseudoXMLWriter]] = XMLWriter
     default_translator_class = XMLTranslator

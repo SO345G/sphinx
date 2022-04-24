@@ -177,7 +177,6 @@ class StandaloneHTMLBuilder(Builder):
     epilog = __('The HTML pages are in %(outdir)s.')
 
     copysource = True
-    allow_parallel = True
     out_suffix = '.html'
     link_suffix = '.html'  # defaults to matching out_suffix
     indexer_format: Any = js_index

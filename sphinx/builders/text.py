@@ -22,7 +22,6 @@ class TextBuilder(Builder):
     epilog = __('The text files are in %(outdir)s.')
 
     out_suffix = '.txt'
-    allow_parallel = True
     default_translator_class = TextTranslator
 
     current_docname: str = None

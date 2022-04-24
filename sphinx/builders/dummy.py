@@ -13,8 +13,6 @@ class DummyBuilder(Builder):
     name = 'dummy'
     epilog = __('The dummy builder generates no files.')
 
-    allow_parallel = True
-
     def init(self) -> None:
         pass
 
