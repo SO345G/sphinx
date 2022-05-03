@@ -38,3 +38,5 @@ html_context = {}
 
 html_logo = "demo/static/logo-wordmark-light.svg"
 html_show_sourcelink = True
+
+html_theme_path = ['../../doc/_themes']

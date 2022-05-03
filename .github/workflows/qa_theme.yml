@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        theme: ["alabaster", "furo", "pydata_sphinx_theme", "sphinx_rtd_theme"]
+        theme: ["sphinx13"]
         docutils: ["17.1", "18.1"]
 
     steps:
@@ -26,9 +26,6 @@ jobs:
 
     - name: Install sphinxcontrib-httpdomain
       run: pip install -U "sphinxcontrib-httpdomain"
-
-    - name: Install ${{ matrix.theme }}
-      run: pip install -U "${{ matrix.theme }}"
 
     - name: Install Docutils ${{ matrix.docutils }}
       run: pip install --no-deps --no-warn-conflicts "docutils==0.${{ matrix.docutils }}"
