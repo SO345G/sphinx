@@ -3,6 +3,7 @@
 import codecs
 import pickle
 import time
+import types
 import warnings
 from os import path
 from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple,
@@ -25,7 +26,7 @@ from sphinx.util.console import bold  # type: ignore
 from sphinx.util.docutils import sphinx_domains
 from sphinx.util.i18n import CatalogInfo, CatalogRepository, docname_to_domain
 from sphinx.util.osutil import SEP, ensuredir, relative_uri, relpath
-from sphinx.util.parallel import ParallelTasks, SerialTasks, make_chunks, parallel_available
+from sphinx.util import parallel
 from sphinx.util.tags import Tags
 
 # side effect: registers roles and directives
@@ -344,7 +345,7 @@ class Builder:
         #     self.finish_tasks = ParallelTasks(self.app.parallel)
         # else:
         # for now, just execute them serially
-        self.finish_tasks = SerialTasks()
+        self.finish_tasks = parallel.SerialTasks()
 
         # write all "normal" documents (or everything for some builders)
         self.write(docnames, list(updated_docnames), method)
@@ -427,28 +428,40 @@ class Builder:
         for docname in docnames:
             self.events.emit('env-purge-doc', self.env, docname)
             self.env.clear_doc(docname)
+        app = types.SimpleNamespace(
+            config=self.app.config,
+            env=self.env,
+            registry=self.app.registry
+        )
+        # parallel.parallel_status_iterator(
+        #     nproc,
+        #     docnames,
+        #     __('reading sources... '),
+        #     "purple",
+        #     self.app.verbosity,
+        #     None,
+        #     _read_process,
+        #     _merge_from_process,
+        #     (self.env, app, self.confdir, self.doctreedir, self.config.default_role)
+        # )
+        with multiprocessing.pool.Pool(nproc, context=multiprocessing.context.SpawnContext()) as pool:
+            result = pool.apply_async(
+                _read_process,
+                (docnames[:10], self.env, app, self.confdir, self.doctreedir, self.config.default_role),
+                {},
+                _merge_from_process
+            )
 
-        def read_process(docs: List[str]) -> bytes:
-            self.env.app = self.app
-            for docname in docs:
-                self.read_doc(docname)
-            # allow pickling self to send it back
-            return pickle.dumps(self.env, pickle.HIGHEST_PROTOCOL)
+            # make sure all threads have finished
+            logger.info(bold(__('waiting for workers...')))
 
-        def merge(docs: List[str], otherenv: bytes) -> None:
-            env = pickle.loads(otherenv)
-            self.env.merge_info_from(docs, env, self.app)
+            while not result.ready():
+                result.wait(0.01)
 
-        tasks = ParallelTasks(nproc)
-        chunks = make_chunks(docnames, nproc)
+            ret = result.get(timeout=0)
+            if not result.successful():
+                raise RuntimeError("!!!") from ret
 
-        for chunk in status_iterator(chunks, __('reading sources... '), "purple",
-                                     len(chunks), self.app.verbosity):
-            tasks.add_task(read_process, chunk, merge)
-
-        # make sure all threads have finished
-        logger.info(bold(__('waiting for workers...')))
-        tasks.join()
 
     def read_doc(self, docname: str) -> None:
         """Parse a file and add/update inventory entries for the doctree."""
@@ -501,8 +514,14 @@ class Builder:
                 self.write_doc(docname, doctree)
 
     def _write_parallel(self, docnames: Sequence[str], nproc: int) -> None:
+        def chunk_preprocessor(chunk: List[str]):
+            arg = []
+            for docname in chunk:
+                doctree = self.env.get_and_resolve_doctree(docname, self)
+                self.write_doc_serialized(docname, doctree)
+                arg.append((docname, doctree))
+
         def write_process(docs: List[Tuple[str, nodes.document]]) -> None:
-            self.app.phase = BuildPhase.WRITING
             for docname, doctree in docs:
                 self.write_doc(docname, doctree)
 
@@ -514,22 +533,17 @@ class Builder:
         self.write_doc_serialized(firstname, doctree)
         self.write_doc(firstname, doctree)
 
-        tasks = ParallelTasks(nproc)
-        chunks = make_chunks(docnames, nproc)
+        parallel.parallel_status_iterator(
+            nproc,
+            docnames,
+            __('writing output... '),
+            "darkgreen",
+            self.app.verbosity,
+            chunk_preprocessor,
+            write_process,
+            None
+        )
 
-        self.app.phase = BuildPhase.RESOLVING
-        for chunk in status_iterator(chunks, __('writing output... '), "darkgreen",
-                                     len(chunks), self.app.verbosity):
-            arg = []
-            for docname in chunk:
-                doctree = self.env.get_and_resolve_doctree(docname, self)
-                self.write_doc_serialized(docname, doctree)
-                arg.append((docname, doctree))
-            tasks.add_task(write_process, arg)
-
-        # make sure all threads have finished
-        logger.info(bold(__('waiting for workers...')))
-        tasks.join()
 
     def prepare_writing(self, docnames: Set[str]) -> None:
         """A place where you can add logic before :meth:`write_doc` is run"""
@@ -574,6 +588,18 @@ class Builder:
         except AttributeError:
             optname = '%s_%s' % (default, option)
             return getattr(self.config, optname)
+
+
+def _read_process(docs: List[str], env, app, confdir, doctreedir, default_role_name) -> BuildEnvironment:
+    for docname in docs:
+        read_doc(docname, env, app, confdir, doctreedir, default_role_name)
+    return env
+
+
+def _merge_from_process(self: Builder, app, result: Dict[str, Any]) -> None:
+    otherenv = result["value"]
+    docs = result["arg"]
+    self.env.merge_info_from(docs, otherenv, app)
 
 
 def read_doc(docname: str, env: BuildEnvironment, app: "Sphinx", confdir: str, doctreedir: str, default_role_name: str) -> None:

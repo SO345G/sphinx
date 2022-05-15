@@ -13,7 +13,7 @@ from datetime import datetime
 from importlib import import_module
 from os import path
 from time import mktime, strptime
-from typing import (IO, TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Optional,
+from typing import (IO, TYPE_CHECKING, Any, Callable, Collection, Dict, Iterable, Iterator, List, Optional,
                     Pattern, Set, Tuple, Type)
 from urllib.parse import parse_qsl, quote_plus, urlencode, urlsplit, urlunsplit
 
@@ -445,32 +445,14 @@ def display_chunk(chunk: Any) -> str:
     return str(chunk)
 
 
-def old_status_iterator(iterable: Iterable, summary: str, color: str = "darkgreen",
-                        stringify_func: Callable[[Any], str] = display_chunk) -> Iterator:
-    l = 0
-    for item in iterable:
-        if l == 0:
-            logger.info(bold(summary), nonl=True)
-            l = 1
-        logger.info(stringify_func(item), color=color, nonl=True)
-        logger.info(" ", nonl=True)
-        yield item
-    if l == 1:
-        logger.info('')
-
-
-# new version with progress info
-def status_iterator(iterable: Iterable, summary: str, color: str = "darkgreen",
+def status_iterator(iterable: Collection, summary: str, color: str = "darkgreen",
                     length: int = 0, verbosity: int = 0,
                     stringify_func: Callable[[Any], str] = display_chunk) -> Iterable:
-    if length == 0:
-        yield from old_status_iterator(iterable, summary, color, stringify_func)
-        return
     l = 0
+    length = len(iterable)
     summary = bold(summary)
-    for item in iterable:
-        l += 1
-        s = '%s[%3d%%] %s' % (summary, 100 * l / length, colorize(color, stringify_func(item)))
+    for l, item in enumerate(iterable):
+        s = f'{summary}[{l * length / 100:3d}%] {colorize(color, stringify_func(item))}'
         if verbosity:
             s += '\n'
         else:

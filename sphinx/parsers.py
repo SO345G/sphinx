@@ -38,7 +38,6 @@ class Parser(docutils.parsers.Parser):
 
         :param sphinx.application.Sphinx app: Sphinx application object
         """
-        self._app = app
         self.config = app.config
         self.env = app.env
 
