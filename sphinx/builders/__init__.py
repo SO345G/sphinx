@@ -458,36 +458,7 @@ class Builder:
 
     def read_doc(self, docname: str) -> None:
         """Parse a file and add/update inventory entries for the doctree."""
-        self.env.prepare_settings(docname)
-
-        # Add confdir/docutils.conf to dependencies list if exists
-        docutilsconf = path.join(self.confdir, 'docutils.conf')
-        if path.isfile(docutilsconf):
-            self.env.note_dependency(docutilsconf)
-
-        filename = self.env.doc2path(docname)
-        filetype = get_filetype(self.app.config.source_suffix, filename)
-        publisher = self.app.registry.get_publisher(self.app, filetype)
-        with sphinx_domains(self.env), rst.default_role(docname, self.config.default_role):
-            # set up error_handler for the target document
-            codecs.register_error('sphinx', UnicodeDecodeErrorHandler(docname))  # type: ignore
-
-            publisher.set_source(source_path=filename)
-            publisher.publish()
-            doctree = publisher.document
-
-        # store time of reading, for outdated files detection
-        # (Some filesystems have coarse timestamp resolution;
-        # therefore time.time() can be older than filesystem's timestamp.
-        # For example, FAT32 has 2sec timestamp resolution.)
-        self.env.all_docs[docname] = max(time.time(),
-                                         path.getmtime(self.env.doc2path(docname)))
-
-        # cleanup
-        self.env.temp_data.clear()
-        self.env.ref_context.clear()
-
-        self.write_doctree(docname, doctree)
+        read_doc(docname, self.env, self.app, self.confdir, self.doctreedir, self.config.default_role)
 
     def write_doctree(self, docname: str, doctree: nodes.document) -> None:
         """Write the doctree to a file."""
@@ -606,6 +577,39 @@ class Builder:
         except AttributeError:
             optname = '%s_%s' % (default, option)
             return getattr(self.config, optname)
+
+
+def read_doc(docname: str, env: BuildEnvironment, app: "Sphinx", confdir: str, doctreedir: str, default_role_name: str) -> None:
+    """Parse a file and add/update inventory entries for the doctree."""
+    env.prepare_settings(docname)
+
+    # Add confdir/docutils.conf to dependencies list if exists
+    docutilsconf = path.join(confdir, 'docutils.conf')
+    if path.isfile(docutilsconf):
+        env.note_dependency(docutilsconf)
+
+    filename = env.doc2path(docname)
+    filetype = get_filetype(app.config.source_suffix, filename)
+    publisher = app.registry.get_publisher(app, filetype)
+    with sphinx_domains(env), rst.default_role(docname, default_role_name):
+        # set up error_handler for the target document
+        codecs.register_error('sphinx', UnicodeDecodeErrorHandler(docname))  # type: ignore
+
+        publisher.set_source(source_path=filename)
+        publisher.publish()
+        doctree = publisher.document
+
+    # store time of reading, for outdated files detection
+    # (Some filesystems have coarse timestamp resolution;
+    # therefore time.time() can be older than filesystem's timestamp.
+    # For example, FAT32 has 2sec timestamp resolution.)
+    env.all_docs[docname] = max(time.time(), path.getmtime(filename))
+
+    # cleanup
+    env.temp_data.clear()
+    env.ref_context.clear()
+
+    write_doctree(doctree, doctreedir, docname)
 
 
 def write_doctree(doctree: nodes.document, doctreedir: str, docname: str) -> None:
