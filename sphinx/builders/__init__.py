@@ -491,21 +491,7 @@ class Builder:
 
     def write_doctree(self, docname: str, doctree: nodes.document) -> None:
         """Write the doctree to a file."""
-        # make it picklable
-        doctree.reporter = None
-        doctree.transformer = None
-
-        # Create a copy of settings object before modification because it is
-        # shared with other documents.
-        doctree.settings = doctree.settings.copy()
-        doctree.settings.warning_stream = None
-        doctree.settings.env = None
-        doctree.settings.record_dependencies = None
-
-        doctree_filename = path.join(self.doctreedir, docname + '.doctree')
-        ensuredir(path.dirname(doctree_filename))
-        with open(doctree_filename, 'wb') as f:
-            pickle.dump(doctree, f, pickle.HIGHEST_PROTOCOL)
+        write_doctree(doctree, self.doctreedir, docname)
 
     def write(self, build_docnames: Iterable[str], updated_docnames: Sequence[str], method: str = 'update') -> None:  # NOQA
         if build_docnames is None or build_docnames == ['__all__']:
@@ -620,3 +606,23 @@ class Builder:
         except AttributeError:
             optname = '%s_%s' % (default, option)
             return getattr(self.config, optname)
+
+
+def write_doctree(doctree: nodes.document, doctreedir: str, docname: str) -> None:
+    """Write the doctree to a file."""
+
+    # Create a copy of the settings object before modification as it is shared
+    # with other documents.
+    doctree.settings = doctree.settings.copy()
+
+    # make the doctree picklable
+    doctree.reporter = None
+    doctree.transformer = None
+    doctree.settings.warning_stream = None
+    doctree.settings.env = None
+    doctree.settings.record_dependencies = None
+
+    doctree_filename = path.join(doctreedir, docname + '.doctree')
+    ensuredir(path.dirname(doctree_filename))
+    with open(doctree_filename, 'wb') as f:
+        pickle.dump(doctree, f, pickle.HIGHEST_PROTOCOL)
