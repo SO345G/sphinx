@@ -3,6 +3,7 @@
 import codecs
 import pickle
 import time
+import warnings
 from os import path
 from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple,
                     Type, Union)
@@ -11,6 +12,7 @@ from docutils import nodes
 from docutils.nodes import Node
 
 from sphinx.config import Config
+from sphinx.deprecation import RemovedInSphinx70Warning
 from sphinx.environment import CONFIG_CHANGED_REASON, CONFIG_OK, BuildEnvironment
 from sphinx.environment.adapters.asset import ImageAdapter
 from sphinx.errors import SphinxError
@@ -462,6 +464,9 @@ class Builder:
 
     def write_doctree(self, docname: str, doctree: nodes.document) -> None:
         """Write the doctree to a file."""
+        warnings.warn("sphinx.builders.Builder.write_doctree is deprecated, use"
+                      "sphinx.builders.write_doctree instead.",
+                      RemovedInSphinx70Warning, stacklevel=2)
         write_doctree(doctree, self.doctreedir, docname)
 
     def write(self, build_docnames: Iterable[str], updated_docnames: Sequence[str], method: str = 'update') -> None:  # NOQA
