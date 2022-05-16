@@ -423,41 +423,6 @@ class Builder:
             self.read_doc(docname)
 
     def _read_parallel(self, docnames: List[str], nproc: int) -> None:
-        with multiprocessing.pool.Pool(nproc, context=multiprocessing.context.SpawnContext()) as pool:
-            results = [
-                pool.apply_async(_process, (task_func, chunk, *extra_args), {}, callback)
-                for chunk in status_iterator(make_chunks(docnames, nproc), status_message, colour, verbosity=verbosity)
-            ]
-
-            # make sure all threads have finished
-            logger.info(bold(__('waiting for workers...')))
-            processing = len(results)
-            while processing > 0:
-                for result in results:
-                    result.wait(0.01)
-                    if not result.ready():
-                        continue
-
-                    try:
-                        ret = result.get(timeout=0)
-                    except Exception as err:
-                        raise SphinxParallelError(
-                            traceback.format_exception_only(None, err)[0].strip(),
-                            "".join(traceback.format_exception(err))
-                        ) from err
-
-                    if not result.successful():
-                        err: BaseException = ret  # type: ignore
-                        raise SphinxParallelError(
-                            traceback.format_exception_only(None, err)[0].strip(),
-                            "".join(traceback.format_exception(err))
-                        ) from ret
-
-                    for log in ret["logs"]:
-                        logger.handle(log)
-
-                    processing -= 1
-
         # clear all outdated docs at once
         for docname in docnames:
             self.events.emit('env-purge-doc', self.env, docname)
