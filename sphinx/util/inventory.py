@@ -2,10 +2,18 @@
 import os
 import re
 import zlib
-from typing import IO, TYPE_CHECKING, Callable, Iterator
+from os import path
+from typing import IO, TYPE_CHECKING, Callable, Iterator, List, Optional, Tuple
 
+from docutils import nodes
+from docutils.nodes import Element, TextElement
+from docutils.utils import relative_path
+
+from sphinx.addnodes import pending_xref
+from sphinx.locale import _
 from sphinx.util import logging
-from sphinx.util.typing import Inventory
+from sphinx.util.nodes import find_pending_xref_condition
+from sphinx.util.typing import Inventory, InventoryItem
 
 BUFSIZE = 16 * 1024
 logger = logging.getLogger(__name__)
@@ -166,3 +174,79 @@ class InventoryFile:
                              (name, domainname, typ, prio, uri, dispname))
                     f.write(compressor.compress(entry.encode()))
             f.write(compressor.flush())
+
+
+class InventoryItemSet:
+    def __init__(self):
+        self._items = []  # type: List[Tuple[str, InventoryItem]]
+
+    def __str__(self) -> str:
+        return "InventoryItemSet({})".format(", ".join(str(e) for e in self._items))
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def append(self, item: Tuple[str, InventoryItem]) -> None:
+        self._items.append(item)
+
+    def select_inventory(self, inv_name: Optional[str]) -> "InventoryItemSet":
+        if inv_name is None:
+            return self
+        items = [item for item in self._items if item[0] == inv_name]
+        if len(items) == 0:
+            return None
+        else:
+            res = InventoryItemSet()
+            res._items = items
+            return res
+
+    def make_refnode(self, domain_name: str, node: pending_xref,
+                     contnode: TextElement) -> Element:
+        assert len(self._items) != 0
+        namedRes = [r for r in self._items if r[0] is not None]
+        unnamedRes = [r for r in self._items if r[0] is None]
+        assert len(unnamedRes) <= 1
+        if len(unnamedRes) != 0:
+            r = unnamedRes[0]
+        else:
+            r = min(namedRes, key=lambda r: r[0])
+
+        # determine the contnode by pending_xref_condition
+        content = find_pending_xref_condition(node, 'resolved')
+        if content:
+            # resolved condition found.
+            contnodes = content.children
+            contnode = content.children[0]  # type: ignore
+        else:
+            # not resolved. Use the given contnode
+            contnodes = [contnode]
+
+        inv_name, inner_data = r
+
+        proj, version, uri, dispname = inner_data
+        if '://' not in uri and node.get('refdoc'):
+            # get correct path in case of subdirectories
+            uri = path.join(relative_path(node['refdoc'], '.'), uri)
+        if version:
+            reftitle = _('(in %s v%s)') % (proj, version)
+        else:
+            reftitle = _('(in %s)') % (proj,)
+        newnode = nodes.reference('', '', internal=False, refuri=uri, reftitle=reftitle)
+        if node.get('refexplicit'):
+            # use whatever title was given
+            newnode.extend(contnodes)
+        elif dispname == '-' or \
+                (domain_name == 'std' and node['reftype'] == 'keyword'):
+            # use whatever title was given, but strip prefix
+            title = contnode.astext()
+            if node.get('origtarget') and \
+                    node['origtarget'] != node['reftarget'] and \
+                    title.startswith(inv_name + ':'):
+                newnode.append(contnode.__class__(title[len(inv_name) + 1:],
+                                                  title[len(inv_name) + 1:]))
+            else:
+                newnode.extend(contnodes)
+        else:
+            # else use the given display name (used for :ref:)
+            newnode.append(contnode.__class__(dispname, dispname))
+        return newnode

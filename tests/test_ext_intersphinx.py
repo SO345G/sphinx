@@ -11,7 +11,8 @@ from docutils import nodes
 from sphinx import addnodes
 from sphinx.ext.intersphinx import (INVENTORY_FILENAME, _get_safe_url, _strip_basic_auth,
                                     fetch_inventory, inspect_main, load_mappings,
-                                    missing_reference, normalize_intersphinx_mapping)
+                                    missing_reference, normalize_intersphinx_mapping,
+                                    process_disabled_reftypes)
 from sphinx.ext.intersphinx import setup as intersphinx_setup
 
 from .test_util_inventory import inventory_v2, inventory_v2_not_having_version
@@ -331,18 +332,22 @@ def test_missing_reference_disabled_domain(tempdir, app, status, warning):
 
     # the base case, everything should resolve
     assert app.config.intersphinx_disabled_reftypes == []
+    process_disabled_reftypes(app.env)
     case(term=True, doc=True, py=True)
 
     # disabled a single ref type
     app.config.intersphinx_disabled_reftypes = ['std:doc']
+    process_disabled_reftypes(app.env)
     case(term=True, doc=False, py=True)
 
     # disabled a whole domain
     app.config.intersphinx_disabled_reftypes = ['std:*']
+    process_disabled_reftypes(app.env)
     case(term=False, doc=False, py=True)
 
     # disabled all domains
     app.config.intersphinx_disabled_reftypes = ['*']
+    process_disabled_reftypes(app.env)
     case(term=False, doc=False, py=False)
 
 
