@@ -18,6 +18,7 @@ from sphinx.locale import _, __
 from sphinx.roles import EmphasizedLiteral, XRefRole
 from sphinx.util import docname_join, logging, ws_re
 from sphinx.util.docutils import SphinxDirective
+from sphinx.util.inventory import InventoryItemSet
 from sphinx.util.nodes import clean_astext, make_id, make_refnode
 from sphinx.util.typing import OptionSpec, RoleFunction
 
@@ -995,6 +996,33 @@ class StandardDomain(Domain):
                                 make_refnode(builder, fromdocname, docname,
                                              labelid, contnode)))
         return results
+
+    def _intersphinx_adjust_object_types(self, objtypes: List[str]) -> None:
+        # we adjust the object types for backwards compatibility
+        if 'cmdoption' in objtypes:
+            # until Sphinx-1.6, cmdoptions are stored as std:option
+            objtypes.append('option')
+
+    def _intersphinx_resolve_xref_lookup(self, store: Dict[str, Dict[str, InventoryItemSet]],
+                                         target: str, objtypes: List[str]
+                                         ) -> Optional[InventoryItemSet]:
+        # Semi-haxy overwriting of the private method in Domain, as we only need to do
+        # case-insensitive lookup for std:term
+        for objtype in objtypes:
+            if objtype not in store:
+                continue
+
+            if target in store[objtype]:
+                # Case-sensitive match, use it
+                return store[objtype][target]
+            elif objtype == 'term':
+                # Check for potential case-insensitive matches for terms only
+                target_lower = target.lower()
+                insensitive_matches = list(filter(lambda k: k.lower() == target_lower,
+                                                  store[objtype].keys()))
+                if insensitive_matches:
+                    return store[objtype][insensitive_matches[0]]
+        return None
 
     def get_objects(self) -> Iterator[Tuple[str, str, str, str, str, int]]:
         # handle the special 'doc' reference here
