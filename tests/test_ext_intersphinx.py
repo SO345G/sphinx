@@ -195,6 +195,31 @@ def test_missing_reference_pydomain(tempdir, app, status, warning):
     assert rn.astext() == 'Foo.bar'
 
 
+def test_py_old_property(tempdir, app, status, warning):
+    inv_file = tempdir / 'inventory'
+    inv_file.write_bytes(b'''\
+# Sphinx inventory version 2
+# Project: foo
+# Version: 2.0
+# The remainder of this file is compressed with zlib.
+''' + zlib.compress(b'''\
+module1.Foo.bar py:method 1 index.html#foo.Bar.baz -
+'''))
+    set_config(app, {
+        'https://docs.python.org/': inv_file,
+    })
+
+    # load the inventory and check if it's done correctly
+    normalize_intersphinx_mapping(app, app.config)
+    load_mappings(app)
+
+    # py:attr context helps to search objects
+    kwargs = {'py:module': 'module1'}
+    node, contnode = fake_node('py', 'attr', 'Foo.bar', 'Foo.bar', **kwargs)
+    rn = missing_reference(app, app.env, node, contnode)
+    assert rn.astext() == 'Foo.bar'
+
+
 def test_missing_reference_stddomain(tempdir, app, status, warning):
     inv_file = tempdir / 'inventory'
     inv_file.write_bytes(inventory_v2)

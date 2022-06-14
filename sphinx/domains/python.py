@@ -1407,6 +1407,12 @@ class PythonDomain(Domain):
         return make_refnode(builder, fromdocname, module.docname, module.node_id,
                             contnode, title)
 
+    def _intersphinx_adjust_object_types(self, objtypes: List[str]) -> None:
+        # we adjust the object types for backwards compatibility
+        if 'attribute' in objtypes:
+            # Since Sphinx-2.1, properties are stored as py:method
+            objtypes.append('method')
+
     def get_objects(self) -> Iterator[Tuple[str, str, str, str, str, int]]:
         for modname, mod in self.modules.items():
             yield (modname, modname, 'module', mod.docname, mod.node_id, 0)

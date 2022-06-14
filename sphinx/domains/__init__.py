@@ -429,10 +429,7 @@ class Domain:
 
     def _intersphinx_adjust_object_types(self, objtypes: List[str]) -> None:
         # for std and py to overwrite for their backwards compatibility
-        # we adjust the object types for backwards compatibility
-        if self.name == 'py' and 'attribute' in objtypes:
-            # Since Sphinx-2.1, properties are stored as py:method
-            objtypes.append('method')
+        pass
 
     def _intersphinx_resolve_xref_lookup(self, store: Dict[str, Dict[str, InventoryItemSet]],
                                          target: str, objtypes: List[str]
