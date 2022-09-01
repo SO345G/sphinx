@@ -293,35 +293,37 @@ def load_mappings(app: Sphinx) -> None:
 
     if any(updated):
         inventories.clear()
-        # old stuff, still used in the tests
-        cached_vals = list(inventories.cache.values())
-        named_vals = sorted(v for v in cached_vals if v[0])
-        unnamed_vals = [v for v in cached_vals if not v[0]]
-        for _name, _x, invdata in named_vals + unnamed_vals:
-            for type, objects in invdata.items():
-                inventories.main_inventory.setdefault(type, {}).update(objects)
-        # end of old stuff
+
+        if True:
+            # old stuff, still used in the tests
+            cached_vals = list(inventories.cache.values())
+            named_vals = sorted(v for v in cached_vals if v[0])
+            unnamed_vals = [v for v in cached_vals if not v[0]]
+            for _name, _, invdata in named_vals + unnamed_vals:
+                for type, objects in invdata.items():
+                    inventories.main_inventory.setdefault(type, {}).update(objects)
+            # end of old stuff
 
         # first collect all entries indexed by domain, object name, and object type
         # domain -> object_type -> object_name -> InventoryItemSet([(inv_name, inner_data)])
         entries: dict[str, dict[str, dict[str, InventoryItemSet]]] = {}
-        for inv_name, _x, inv_data in inventories.cache.values():
+        for inv_name, _, inv_data in inventories.cache.values():
             assert inv_name not in inventories.names
             inventories.names.add(inv_name)
 
-            # inv_data: Inventory = Dict[str, Dict[str, InventoryItem]]
-            for inv_type, inv_objects in inv_data.items():
-                # inv_objects: Dict[str, InventoryItem]
-                assert ':' in inv_type
-                domain_name, object_type = inv_type.split(':')
-                # the inventory may have objects in domains we don't use
+            for inv_object_type, inv_objects in inv_data.items():
+                domain_name, object_type = inv_object_type.split(':')
+
+                # skip objects in domains we don't use
                 if domain_name not in app.env.domains:
                     continue
+
                 domain_entries = entries.setdefault(domain_name, {})
-                for object_name, inner_data in inv_objects.items():
-                    per_type = domain_entries.setdefault(object_type, {})
-                    itemSet = per_type.setdefault(object_name, InventoryItemSet())
-                    itemSet.append((inv_name, inner_data))
+                per_type = domain_entries.setdefault(object_type, {})
+                for object_name, object_data in inv_objects.items():
+                    item_set = per_type.setdefault(object_name, InventoryItemSet())
+                    item_set.append(inv_name, object_data)
+
         # and then give the data to each domain
         for domain_name, domain_entries in entries.items():
             if debug:
@@ -374,8 +376,8 @@ def _resolve_reference(env: BuildEnvironment, inv_name: str | None,
 
     if node['reftype'] == 'any':
         for domain_name, domain in env.domains.items():
-            if honor_disabled_refs \
-                    and EnvAdapter(env).all_domain_objtypes_disabled(domain_name):
+            if (honor_disabled_refs
+                    and EnvAdapter(env).all_domain_objtypes_disabled(domain_name)):
                 continue
             res = _resolve_reference_in_domain(env, inv_name, honor_disabled_refs,
                                                domain, node, contnode)
