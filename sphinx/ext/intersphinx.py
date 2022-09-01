@@ -347,7 +347,7 @@ def load_mappings(app: Sphinx) -> None:
                 print("intersphinx debug(load_mappings): entries={}".format(domain_entries))
             domain = app.env.domains[domain_name]
             domain_store = inventories.by_domain_inventory[domain_name]
-            domain.intersphinx_add_entries_v2(domain_store, domain_entries)
+            domain.intersphinx_add_entries(domain_store, domain_entries)
 
 
 def _resolve_reference_in_domain(env: BuildEnvironment,

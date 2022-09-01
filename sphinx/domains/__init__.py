@@ -405,8 +405,8 @@ class Domain:
         """Return full qualified name for given node."""
         return None
 
-    def intersphinx_add_entries_v2(self, store: Any,
-                                   data: dict[str, dict[str, InventoryItemSet]]) -> None:
+    def intersphinx_add_entries(self, store: dict[str, dict[str, InventoryItemSet]],
+                                data: dict[str, dict[str, InventoryItemSet]]) -> None:
         """Store the given *data* for later intersphinx reference resolution.
 
         This method is called at most once with all data loaded from inventories in
@@ -424,8 +424,8 @@ class Domain:
 
         .. versionadded:: 5.1
         """
-        store = cast(Dict[str, Dict[str, InventoryItemSet]], store)
-        assert len(store) == 0  # the method is called at most once
+        if len(store) > 0:
+            raise AssertionError  # ensure the method is called at most once
         store.update(data)  # update so the object is changed in-place
 
     def _intersphinx_adjust_object_types(self, objtypes: list[str]) -> None:
@@ -455,7 +455,7 @@ class Domain:
 
         The *typ* may be ``any`` if the cross-references comes from an any-role.
 
-        The *store* was created through a previous call to :meth:`intersphinx_add_entries_v2`.
+        The *store* was created through a previous call to :meth:`intersphinx_add_entries`.
 
         The *disabled_object_types* is a list of object types that the reference may not
         resolve to, per user request through :confval:`intersphinx_disabled_reftypes`,

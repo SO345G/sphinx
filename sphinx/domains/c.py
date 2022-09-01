@@ -40,7 +40,7 @@ T = TypeVar('T')
 DeclarationType = Union[
     "ASTStruct", "ASTUnion", "ASTEnum", "ASTEnumerator",
     "ASTType", "ASTTypeWithInit", "ASTMacro",
-    "ASTIntersphinx_v2",
+    "ASTIntersphinx",
 ]
 
 # https://en.cppreference.com/w/c/keyword
@@ -1406,7 +1406,7 @@ class ASTEnumerator(ASTBase):
             self.init.describe_signature(signode, 'markType', env, symbol)
 
 
-class ASTIntersphinx_v2(ASTBaseBase):
+class ASTIntersphinx(ASTBaseBase):
     def __init__(self, name: ASTNestedName, data: InventoryItemSet):
         self.name = name
         self.data = data
@@ -3881,8 +3881,8 @@ class CDomain(Domain):
             newestId = symbol.declaration.get_newest_id()
             yield (name, dispname, objectType, docname, newestId, 1)
 
-    def intersphinx_add_entries_v2(self, store: dict,
-                                   data: dict[str, dict[str, InventoryItemSet]]) -> None:
+    def intersphinx_add_entries(self, store: dict,
+                                data: dict[str, dict[str, InventoryItemSet]]) -> None:
         root: Symbol = store['root_symbol']
         for object_type, per_type_data in data.items():
             for object_name, item_set in per_type_data.items():
@@ -3894,7 +3894,7 @@ class CDomain(Domain):
                     logger.warning("Error in C entry in intersphinx inventory:\n" + str(e))
                     continue
                 decl = ASTDeclaration(object_type, 'intersphinx',
-                                      ASTIntersphinx_v2(ast, item_set))
+                                      ASTIntersphinx(ast, item_set))
                 root.add_declaration(decl, docname="$FakeIntersphinxDoc", line=0)
 
     def _intersphinx_resolve_xref_inner(self, env: BuildEnvironment, store: dict,
@@ -3908,7 +3908,7 @@ class CDomain(Domain):
         if s is None:
             return None
         assert s.declaration is not None
-        decl = cast(ASTIntersphinx_v2, s.declaration.declaration)
+        decl = cast(ASTIntersphinx, s.declaration.declaration)
         return decl.data
 
     def intersphinx_resolve_xref(self, env: "BuildEnvironment",
