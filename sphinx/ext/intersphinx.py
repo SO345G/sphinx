@@ -105,7 +105,15 @@ class EnvAdapter:
             self.env.intersphinx_by_domain_inventory[domain.name] = inv  # type: ignore
 
     @property
-    def cache(self) -> dict[str, tuple[str, int, Inventory]]:
+    def cache(self) -> dict[str, tuple[str | None, int, Inventory]]:
+        """Intersphinx cache.
+
+        - Key is the URI of the remote inventory
+        - Element one is the key given in the Sphinx intersphinx_mapping
+          configuration value
+        - Element two is a time value for cache invalidation, a float
+        - Element three is the loaded remote inventory, type Inventory
+        """
         return self.env.intersphinx_cache  # type: ignore
 
     @property
@@ -114,7 +122,7 @@ class EnvAdapter:
         return self.env.intersphinx_inventory  # type: ignore
 
     @property
-    def names(self) -> set[str]:
+    def names(self) -> set[str | None]:
         return self.env.intersphinx_inventory_names  # type: ignore
 
     @property
@@ -199,7 +207,7 @@ def _get_safe_url(url: str) -> str:
         return urlunsplit(frags)
 
 
-def fetch_inventory(app: Sphinx, uri: str, inv: Any) -> Any:
+def fetch_inventory(app: Sphinx, uri: str, inv: Any) -> Inventory:
     """Fetch, parse and return an intersphinx inventory file."""
     # both *uri* (base URI of the links to generate) and *inv* (actual
     # location of the inventory file) can be local or remote URIs
@@ -239,7 +247,12 @@ def fetch_inventory(app: Sphinx, uri: str, inv: Any) -> Any:
 
 
 def fetch_inventory_group(
-    name: str, uri: str, invs: Any, cache: Any, app: Any, now: float
+    name: str | None,
+    uri: str,
+    invs: tuple[str | None, ...],
+    cache: dict[str, tuple[str | None, int, Inventory]],
+    app: Any,
+    now: int,
 ) -> bool:
     cache_time = now - app.config.intersphinx_cache_limit * 86400
     failures = []
@@ -285,6 +298,9 @@ def load_mappings(app: Sphinx) -> None:
 
     with concurrent.futures.ThreadPoolExecutor() as pool:
         futures = []
+        name: str | None
+        uri: str
+        invs: tuple[str | None, ...]
         for name, (uri, invs) in app.config.intersphinx_mapping.values():
             futures.append(pool.submit(
                 fetch_inventory_group, name, uri, invs, inventories.cache, app, now
@@ -339,7 +355,7 @@ def _resolve_reference_in_domain(env: BuildEnvironment,
                                  honor_disabled_refs: bool,
                                  domain: Domain,
                                  node: pending_xref, contnode: TextElement
-                                 ) -> Element | None:
+                                 ) -> nodes.reference | None:
     if honor_disabled_refs:
         conf = EnvAdapter(env)  # make sure the disabled has been processed
         assert not conf.all_objtypes_disabled

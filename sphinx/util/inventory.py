@@ -5,7 +5,7 @@ import os
 import re
 import zlib
 from os import path
-from typing import IO, TYPE_CHECKING, Callable, Dict, Iterator, List, Optional
+from typing import IO, TYPE_CHECKING, Callable, Iterator
 
 from docutils import nodes
 from docutils.nodes import TextElement
@@ -189,16 +189,16 @@ class InventoryItemSet:
       InventoryItem tuple
     """
 
-    def __init__(self, __items: Optional[dict[str, list[InventoryItem]]] = None):
+    def __init__(self, __items: dict[str | None, list[InventoryItem]] | None = None):
         if __items is None:
-            self._items: Dict[str, list[InventoryItem]] = {}
+            self._items: dict[str | None, list[InventoryItem]] = {}
         else:
             self._items = __items
 
     def __repr__(self) -> str:
         return "InventoryItemSet({})".format(self._items)
 
-    def append(self, inventory_name: str, item: InventoryItem) -> None:
+    def append(self, inventory_name: str | None, item: InventoryItem) -> None:
         self._items.setdefault(inventory_name, []).append(item)
 
     def select_inventory(self, inv_name: str | None) -> InventoryItemSet | None:
@@ -263,8 +263,8 @@ class InventoryItemSet:
             # use whatever title was given, but strip prefix
             title = contnode.astext()
             if (node.get('origtarget') and node['origtarget'] != node['reftarget']
-                    and title.startswith(inv_name + ':')):
-                new_title = title[len(inv_name + ':'):]
+                    and title.startswith(str(inv_name) + ':')):
+                new_title = title[len(str(inv_name) + ':'):]
                 newnode.append(contnode.__class__(new_title, new_title))
             else:
                 newnode.extend(contnodes)
