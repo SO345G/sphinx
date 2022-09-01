@@ -357,9 +357,10 @@ def _resolve_reference_in_domain(env: BuildEnvironment,
     if debug:
         print("intersphinx debug(_resolve_reference_in_domain):"
               " inv_name={}, inv_set_restricted={}".format(inv_name, inv_set_restricted))
-    if inv_set_restricted is None:
+    try:
+        return inv_set_restricted.make_reference_node(domain.name, node, contnode)
+    except ValueError:
         return None
-    return inv_set_restricted.make_refnode(domain.name, node, contnode)
 
 
 def _resolve_reference(env: BuildEnvironment, inv_name: str | None,

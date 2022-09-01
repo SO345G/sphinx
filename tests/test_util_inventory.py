@@ -4,7 +4,7 @@ import posixpath
 import zlib
 from io import BytesIO
 
-from sphinx.ext.intersphinx import InventoryFile
+from sphinx.util.inventory import InventoryFile, InventoryItemSet
 
 inventory_v1 = b'''\
 # Sphinx inventory version 1
@@ -83,3 +83,24 @@ def test_read_inventory_v2_not_having_version():
     invdata = InventoryFile.load(f, '/util', posixpath.join)
     assert invdata['py:module']['module1'] == \
         ('foo', '', '/util/foo.html#module-module1', 'Long Module desc')
+
+
+def test_inventory_item_set_repr():
+    # Given
+    item_set = InventoryItemSet()
+
+    # When
+    item_set._items = {
+        "test_inventory_name": [
+            (
+                "project name",
+                "project version",
+                "https://project.example/page.html#anchor",
+                "display name"
+            ),
+        ]
+    }
+
+    # Then
+    assert repr(item_set) == "InventoryItemSet({'test_inventory_name': [('project name', 'project version', 'https://project.example/page.html#anchor', 'display name')]})"
+    assert str(item_set) == repr(item_set)

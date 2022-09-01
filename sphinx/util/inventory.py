@@ -5,10 +5,10 @@ import os
 import re
 import zlib
 from os import path
-from typing import IO, TYPE_CHECKING, Callable, Iterator
+from typing import IO, TYPE_CHECKING, Callable, Dict, Iterator, List, Optional
 
 from docutils import nodes
-from docutils.nodes import Element, TextElement
+from docutils.nodes import TextElement
 from docutils.utils import relative_path
 
 from sphinx.addnodes import pending_xref
@@ -141,8 +141,8 @@ class InventoryFile:
             if location.endswith('$'):
                 location = location[:-1] + name
             location = join(uri, location)
-            invdata.setdefault(type, {})[name] = (projname, version,
-                                                  location, dispname)
+            inv_item: InventoryItem = (projname, version, location, dispname)
+            invdata.setdefault(type, {})[name] = inv_item
         return invdata
 
     @classmethod
@@ -179,73 +179,93 @@ class InventoryFile:
 
 
 class InventoryItemSet:
-    def __init__(self):
-        self._items: list[tuple[str, InventoryItem]] = []
+    """Wrapper for inventory items.
 
-    def __str__(self) -> str:
-        return "InventoryItemSet({})".format(", ".join(str(e) for e in self._items))
+    Primary data store is a list of tuples.
+
+    - Element one is a unique reference given in the intersphinx_mapping
+      configuration variable
+    - Element two is data about an inventory item in the form of an
+      InventoryItem tuple
+    """
+
+    def __init__(self, __items: Optional[dict[str, list[InventoryItem]]] = None):
+        if __items is None:
+            self._items: Dict[str, list[InventoryItem]] = {}
+        else:
+            self._items = __items
 
     def __repr__(self) -> str:
-        return str(self)
+        return "InventoryItemSet({})".format(self._items)
 
-    def append(self, item: tuple[str, InventoryItem]) -> None:
-        self._items.append(item)
+    def append(self, inventory_name: str, item: InventoryItem) -> None:
+        self._items.setdefault(inventory_name, []).append(item)
 
     def select_inventory(self, inv_name: str | None) -> InventoryItemSet | None:
-        if inv_name is None:
-            return self
-        items = [item for item in self._items if item[0] == inv_name]
-        if len(items) == 0:
-            return None
-        else:
-            res = InventoryItemSet()
-            res._items = items
-            return res
+        """Return inventory items from ``inv_name``.
 
-    def make_refnode(self, domain_name: str, node: pending_xref,
-                     contnode: TextElement) -> Element:
-        assert len(self._items) != 0
-        namedRes = [r for r in self._items if r[0] is not None]
-        unnamedRes = [r for r in self._items if r[0] is None]
-        assert len(unnamedRes) <= 1
-        if len(unnamedRes) != 0:
-            r = unnamedRes[0]
+        If ``inv_name`` is ``None``, return all inventories.
+        """
+        if inv_name is None:
+            return InventoryItemSet(self._items.copy())
+        try:
+            return InventoryItemSet({inv_name: self._items[inv_name].copy()})
+        except KeyError:
+            # If inv_name doesn't exist within self._items
+            return InventoryItemSet()
+
+    def make_reference_node(
+        self,
+        domain_name: str,
+        node: pending_xref,
+        contnode: TextElement,
+    ) -> nodes.reference:
+        # TODO: document and test
+        if len(self._items) == 0:
+            raise ValueError("No inventory items!")
+
+        legacy_mapping_items = self._items.get(None, [])
+        if len(legacy_mapping_items) == 0:
+            inv_name = min(filter(None, self._items))
+            proj, version, uri, dispname = self._items[inv_name][0]
+        elif len(legacy_mapping_items) == 1:
+            # Deprecated path for handling pre-Sphinx 1.0 intersphinx_mapping
+            # xref RemovedInSphinx70Warning
+            inv_name = None
+            proj, version, uri, dispname = legacy_mapping_items[0]
         else:
-            r = min(namedRes, key=lambda r: r[0])
+            raise AssertionError
 
         # determine the contnode by pending_xref_condition
         content = find_pending_xref_condition(node, 'resolved')
         if content:
-            # resolved condition found.
+            # resolved condition found
             contnodes = content.children
             contnode = content.children[0]  # type: ignore
         else:
-            # not resolved. Use the given contnode
+            # not resolved, use the given contnode
             contnodes = [contnode]
 
-        inv_name, inner_data = r
-
-        proj, version, uri, dispname = inner_data
-        if '://' not in uri and node.get('refdoc'):
+        if '://' not in uri and 'refdoc' in node:
             # get correct path in case of subdirectories
             uri = path.join(relative_path(node['refdoc'], '.'), uri)
         if version:
             reftitle = _('(in %s v%s)') % (proj, version)
         else:
-            reftitle = _('(in %s)') % (proj,)
+            reftitle = _('(in %s)') % proj
+
         newnode = nodes.reference('', '', internal=False, refuri=uri, reftitle=reftitle)
         if node.get('refexplicit'):
             # use whatever title was given
             newnode.extend(contnodes)
-        elif dispname == '-' or \
-                (domain_name == 'std' and node['reftype'] == 'keyword'):
+        elif (dispname == '-'
+              or (domain_name == 'std' and node['reftype'] == 'keyword')):
             # use whatever title was given, but strip prefix
             title = contnode.astext()
-            if node.get('origtarget') and \
-                    node['origtarget'] != node['reftarget'] and \
-                    title.startswith(inv_name + ':'):
-                newnode.append(contnode.__class__(title[len(inv_name) + 1:],
-                                                  title[len(inv_name) + 1:]))
+            if (node.get('origtarget') and node['origtarget'] != node['reftarget']
+                    and title.startswith(inv_name + ':')):
+                new_title = title[len(inv_name + ':'):]
+                newnode.append(contnode.__class__(new_title, new_title))
             else:
                 newnode.extend(contnodes)
         else:
