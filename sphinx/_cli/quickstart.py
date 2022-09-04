@@ -2,44 +2,17 @@
 
 from __future__ import annotations
 
-import argparse
-import locale
-import os
 import sys
-import time
 from os import path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING
 
-# try to import readline, unix specific enhancement
-try:
-    import readline
-    if TYPE_CHECKING and sys.platform == "win32":  # always false, for type checking
-        raise ImportError
-    READLINE_AVAILABLE = True
-    if readline.__doc__ and 'libedit' in readline.__doc__:
-        readline.parse_and_bind("bind ^I rl_complete")
-        USE_LIBEDIT = True
-    else:
-        readline.parse_and_bind("tab: complete")
-        USE_LIBEDIT = False
-except ImportError:
-    READLINE_AVAILABLE = False
-    USE_LIBEDIT = False
-
-from docutils.utils import column_width
-
-import sphinx.locale
-from sphinx import __display_version__, package_dir
-from sphinx._cli.util.colour import (  # type: ignore
-    bold,
-    color_terminal,
-    colorize,
-    nocolor,
-    red,
-)
 from sphinx.locale import __
-from sphinx.util.osutil import ensuredir
+from sphinx.util.colour import bold, color_terminal, colorize, nocolor, red  # type: ignore
 from sphinx.util.template import SphinxRenderer
+
+if TYPE_CHECKING:
+    import argparse
+    from typing import Any, Callable
 
 EXTENSIONS = {
     'autodoc': __('automatically insert docstrings from modules'),
@@ -65,13 +38,8 @@ DEFAULTS = {
     'batchfile': True,
 }
 
+USE_READLINE = False
 PROMPT_PREFIX = '> '
-
-if sys.platform == 'win32':
-    # On Windows, show questions as bold because of color scheme of PowerShell (refs: #5294).
-    COLOR_QUESTION = 'bold'
-else:
-    COLOR_QUESTION = 'purple'
 
 
 # function to get input from terminal -- overridden by the test suite
@@ -90,11 +58,33 @@ class ValidationError(Exception):
     """Raised for validation errors."""
 
 
+def _check_readline():
+    """Try to import readline, unix specific enhancement"""
+
+    if sys.platform == "win32":
+        return
+    try:
+        import readline
+    except ImportError:
+        return
+
+    if readline.__doc__ and 'libedit' in readline.__doc__:
+        # Note: libedit has a problem for combination of ``input()`` and escape
+        # sequence (see #5335).  To avoid the problem, all prompts are not colored
+        # on libedit.
+        readline.parse_and_bind("bind ^I rl_complete")  # type: ignore
+        return
+
+    global USE_READLINE
+    readline.parse_and_bind("tab: complete")  # type: ignore
+    USE_READLINE = True
+
+
 def is_path(x: str) -> str:
     x = path.expanduser(x)
-    if not path.isdir(x):
-        raise ValidationError(__("Please enter a valid path name."))
-    return x
+    if path.isdir(x):
+        return x
+    raise ValidationError(__("Please enter a valid path name."))
 
 
 def is_path_or_empty(x: str) -> str:
@@ -108,53 +98,47 @@ def allow_empty(x: str) -> str:
 
 
 def nonempty(x: str) -> str:
-    if not x:
-        raise ValidationError(__("Please enter some text."))
-    return x
+    if x:
+        return x
+    raise ValidationError(__("Please enter some text."))
 
 
 def choice(*l: str) -> Callable[[str], str]:
-    def val(x: str) -> str:
-        if x not in l:
-            raise ValidationError(__('Please enter one of %s.') % ', '.join(l))
-        return x
-    return val
+    choices = frozenset(l)
+    choices_str = ', '.join(l)
+
+    def validate(x: str) -> str:
+        if x in choices:
+            return x
+        raise ValidationError(__('Please enter one of %s.') % choices_str)
+    return validate
 
 
 def boolean(x: str) -> bool:
-    if x.upper() not in ('Y', 'YES', 'N', 'NO'):
-        raise ValidationError(__("Please enter either 'y' or 'n'."))
-    return x.upper() in ('Y', 'YES')
+    x = x.lower()
+    if x in {'y', 'yes'}:
+        return True
+    if x in {'n', 'no'}:
+        return False
+    raise ValidationError(__("Please enter either 'y' or 'n'."))
 
 
 def suffix(x: str) -> str:
-    if not (x[0:1] == '.' and len(x) > 1):
-        raise ValidationError(__("Please enter a file suffix, e.g. '.rst' or '.txt'."))
-    return x
-
-
-def ok(x: str) -> str:
-    return x
+    if len(x) > 1 and x[0] == '.':
+        return x
+    raise ValidationError(__("Please enter a file suffix, e.g. '.rst' or '.txt'."))
 
 
 def do_prompt(
-    text: str, default: str | None = None, validator: Callable[[str], Any] = nonempty,
+    text: str, default: str | None = None,
+    validator: Callable[[str], Any] = nonempty,
 ) -> str | bool:
     while True:
         if default is not None:
-            prompt = PROMPT_PREFIX + f'{text} [{default}]: '
+            prompt = f'{text} [{default}]: '
         else:
-            prompt = PROMPT_PREFIX + text + ': '
-        if USE_LIBEDIT:
-            # Note: libedit has a problem for combination of ``input()`` and escape
-            # sequence (see #5335).  To avoid the problem, all prompts are not colored
-            # on libedit.
-            pass
-        elif READLINE_AVAILABLE:
-            # pass input_mode=True if readline available
-            prompt = colorize(COLOR_QUESTION, prompt, input_mode=True)
-        else:
-            prompt = colorize(COLOR_QUESTION, prompt, input_mode=False)
+            prompt = f'{text}: '
+        prompt = colorize('teal', PROMPT_PREFIX + prompt, input_mode=USE_READLINE)
         x = term_input(prompt).strip()
         if default and not x:
             x = default
@@ -169,7 +153,7 @@ def do_prompt(
 
 class QuickstartRenderer(SphinxRenderer):
     def __init__(self, templatedir: str = '') -> None:
-        self.templatedir = templatedir
+        self.templatedir = templatedir or ''
         super().__init__()
 
     def _has_custom_template(self, template_name: str) -> bool:
@@ -208,8 +192,12 @@ def ask_user(d: dict[str, Any]) -> None:
     * makefile:  make Makefile
     * batchfile: make command file
     """
+    from sphinx import __display_version__
 
-    print(bold(__('Welcome to the Sphinx %s quickstart utility.')) % __display_version__)
+    # potentially import and set up readline
+    _check_readline()
+
+    print(__('Welcome to the Sphinx %s quickstart utility.') % __display_version__)
     print()
     print(__('Please enter values for the following settings (just press Enter to\n'
              'accept a default value, if one is given in brackets).'))
@@ -222,10 +210,9 @@ def ask_user(d: dict[str, Any]) -> None:
         print(__('Enter the root path for documentation.'))
         d['path'] = do_prompt(__('Root path for the documentation'), '.', is_path)
 
-    while path.isfile(path.join(d['path'], 'conf.py')) or \
-            path.isfile(path.join(d['path'], 'source', 'conf.py')):
+    while not valid_dir(d):
         print()
-        print(bold(__('Error: an existing conf.py has been found in the '
+        print(bold(__('Error: existing Sphinx files have been found in the '
                       'selected root path.')))
         print(__('sphinx-quickstart will not overwrite existing Sphinx projects.'))
         print()
@@ -246,7 +233,7 @@ def ask_user(d: dict[str, Any]) -> None:
         print(__('Inside the root directory, two more directories will be created; "_templates"\n'      # noqa: E501
                  'for custom HTML templates and "_static" for custom stylesheets and other static\n'    # noqa: E501
                  'files. You can enter another prefix (such as ".") to replace the underscore.'))       # noqa: E501
-        d['dot'] = do_prompt(__('Name prefix for templates and static dir'), '_', ok)
+        d['dot'] = do_prompt(__('Name prefix for templates and static dir'), '_', allow_empty)
 
     if 'project' not in d:
         print()
@@ -333,6 +320,14 @@ def generate(
     d: dict, overwrite: bool = True, silent: bool = False, templatedir: str | None = None,
 ) -> None:
     """Generate project based on values in *d*."""
+    import time
+
+    from docutils.utils import column_width
+
+    from sphinx import package_dir
+    from sphinx._cli.console_utilities import bold, colorize  # type: ignore
+    from sphinx.util.osutil import ensuredir
+
     template = QuickstartRenderer(templatedir or '')
 
     if 'mastertoctree' not in d:
@@ -346,7 +341,7 @@ def generate(
     d.setdefault('extensions', [])
     d['copyright'] = time.strftime('%Y') + ', ' + d['author']
 
-    d["path"] = os.path.abspath(d['path'])
+    d["path"] = path.abspath(d['path'])
     ensuredir(d['path'])
 
     srcdir = path.join(d['path'], 'source') if d['sep'] else d['path']
@@ -376,9 +371,9 @@ def generate(
             if 'quiet' not in d:
                 print(__('File %s already exists, skipping.') % fpath)
 
-    conf_path = os.path.join(templatedir, 'conf.py_t') if templatedir else None
+    conf_path = path.join(templatedir, 'conf.py_t') if templatedir else None
     if not conf_path or not path.isfile(conf_path):
-        conf_path = os.path.join(package_dir, 'templates', 'quickstart', 'conf.py_t')
+        conf_path = path.join(package_dir, 'templates', 'quickstart', 'conf.py_t')
     with open(conf_path, encoding="utf-8") as f:
         conf_text = f.read()
 
@@ -388,7 +383,7 @@ def generate(
     if template._has_custom_template('quickstart/master_doc.rst_t'):
         msg = ('A custom template `master_doc.rst_t` found. It has been renamed to '
                '`root_doc.rst_t`.  Please rename it on your project too.')
-        print(colorize('red', msg))
+        print(red(msg))
         write_file(masterfile, template.render('quickstart/master_doc.rst_t', d))
     else:
         write_file(masterfile, template.render('quickstart/root_doc.rst_t', d))
@@ -416,7 +411,7 @@ def generate(
     if silent:
         return
     print()
-    print(bold(__('Finished: An initial directory structure has been created.')))
+    print(__('Finished: An initial directory structure has been created.'))
     print()
     print(__('You should now populate your master file %s and create other documentation\n'
              'source files. ') % masterfile, end='')
@@ -432,17 +427,19 @@ def generate(
 
 
 def valid_dir(d: dict) -> bool:
+    from os import listdir
+
     dir = d['path']
     if not path.exists(dir):
         return True
     if not path.isdir(dir):
         return False
 
-    if {'Makefile', 'make.bat'} & set(os.listdir(dir)):
+    if {'Makefile', 'make.bat'} & set(listdir(dir)):
         return False
 
     if d['sep']:
-        dir = os.path.join('source', dir)
+        dir = path.join('source', dir)
         if not path.exists(dir):
             return True
         if not path.isdir(dir):
@@ -454,31 +451,25 @@ def valid_dir(d: dict) -> bool:
         d['dot'] + 'templates',
         d['master'] + d['suffix'],
     ]
-    if set(reserved_names) & set(os.listdir(dir)):
+    if set(reserved_names) & set(listdir(dir)):
         return False
 
     return True
 
 
-def get_parser() -> argparse.ArgumentParser:
-    description = __(
-        "\n"
-        "Generate required files for a Sphinx project.\n"
-        "\n"
-        "sphinx-quickstart is an interactive tool that asks some questions about your\n"
-        "project and then generates a complete documentation directory and sample\n"
-        "Makefile to be used with sphinx-build.\n",
-    )
-    parser = argparse.ArgumentParser(
-        usage='%(prog)s [OPTIONS] <PROJECT_DIR>',
-        epilog=__("For more information, visit <https://www.sphinx-doc.org/>."),
-        description=description)
+parser_description = __("""
+Generate required files for a Sphinx project.
 
+'sphinx init' is an interactive tool that asks some questions about your
+project and then generates a complete documentation directory and sample
+Makefile to be used with 'sphinx build'.
+""")
+
+
+def set_up_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument('-q', '--quiet', action='store_true', dest='quiet',
                         default=None,
                         help=__('quiet mode'))
-    parser.add_argument('--version', action='version', dest='show_version',
-                        version='%%(prog)s %s' % __display_version__)
 
     parser.add_argument('path', metavar='PROJECT_DIR', default='.', nargs='?',
                         help=__('project root'))
@@ -545,61 +536,38 @@ def get_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: list[str] = sys.argv[1:]) -> int:
-    locale.setlocale(locale.LC_ALL, '')
-    sphinx.locale.init_console()
-
-    if not color_terminal():
-        nocolor()
-
-    # parse options
-    parser = get_parser()
-    try:
-        args = parser.parse_args(argv)
-    except SystemExit as err:
-        return err.code  # type: ignore[return-value]
-
-    d = vars(args)
+def run(args: argparse.Namespace) -> int:
     # delete None or False value
-    d = {k: v for k, v in d.items() if v is not None}
+    d = {k: v for k, v in args.__dict__.items() if v is not None}
 
     # handle use of CSV-style extension values
-    d.setdefault('extensions', [])
-    for ext in d['extensions'][:]:
-        if ',' in ext:
-            d['extensions'].remove(ext)
-            d['extensions'].extend(ext.split(','))
+    d['extensions'] = ','.join(d.get('extensions', ())).split(',')
 
     try:
-        if 'quiet' in d:
-            if not {'project', 'author'}.issubset(d):
-                print(__('"quiet" is specified, but any of "project" or '
-                         '"author" is not specified.'))
-                return 1
-
-        if {'quiet', 'project', 'author'}.issubset(d):
+        if 'quiet' not in d:
+            ask_user(d)
+        elif 'project' not in d:
+            print(__('"quiet" is specified, but "project" is missing.'))
+            return 1
+        elif 'author' not in d:
+            print(__('"quiet" is specified, but "author" is missing.'))
+            return 1
+        else:
             # quiet mode with all required params satisfied, use default
-            d.setdefault('version', '')
-            d.setdefault('release', d['version'])
-            d2 = DEFAULTS.copy()
-            d2.update(d)
-            d = d2
-
+            d = {'version': '', 'release': d['version'], **DEFAULTS, **d}
             if not valid_dir(d):
                 print()
-                print(bold(__('Error: specified path is not a directory, or sphinx'
-                              ' files already exist.')))
-                print(__('sphinx-quickstart only generate into a empty directory.'
+                print(__('Error: specified path is not a directory, or sphinx'
+                         ' files already exist.'))
+                print(__('sphinx-quickstart requires an empty directory.'
                          ' Please specify a new root path.'))
                 return 1
-        else:
-            ask_user(d)
     except (KeyboardInterrupt, EOFError):
         print()
         print('[Interrupted.]')
         return 130  # 128 + SIGINT
 
-    for variable in d.get('variables', []):
+    for variable in d.get('variables', ()):
         try:
             name, value = variable.split('=')
             d[name] = value
@@ -608,7 +576,3 @@ def main(argv: list[str] = sys.argv[1:]) -> int:
 
     generate(d, overwrite=False, templatedir=args.templatedir)
     return 0
-
-
-if __name__ == '__main__':
-    raise SystemExit(main())
