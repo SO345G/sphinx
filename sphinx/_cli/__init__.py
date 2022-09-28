@@ -47,6 +47,7 @@ else:
 # Command name -> import path
 _COMMANDS: dict[str, str] = {
     'init': 'sphinx.cli.quickstart',
+    'build': 'sphinx.cli.build',
 }
 
 
