@@ -4,97 +4,99 @@ from __future__ import annotations
 
 import os
 import sys
+from typing import Callable
 
-try:
-    # check if colorama is installed to support color on Windows
+if sys.platform == 'win32':
     import colorama
-except ImportError:
-    colorama = None
 
 
-codes: dict[str, str] = {}
+_COLOURING_DISABLED = False
 
 
 def color_terminal() -> bool:
+    """Return True if coloured terminal output is supported."""
     if 'NO_COLOR' in os.environ:
         return False
-    if sys.platform == 'win32' and colorama is not None:
-        colorama.init()
-        return True
     if 'FORCE_COLOR' in os.environ:
         return True
-    if not hasattr(sys.stdout, 'isatty'):
+    try:
+        if not sys.stdout.isatty():
+            return False
+    except (AttributeError, ValueError):
+        # Handle cases where .isatty() is not defined, or where e.g.
+        # "ValueError: I/O operation on closed file" is raised
         return False
-    if not sys.stdout.isatty():
+    if os.environ.get("TERM", "").lower() in {"dumb", "unknown"}:
+        # Do not colour output if on a dumb terminal
         return False
-    if 'COLORTERM' in os.environ:
-        return True
-    term = os.environ.get('TERM', 'dumb').lower()
-    if term in ('xterm', 'linux') or 'color' in term:
-        return True
-    return False
+    if sys.platform == 'win32':
+        colorama.init()
+    return True
 
 
 def nocolor() -> None:
-    if sys.platform == 'win32' and colorama is not None:
+    global _COLOURING_DISABLED
+    _COLOURING_DISABLED = True
+    if sys.platform == 'win32':
         colorama.deinit()
-    codes.clear()
 
 
 def coloron() -> None:
-    codes.update(_orig_codes)
+    global _COLOURING_DISABLED
+    _COLOURING_DISABLED = False
+    if sys.platform == 'win32':
+        colorama.init()
 
 
 def colorize(name: str, text: str, input_mode: bool = False) -> str:
-    def escseq(name: str) -> str:
-        # Wrap escape sequence with ``\1`` and ``\2`` to let readline know
-        # it is non-printable characters
-        # ref: https://tiswww.case.edu/php/chet/readline/readline.html
-        #
-        # Note: This hack does not work well in Windows (see #5059)
-        escape = codes.get(name, '')
-        if input_mode and escape and sys.platform != 'win32':
-            return '\1' + escape + '\2'
-        else:
-            return escape
+    if _COLOURING_DISABLED:
+        return text
 
-    return escseq(name) + text + escseq('reset')
+    if sys.platform == 'win32' or not input_mode:
+        return globals()[name](text)
+
+    # Wrap escape sequence with ``\1`` and ``\2`` to let readline know
+    # it is non-printable characters
+    # ref: https://tiswww.case.edu/php/chet/readline/readline.html
+    #
+    # Note: This does not work well in Windows (see
+    # https://github.com/sphinx-doc/sphinx/pull/5059)
+    escape_code = getattr(globals()[name], '__escape_code', '39;49;00')
+    return f'\1\x1b[{escape_code}m\2{text}\1\x1b[39;49;00m\2'
 
 
-def create_color_func(name: str) -> None:
+def _create_colour_func(
+    __escape_code: str,
+) -> Callable[[str], str]:
     def inner(text: str) -> str:
-        return colorize(name, text)
-    globals()[name] = inner
+        if _COLOURING_DISABLED:
+            return text
+        return f'\x1b[{__escape_code}m{text}\x1b[39;49;00m'
+    # private attribute, only for ``colorize()``
+    inner.__escape_code = __escape_code
+    return inner
 
 
-_attrs = {
-    'reset':     '39;49;00m',
-    'bold':      '01m',
-    'faint':     '02m',
-    'standout':  '03m',
-    'underline': '04m',
-    'blink':     '05m',
-}
+reset = _create_colour_func('39;49;00')
+bold = _create_colour_func('01')
+# faint = _create_colour_func('02')
+# standout = _create_colour_func('03')
+# underline = _create_colour_func('04')
+# blink = _create_colour_func('05')
 
-for _name, _value in _attrs.items():
-    codes[_name] = '\x1b[' + _value
-
-_colors = [
-    ('black',     'darkgray'),
-    ('darkred',   'red'),
-    ('darkgreen', 'green'),
-    ('brown',     'yellow'),
-    ('darkblue',  'blue'),
-    ('purple',    'fuchsia'),
-    ('turquoise', 'teal'),
-    ('lightgray', 'white'),
-]
-
-for i, (dark, light) in enumerate(_colors, 30):
-    codes[dark] = '\x1b[%im' % i
-    codes[light] = '\x1b[%im' % (i + 60)
-
-_orig_codes = codes.copy()
-
-for _name in codes:
-    create_color_func(_name)
+black = _create_colour_func('30')
+darkgray = _create_colour_func('90')
+darkred = _create_colour_func('31')
+red = _create_colour_func('91')
+darkgreen = _create_colour_func('32')
+green = _create_colour_func('92')
+brown = _create_colour_func('33')
+yellow = _create_colour_func('93')
+darkblue = _create_colour_func('34')
+blue = _create_colour_func('94')
+purple = _create_colour_func('35')
+fuchsia = _create_colour_func('95')
+turquoise = _create_colour_func('36')
+teal = _create_colour_func('96')
+lightgray = _create_colour_func('37')
+white = _create_colour_func('97')
