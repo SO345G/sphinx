@@ -242,20 +242,6 @@ def import_object(objname: str, source: str | None = None) -> Any:
         raise ExtensionError('Could not import %s' % objname, exc) from exc
 
 
-def encode_uri(uri: str) -> str:
-    split = list(urlsplit(uri))
-    split[1] = split[1].encode('idna').decode('ascii')
-    split[2] = quote_plus(split[2].encode(), '/')
-    query = [(q, v.encode()) for (q, v) in parse_qsl(split[3])]
-    split[3] = urlencode(query)
-    return urlunsplit(split)
-
-
-def isurl(url: str) -> bool:
-    """Check *url* is URL or not."""
-    return bool(url) and '://' in url
-
-
 def _xml_name_checker():
     # to prevent import cycles
     from sphinx.builders.epub3 import _XML_NAME_PATTERN
