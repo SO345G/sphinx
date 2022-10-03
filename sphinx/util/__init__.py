@@ -174,25 +174,6 @@ class UnicodeDecodeErrorHandler:
 
 # Low-level utility functions and classes.
 
-class Tee:
-    """
-    File-like object writing to two streams.
-    """
-    def __init__(self, stream1: IO, stream2: IO) -> None:
-        self.stream1 = stream1
-        self.stream2 = stream2
-
-    def write(self, text: str) -> None:
-        self.stream1.write(text)
-        self.stream2.write(text)
-
-    def flush(self) -> None:
-        if hasattr(self.stream1, 'flush'):
-            self.stream1.flush()
-        if hasattr(self.stream2, 'flush'):
-            self.stream2.flush()
-
-
 def import_object(objname: str, source: str | None = None) -> Any:
     """Import python object by qualname."""
     try:
