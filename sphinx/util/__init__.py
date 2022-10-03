@@ -11,8 +11,7 @@ from os import path
 from typing import IO, Any, Iterable
 from urllib.parse import parse_qsl, quote_plus, urlencode, urlsplit, urlunsplit
 
-from sphinx.errors import ExtensionError, FiletypeNotFoundError
-from sphinx.locale import __
+from sphinx.errors import FiletypeNotFoundError
 from sphinx.util import display as _display
 from sphinx.util import exceptions as _exceptions
 from sphinx.util import http_date as _http_date
@@ -71,26 +70,6 @@ def _sha1(data=b'', **_kw):
     To be removed in Sphinx 9.0
     """
     return hashlib.sha1(data, usedforsecurity=False)
-
-
-class UnicodeDecodeErrorHandler:
-    """Custom error handler for open() that warns and replaces."""
-
-    def __init__(self, docname: str) -> None:
-        self.docname = docname
-
-    def __call__(self, error: UnicodeDecodeError) -> tuple[str, int]:
-        linestart = error.object.rfind(b'\n', 0, error.start)
-        lineend = error.object.find(b'\n', error.start)
-        if lineend == -1:
-            lineend = len(error.object)
-        lineno = error.object.count(b'\n', 0, error.start) + 1
-        logger.warning(__('undecodable source characters, replacing with "?": %r'),
-                       (error.object[linestart + 1:error.start] + b'>>>' +
-                        error.object[error.start:error.end] + b'<<<' +
-                        error.object[error.end:lineend]),
-                       location=(self.docname, lineno))
-        return ('?', error.end)
 
 
 # Low-level utility functions and classes.
