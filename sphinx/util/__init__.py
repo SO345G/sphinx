@@ -174,27 +174,6 @@ class UnicodeDecodeErrorHandler:
 
 # Low-level utility functions and classes.
 
-def import_object(objname: str, source: str | None = None) -> Any:
-    """Import python object by qualname."""
-    try:
-        objpath = objname.split('.')
-        modname = objpath.pop(0)
-        obj = import_module(modname)
-        for name in objpath:
-            modname += '.' + name
-            try:
-                obj = getattr(obj, name)
-            except AttributeError:
-                obj = import_module(modname)
-
-        return obj
-    except (AttributeError, ImportError) as exc:
-        if source:
-            raise ExtensionError('Could not import %s (needed for %s)' %
-                                 (objname, source), exc) from exc
-        raise ExtensionError('Could not import %s' % objname, exc) from exc
-
-
 def _xml_name_checker():
     # to prevent import cycles
     from sphinx.builders.epub3 import _XML_NAME_PATTERN
