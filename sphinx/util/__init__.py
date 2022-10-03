@@ -43,11 +43,6 @@ from sphinx.util.osutil import (  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
-# Generally useful regular expressions.
-ws_re: re.Pattern[str] = re.compile(r'\s+')
-url_re: re.Pattern[str] = re.compile(r'(?P<schema>.+)://.*')
-
-
 # High-level utility functions.
 
 def docname_join(basedocname: str, docname: str) -> str:
@@ -146,10 +141,6 @@ class DownloadFiles(dict):
         for filename, (docs, _dest) in other.items():
             for docname in docs & set(docnames):
                 self.add_file(docname, filename)
-
-
-# a regex to recognize coding cookies
-_coding_re = re.compile(r'coding[:=]\s*([-\w.]+)')
 
 
 class UnicodeDecodeErrorHandler:
