@@ -1,4 +1,4 @@
-Release 6.0.1 (in development)
+Release 6.1.0 (in development)
 ==============================
 
 Dependencies
@@ -14,6 +14,27 @@ Features added
 --------------
 
 - #8929: Delegate intersphinx lookup to individual domains.
+
+Bugs fixed
+----------
+
+Testing
+--------
+
+Release 6.0.1 (in development)
+==============================
+
+Dependencies
+------------
+
+Incompatible changes
+--------------------
+
+Deprecated
+----------
+
+Features added
+--------------
 
 Bugs fixed
 ----------
