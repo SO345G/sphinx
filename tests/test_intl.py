@@ -6,7 +6,6 @@ Runs the text builder in the test root.
 import os
 import re
 
-import docutils
 import pygments
 import pytest
 from babel.messages import mofile, pofile
@@ -24,8 +23,6 @@ sphinx_intl = pytest.mark.sphinx(
         'gettext_compact': False,
     },
 )
-
-pygments_version = tuple(int(v) for v in pygments.__version__.split('.'))
 
 
 def read_po(pathname):
@@ -708,12 +705,12 @@ def test_html_index_entries(app):
     def wrap(tag, keyword):
         start_tag = "<%s[^>]*>" % tag
         end_tag = "</%s>" % tag
-        return r"%s\s*%s\s*%s" % (start_tag, keyword, end_tag)
+        return fr"{start_tag}\s*{keyword}\s*{end_tag}"
 
     def wrap_nest(parenttag, childtag, keyword):
         start_tag1 = "<%s[^>]*>" % parenttag
         start_tag2 = "<%s[^>]*>" % childtag
-        return r"%s\s*%s\s*%s" % (start_tag1, keyword, start_tag2)
+        return fr"{start_tag1}\s*{keyword}\s*{start_tag2}"
     expected_exprs = [
         wrap('a', 'NEWSLETTER'),
         wrap('a', 'MAILING LIST'),
@@ -1099,21 +1096,20 @@ def test_additional_targets_should_not_be_translated(app):
     assert_count(expected_expr, result, 1)
 
     # C code block with lang should not be translated but be *C* highlighted
-    if pygments_version < (2, 10, 0):
-        expected_expr = ("""<span class="cp">#include</span> """
-                         """<span class="cpf">&lt;stdio.h&gt;</span>""")
-    else:
-        expected_expr = ("""<span class="cp">#include</span>"""
-                         """<span class="w"> </span>"""
-                         """<span class="cpf">&lt;stdio.h&gt;</span>""")
+    expected_expr = ("""<span class="cp">#include</span>"""
+                     """<span class="w"> </span>"""
+                     """<span class="cpf">&lt;stdio.h&gt;</span>""")
     assert_count(expected_expr, result, 1)
 
     # literal block in list item should not be translated
     expected_expr = ("""<span class="n">literal</span>"""
                      """<span class="o">-</span>"""
                      """<span class="n">block</span>\n"""
-                     """<span class="k">in</span> """
+                     """<span class="k">in</span>"""
+                     """<span class="w"> </span>"""
                      """<span class="n">list</span>""")
+    if pygments.__version__ < '2.14.0':
+        expected_expr = expected_expr.replace("""<span class="w"> </span>""", ' ')
     assert_count(expected_expr, result, 1)
 
     # doctest block should not be translated but be highlighted
@@ -1128,12 +1124,8 @@ def test_additional_targets_should_not_be_translated(app):
     result = (app.outdir / 'raw.html').read_text(encoding='utf8')
 
     # raw block should not be translated
-    if docutils.__version_info__ < (0, 17):
-        expected_expr = """<iframe src="http://sphinx-doc.org"></iframe></div>"""
-        assert_count(expected_expr, result, 1)
-    else:
-        expected_expr = """<iframe src="http://sphinx-doc.org"></iframe></section>"""
-        assert_count(expected_expr, result, 1)
+    expected_expr = """<iframe src="http://sphinx-doc.org"></iframe></section>"""
+    assert_count(expected_expr, result, 1)
 
     # [figure.txt]
 
@@ -1182,21 +1174,20 @@ def test_additional_targets_should_be_translated(app):
     assert_count(expected_expr, result, 1)
 
     # C code block with lang should be translated and be *C* highlighted
-    if pygments_version < (2, 10, 0):
-        expected_expr = ("""<span class="cp">#include</span> """
-                         """<span class="cpf">&lt;STDIO.H&gt;</span>""")
-    else:
-        expected_expr = ("""<span class="cp">#include</span>"""
-                         """<span class="w"> </span>"""
-                         """<span class="cpf">&lt;STDIO.H&gt;</span>""")
+    expected_expr = ("""<span class="cp">#include</span>"""
+                     """<span class="w"> </span>"""
+                     """<span class="cpf">&lt;STDIO.H&gt;</span>""")
     assert_count(expected_expr, result, 1)
 
     # literal block in list item should be translated
     expected_expr = ("""<span class="no">LITERAL</span>"""
                      """<span class="o">-</span>"""
                      """<span class="no">BLOCK</span>\n"""
-                     """<span class="no">IN</span> """
+                     """<span class="no">IN</span>"""
+                     """<span class="w"> </span>"""
                      """<span class="no">LIST</span>""")
+    if pygments.__version__ < '2.14.0':
+        expected_expr = expected_expr.replace("""<span class="w"> </span>""", ' ')
     assert_count(expected_expr, result, 1)
 
     # doctest block should not be translated but be highlighted
@@ -1214,12 +1205,8 @@ def test_additional_targets_should_be_translated(app):
     result = (app.outdir / 'raw.html').read_text(encoding='utf8')
 
     # raw block should be translated
-    if docutils.__version_info__ < (0, 17):
-        expected_expr = """<iframe src="HTTP://SPHINX-DOC.ORG"></iframe></div>"""
-        assert_count(expected_expr, result, 1)
-    else:
-        expected_expr = """<iframe src="HTTP://SPHINX-DOC.ORG"></iframe></section>"""
-        assert_count(expected_expr, result, 1)
+    expected_expr = """<iframe src="HTTP://SPHINX-DOC.ORG"></iframe></section>"""
+    assert_count(expected_expr, result, 1)
 
     # [figure.txt]
 
@@ -1403,3 +1390,13 @@ def test_customize_system_message(make_app, app_params, sphinx_test_tempdir):
         assert 'QUICK SEARCH' in content
     finally:
         locale.translators.clear()
+
+
+@pytest.mark.sphinx('html', testroot='intl', confoverrides={'today_fmt': '%Y-%m-%d'})
+def test_customize_today_date_format(app, monkeypatch):
+    with monkeypatch.context() as m:
+        m.setenv('SOURCE_DATE_EPOCH', '1439131307')
+        app.build()
+        content = (app.outdir / 'refs.html').read_text(encoding='utf8')
+
+    assert '2015-08-09' in content

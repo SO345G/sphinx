@@ -1,9 +1,10 @@
 """Docutils node-related utility functions for Sphinx."""
 
+from __future__ import annotations
+
 import re
 import unicodedata
-from typing import (TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Set, Tuple, Type,
-                    Union)
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 from docutils import nodes
 from docutils.nodes import Element, Node
@@ -45,13 +46,14 @@ class NodeMatcher:
     A special value ``typing.Any`` matches any kind of node-attributes.  For example,
     following example searches ``reference`` node having ``refdomain`` attributes::
 
-        from typing import Any
+        from __future__ import annotations
+from typing import Any
         matcher = NodeMatcher(nodes.reference, refdomain=Any)
         doctree.findall(matcher)
         # => [<reference ...>, <reference ...>, ...]
     """
 
-    def __init__(self, *node_classes: Type[Node], **attrs: Any) -> None:
+    def __init__(self, *node_classes: type[Node], **attrs: Any) -> None:
         self.classes = node_classes
         self.attrs = attrs
 
@@ -88,7 +90,7 @@ def get_full_module_name(node: Node) -> str:
     :param nodes.Node node: target node
     :return: full module dotted path
     """
-    return '{}.{}'.format(node.__module__, node.__class__.__name__)
+    return f'{node.__module__}.{node.__class__.__name__}'
 
 
 def repr_domxml(node: Node, length: int = 80) -> str:
@@ -182,14 +184,6 @@ IGNORED_NODES = (
 )
 
 
-def is_pending_meta(node: Node) -> bool:
-    if (isinstance(node, nodes.pending) and
-       isinstance(node.details.get('nodes', [None])[0], addnodes.meta)):
-        return True
-    else:
-        return False
-
-
 def is_translatable(node: Node) -> bool:
     if isinstance(node, addnodes.translatable):
         return True
@@ -225,11 +219,7 @@ def is_translatable(node: Node) -> bool:
             return False
         return True
 
-    if is_pending_meta(node) or isinstance(node, addnodes.meta):
-        # docutils-0.17 or older
-        return True
-    elif isinstance(node, addnodes.docutils_meta):
-        # docutils-0.18+
+    if isinstance(node, nodes.meta):  # type: ignore
         return True
 
     return False
@@ -244,12 +234,9 @@ LITERAL_TYPE_NODES = (
 IMAGE_TYPE_NODES = (
     nodes.image,
 )
-META_TYPE_NODES = (
-    addnodes.meta,
-)
 
 
-def extract_messages(doctree: Element) -> Iterable[Tuple[Element, str]]:
+def extract_messages(doctree: Element) -> Iterable[tuple[Element, str]]:
     """Extract translatable messages from a document tree."""
     for node in doctree.findall(is_translatable):  # type: Element
         if isinstance(node, addnodes.translatable):
@@ -267,14 +254,7 @@ def extract_messages(doctree: Element) -> Iterable[Tuple[Element, str]]:
                 msg = '.. image:: %s' % node['uri']
             else:
                 msg = ''
-        elif isinstance(node, META_TYPE_NODES):
-            # docutils-0.17 or older
-            msg = node.rawcontent
-        elif isinstance(node, nodes.pending) and is_pending_meta(node):
-            # docutils-0.17 or older
-            msg = node.details['nodes'][0].rawcontent
-        elif isinstance(node, addnodes.docutils_meta):
-            # docutils-0.18+
+        elif isinstance(node, nodes.meta):  # type: ignore
             msg = node["content"]
         else:
             msg = node.rawsource.replace('\n', ' ').strip()
@@ -284,14 +264,14 @@ def extract_messages(doctree: Element) -> Iterable[Tuple[Element, str]]:
             yield node, msg
 
 
-def get_node_source(node: Element) -> Optional[str]:
+def get_node_source(node: Element) -> str | None:
     for pnode in traverse_parent(node):
         if pnode.source:
             return pnode.source
     return None
 
 
-def get_node_line(node: Element) -> Optional[int]:
+def get_node_line(node: Element) -> int | None:
     for pnode in traverse_parent(node):
         if pnode.line:
             return pnode.line
@@ -305,7 +285,7 @@ def traverse_parent(node: Element, cls: Any = None) -> Iterable[Element]:
         node = node.parent
 
 
-def get_prev_node(node: Node) -> Optional[Node]:
+def get_prev_node(node: Node) -> Node | None:
     pos = node.parent.index(node)
     if pos > 0:
         return node.parent[pos - 1]
@@ -313,7 +293,9 @@ def get_prev_node(node: Node) -> Optional[Node]:
         return None
 
 
-def traverse_translatable_index(doctree: Element) -> Iterable[Tuple[Element, List["IndexEntry"]]]:  # NOQA
+def traverse_translatable_index(
+    doctree: Element
+) -> Iterable[tuple[Element, list[IndexEntry]]]:
     """Traverse translatable index node from a document tree."""
     matcher = NodeMatcher(addnodes.index, inline=False)
     for node in doctree.findall(matcher):  # type: addnodes.index
@@ -353,7 +335,7 @@ def clean_astext(node: Element) -> str:
     return node.astext()
 
 
-def split_explicit_title(text: str) -> Tuple[bool, str, str]:
+def split_explicit_title(text: str) -> tuple[bool, str, str]:
     """Split role content into title and target, if given."""
     match = explicit_title_re.match(text)
     if match:
@@ -367,10 +349,10 @@ indextypes = [
 
 
 def process_index_entry(entry: str, targetid: str
-                        ) -> List[Tuple[str, str, str, str, Optional[str]]]:
+                        ) -> list[tuple[str, str, str, str, str | None]]:
     from sphinx.domains.python import pairindextypes
 
-    indexentries: List[Tuple[str, str, str, str, Optional[str]]] = []
+    indexentries: list[tuple[str, str, str, str, str | None]] = []
     entry = entry.strip()
     oentry = entry
     main = ''
@@ -405,8 +387,8 @@ def process_index_entry(entry: str, targetid: str
     return indexentries
 
 
-def inline_all_toctrees(builder: "Builder", docnameset: Set[str], docname: str,
-                        tree: nodes.document, colorfunc: Callable, traversed: List[str]
+def inline_all_toctrees(builder: Builder, docnameset: set[str], docname: str,
+                        tree: nodes.document, colorfunc: Callable, traversed: list[str]
                         ) -> nodes.document:
     """Inline all toctrees in the *tree*.
 
@@ -512,8 +494,8 @@ _non_id_translate_digraphs = {
 }
 
 
-def make_id(env: "BuildEnvironment", document: nodes.document,
-            prefix: str = '', term: Optional[str] = None) -> str:
+def make_id(env: BuildEnvironment, document: nodes.document,
+            prefix: str = '', term: str | None = None) -> str:
     """Generate an appropriate node_id for given *prefix* and *term*."""
     node_id = None
     if prefix:
@@ -539,18 +521,17 @@ def make_id(env: "BuildEnvironment", document: nodes.document,
 
 
 def find_pending_xref_condition(node: addnodes.pending_xref, condition: str
-                                ) -> Optional[Element]:
+                                ) -> Element | None:
     """Pick matched pending_xref_condition node up from the pending_xref."""
     for subnode in node:
         if (isinstance(subnode, addnodes.pending_xref_condition) and
                 subnode.get('condition') == condition):
             return subnode
-    else:
-        return None
+    return None
 
 
-def make_refnode(builder: "Builder", fromdocname: str, todocname: str, targetid: str,
-                 child: Union[Node, List[Node]], title: Optional[str] = None
+def make_refnode(builder: Builder, fromdocname: str, todocname: str, targetid: str,
+                 child: Node | list[Node], title: str | None = None
                  ) -> nodes.reference:
     """Shortcut to create a reference node."""
     node = nodes.reference('', '', internal=True)
@@ -607,7 +588,7 @@ def is_smartquotable(node: Node) -> bool:
     return True
 
 
-def process_only_nodes(document: Node, tags: "Tags") -> None:
+def process_only_nodes(document: Node, tags: Tags) -> None:
     """Filter ``only`` nodes which do not match *tags*."""
     for node in document.findall(addnodes.only):
         try:
@@ -625,19 +606,3 @@ def process_only_nodes(document: Node, tags: "Tags") -> None:
                 # the only node, so we make sure docutils can transfer the id to
                 # something, even if it's just a comment and will lose the id anyway...
                 node.replace_self(nodes.comment())
-
-
-def _new_copy(self: Element) -> Element:
-    """monkey-patch Element.copy to copy the rawsource and line
-    for docutils-0.16 or older versions.
-
-    refs: https://sourceforge.net/p/docutils/patches/165/
-    """
-    newnode = self.__class__(self.rawsource, **self.attributes)
-    if isinstance(self, nodes.Element):
-        newnode.source = self.source
-        newnode.line = self.line
-    return newnode
-
-
-nodes.Element.copy = _new_copy  # type: ignore

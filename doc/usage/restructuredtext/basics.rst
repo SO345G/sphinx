@@ -240,7 +240,7 @@ as long as the text::
 Normally, there are no heading levels assigned to certain characters as the
 structure is determined from the succession of headings.  However, this
 convention is used in `Python's Style Guide for documenting
-<https://docs.python.org/devguide/documenting.html#style-guide>`_ which you may
+<https://devguide.python.org/documentation/style-guide/>`_ which you may
 follow:
 
 * ``#`` with overline, for parts
@@ -370,7 +370,15 @@ Docutils supports the following directives:
   - :dudir:`include` (include reStructuredText from another file) -- in Sphinx,
     when given an absolute include file path, this directive takes it as
     relative to the source directory
-  - :dudir:`class` (assign a class attribute to the next element) [1]_
+
+    .. _rstclass:
+
+  - :dudir:`class` (assign a class attribute to the next element)
+
+    .. note::
+
+       When the default domain contains a ``class`` directive, this directive
+       will be shadowed.  Therefore, Sphinx re-exports it as ``rst-class``.
 
 * HTML specifics:
 
@@ -621,10 +629,3 @@ There are some problems one commonly runs into while authoring reST documents:
 
 * **No nested inline markup:** Something like ``*see :func:`foo`*`` is not
   possible.
-
-
-.. rubric:: Footnotes
-
-.. [1] When the default domain contains a :rst:dir:`class` directive, this
-       directive will be shadowed.  Therefore, Sphinx re-exports it as
-       :rst:dir:`rst-class`.

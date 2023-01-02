@@ -1,8 +1,10 @@
 """Support for NumPy and Google style docstrings."""
 
-from typing import Any, Dict, List
+from __future__ import annotations
 
-from sphinx import __display_version__ as __version__
+from typing import Any
+
+import sphinx
 from sphinx.application import Sphinx
 from sphinx.ext.napoleon.docstring import GoogleDocstring, NumpyDocstring
 from sphinx.util import inspect
@@ -286,7 +288,7 @@ class Config:
             setattr(self, name, value)
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx) -> dict[str, Any]:
     """Sphinx extension setup function.
 
     When the extension is loaded, Sphinx imports this module and executes
@@ -310,7 +312,7 @@ def setup(app: Sphinx) -> Dict[str, Any]:
     """
     if not isinstance(app, Sphinx):
         # probably called by tests
-        return {'version': __version__, 'parallel_read_safe': True}
+        return {'version': sphinx.__display_version__, 'parallel_read_safe': True}
 
     _patch_python_domain()
 
@@ -320,30 +322,25 @@ def setup(app: Sphinx) -> Dict[str, Any]:
 
     for name, (default, rebuild) in Config._config_values.items():
         app.add_config_value(name, default, rebuild)
-    return {'version': __version__, 'parallel_read_safe': True}
+    return {'version': sphinx.__display_version__, 'parallel_read_safe': True}
 
 
 def _patch_python_domain() -> None:
-    try:
-        from sphinx.domains.python import PyTypedField
-    except ImportError:
-        pass
-    else:
-        import sphinx.domains.python
-        from sphinx.locale import _
-        for doc_field in sphinx.domains.python.PyObject.doc_field_types:
-            if doc_field.name == 'parameter':
-                doc_field.names = ('param', 'parameter', 'arg', 'argument')
-                break
-        sphinx.domains.python.PyObject.doc_field_types.append(
-            PyTypedField('keyword', label=_('Keyword Arguments'),
-                         names=('keyword', 'kwarg', 'kwparam'),
-                         typerolename='obj', typenames=('paramtype', 'kwtype'),
-                         can_collapse=True))
+    from sphinx.domains.python import PyObject, PyTypedField
+    from sphinx.locale import _
+    for doc_field in PyObject.doc_field_types:
+        if doc_field.name == 'parameter':
+            doc_field.names = ('param', 'parameter', 'arg', 'argument')
+            break
+    PyObject.doc_field_types.append(
+        PyTypedField('keyword', label=_('Keyword Arguments'),
+                     names=('keyword', 'kwarg', 'kwparam'),
+                     typerolename='obj', typenames=('paramtype', 'kwtype'),
+                     can_collapse=True))
 
 
 def _process_docstring(app: Sphinx, what: str, name: str, obj: Any,
-                       options: Any, lines: List[str]) -> None:
+                       options: Any, lines: list[str]) -> None:
     """Process the docstring for a given python object.
 
     Called when autodoc has read and processed a docstring. `lines` is a list

@@ -1,9 +1,11 @@
 """Inventory utility functions for Sphinx."""
+from __future__ import annotations
+
 import os
 import re
 import zlib
 from os import path
-from typing import IO, TYPE_CHECKING, Callable, Iterator, List, Optional, Tuple
+from typing import IO, TYPE_CHECKING, Callable, Iterator
 
 from docutils import nodes
 from docutils.nodes import Element, TextElement
@@ -144,7 +146,7 @@ class InventoryFile:
         return invdata
 
     @classmethod
-    def dump(cls, filename: str, env: "BuildEnvironment", builder: "Builder") -> None:
+    def dump(cls, filename: str, env: BuildEnvironment, builder: Builder) -> None:
         def escape(string: str) -> str:
             return re.sub("\\s+", " ", string)
 
@@ -178,7 +180,7 @@ class InventoryFile:
 
 class InventoryItemSet:
     def __init__(self):
-        self._items = []  # type: List[Tuple[str, InventoryItem]]
+        self._items: list[tuple[str, InventoryItem]] = []
 
     def __str__(self) -> str:
         return "InventoryItemSet({})".format(", ".join(str(e) for e in self._items))
@@ -186,10 +188,10 @@ class InventoryItemSet:
     def __repr__(self) -> str:
         return str(self)
 
-    def append(self, item: Tuple[str, InventoryItem]) -> None:
+    def append(self, item: tuple[str, InventoryItem]) -> None:
         self._items.append(item)
 
-    def select_inventory(self, inv_name: Optional[str]) -> "InventoryItemSet":
+    def select_inventory(self, inv_name: str | None) -> InventoryItemSet | None:
         if inv_name is None:
             return self
         items = [item for item in self._items if item[0] == inv_name]

@@ -1,24 +1,26 @@
 """Sphinx deprecation classes and utilities."""
 
+from __future__ import annotations
+
 import sys
 import warnings
 from importlib import import_module
-from typing import Any, Dict, Type
+from typing import Any, Dict
 
 
-class RemovedInSphinx60Warning(DeprecationWarning):
+class RemovedInSphinx70Warning(DeprecationWarning):
     pass
 
 
-class RemovedInSphinx70Warning(PendingDeprecationWarning):
+class RemovedInSphinx80Warning(PendingDeprecationWarning):
     pass
 
 
-RemovedInNextVersionWarning = RemovedInSphinx60Warning
+RemovedInNextVersionWarning = RemovedInSphinx70Warning
 
 
-def deprecated_alias(modname: str, objects: Dict[str, object],
-                     warning: Type[Warning], names: Dict[str, str] = {}) -> None:
+def deprecated_alias(modname: str, objects: dict[str, object],
+                     warning: type[Warning], names: dict[str, str] = {}) -> None:
     module = import_module(modname)
     sys.modules[modname] = _ModuleWrapper(  # type: ignore
         module, modname, objects, warning, names)
@@ -26,9 +28,9 @@ def deprecated_alias(modname: str, objects: Dict[str, object],
 
 class _ModuleWrapper:
     def __init__(self, module: Any, modname: str,
-                 objects: Dict[str, object],
-                 warning: Type[Warning],
-                 names: Dict[str, str]) -> None:
+                 objects: dict[str, object],
+                 warning: type[Warning],
+                 names: dict[str, str]) -> None:
         self._module = module
         self._modname = modname
         self._objects = objects
@@ -41,21 +43,21 @@ class _ModuleWrapper:
 
         canonical_name = self._names.get(name, None)
         if canonical_name is not None:
-            warnings.warn(
-                "The alias '{}.{}' is deprecated, use '{}' instead. Check CHANGES for "
-                "Sphinx API modifications.".format(self._modname, name, canonical_name),
-                self._warning, stacklevel=3)
+            warnings.warn(f"The alias '{self._modname}.{name}' is deprecated, "
+                          f"use '{canonical_name}' instead. "
+                          "Check CHANGES for Sphinx API modifications.",
+                          self._warning, stacklevel=3)
         else:
-            warnings.warn("{}.{} is deprecated. Check CHANGES for Sphinx "
-                          "API modifications.".format(self._modname, name),
+            warnings.warn(f"{self._modname}.{name} is deprecated. "
+                          "Check CHANGES for Sphinx API modifications.",
                           self._warning, stacklevel=3)
         return self._objects[name]
 
 
-class DeprecatedDict(dict):
+class DeprecatedDict(Dict[str, Any]):
     """A deprecated dict which warns on each access."""
 
-    def __init__(self, data: Dict, message: str, warning: Type[Warning]) -> None:
+    def __init__(self, data: dict[str, Any], message: str, warning: type[Warning]) -> None:
         self.message = message
         self.warning = warning
         super().__init__(data)
@@ -68,7 +70,7 @@ class DeprecatedDict(dict):
         warnings.warn(self.message, self.warning, stacklevel=2)
         return super().setdefault(key, default)
 
-    def __getitem__(self, key: str) -> None:
+    def __getitem__(self, key: str) -> Any:
         warnings.warn(self.message, self.warning, stacklevel=2)
         return super().__getitem__(key)
 
@@ -76,6 +78,6 @@ class DeprecatedDict(dict):
         warnings.warn(self.message, self.warning, stacklevel=2)
         return super().get(key, default)
 
-    def update(self, other: Dict) -> None:  # type: ignore
+    def update(self, other: dict[str, Any]) -> None:  # type: ignore
         warnings.warn(self.message, self.warning, stacklevel=2)
         super().update(other)

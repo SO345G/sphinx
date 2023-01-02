@@ -1,13 +1,14 @@
 """Docutils transforms used by Sphinx when reading documents."""
 
+from __future__ import annotations
+
 import re
 import unicodedata
-import warnings
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, Generator, cast
 
-import docutils
 from docutils import nodes
-from docutils.nodes import Element, Node, Text
+from docutils.nodes import Element  # noqa: F401 (used for type comments only)
+from docutils.nodes import Node, Text
 from docutils.transforms import Transform, Transformer
 from docutils.transforms.parts import ContentsFilter
 from docutils.transforms.universal import SmartQuotes
@@ -16,12 +17,11 @@ from docutils.utils.smartquotes import smartchars
 
 from sphinx import addnodes
 from sphinx.config import Config
-from sphinx.deprecation import RemovedInSphinx60Warning
 from sphinx.locale import _, __
 from sphinx.util import logging
 from sphinx.util.docutils import new_document
 from sphinx.util.i18n import format_date
-from sphinx.util.nodes import NodeMatcher, apply_source_workaround, is_smartquotable
+from sphinx.util.nodes import apply_source_workaround, is_smartquotable
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -46,12 +46,12 @@ class SphinxTransform(Transform):
     """
 
     @property
-    def app(self) -> "Sphinx":
+    def app(self) -> Sphinx:
         """Reference to the :class:`.Sphinx` object."""
         return self.env.app
 
     @property
-    def env(self) -> "BuildEnvironment":
+    def env(self) -> BuildEnvironment:
         """Reference to the :class:`.BuildEnvironment` object."""
         return self.document.settings.env
 
@@ -67,9 +67,9 @@ class SphinxTransformer(Transformer):
     """
 
     document: nodes.document
-    env: Optional["BuildEnvironment"] = None
+    env: BuildEnvironment | None = None
 
-    def set_environment(self, env: "BuildEnvironment") -> None:
+    def set_environment(self, env: BuildEnvironment) -> None:
         self.env = env
 
     def apply_transforms(self) -> None:
@@ -274,23 +274,6 @@ class DoctestTransform(SphinxTransform):
             node['classes'].append('doctest')
 
 
-class FigureAligner(SphinxTransform):
-    """
-    Align figures to center by default.
-    """
-    default_priority = 700
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        warnings.warn('FigureAilgner is deprecated.',
-                      RemovedInSphinx60Warning)
-        super().__init__(*args, **kwargs)
-
-    def apply(self, **kwargs: Any) -> None:
-        matcher = NodeMatcher(nodes.table, nodes.figure)
-        for node in self.document.findall(matcher):  # type: Element
-            node.setdefault('align', 'default')
-
-
 class FilterSystemMessages(SphinxTransform):
     """Filter system messages from a doctree."""
     default_priority = 999
@@ -350,27 +333,22 @@ class SphinxSmartQuotes(SmartQuotes, SphinxTransform):
 
         # confirm selected language supports smart_quotes or not
         language = self.env.settings['language_code']
-        for tag in normalize_language_tag(language):
-            if tag in smartchars.quotes:
-                return True
-        else:
-            return False
+        return any(
+            tag in smartchars.quotes
+            for tag in normalize_language_tag(language)
+        )
 
-    def get_tokens(self, txtnodes: List[Text]) -> Generator[Tuple[str, str], None, None]:
+    def get_tokens(self, txtnodes: list[Text]) -> Generator[tuple[str, str], None, None]:
         # A generator that yields ``(texttype, nodetext)`` tuples for a list
         # of "Text" nodes (interface to ``smartquotes.educate_tokens()``).
         for txtnode in txtnodes:
             if is_smartquotable(txtnode):
-                if docutils.__version_info__ >= (0, 16):
-                    # SmartQuotes uses backslash escapes instead of null-escapes
-                    text = re.sub(r'(?<=\x00)([-\\\'".`])', r'\\\1', str(txtnode))
-                else:
-                    text = txtnode.astext()
-
-                yield ('plain', text)
+                # SmartQuotes uses backslash escapes instead of null-escapes
+                text = re.sub(r'(?<=\x00)([-\\\'".`])', r'\\\1', str(txtnode))
+                yield 'plain', text
             else:
                 # skip smart quotes
-                yield ('literal', txtnode.astext())
+                yield 'literal', txtnode.astext()
 
 
 class DoctreeReadEvent(SphinxTransform):
@@ -389,7 +367,7 @@ class ManpageLink(SphinxTransform):
         for node in self.document.findall(addnodes.manpage):
             manpage = ' '.join([str(x) for x in node.children
                                 if isinstance(x, nodes.Text)])
-            pattern = r'^(?P<path>(?P<page>.+)[\(\.](?P<section>[1-9]\w*)?\)?)$'  # noqa
+            pattern = r'^(?P<path>(?P<page>.+)[\(\.](?P<section>[1-9]\w*)?\)?)$'
             info = {'path': manpage,
                     'page': manpage,
                     'section': ''}
@@ -417,7 +395,7 @@ class GlossarySorter(SphinxTransform):
                 )
 
 
-def setup(app: "Sphinx") -> Dict[str, Any]:
+def setup(app: Sphinx) -> dict[str, Any]:
     app.add_transform(ApplySourceWorkaround)
     app.add_transform(ExtraTranslatableNodes)
     app.add_transform(DefaultSubstitutions)

@@ -20,7 +20,7 @@ templates_path = ['_templates']
 source_suffix = ['.txt', '.add', '.foo']
 
 project = 'Sphinx <Tests>'
-copyright = '2010-2016, Georg Brandl & Team'
+copyright = '1234-6789, copyright text credits'
 # If this is changed, remember to update the versionchanges!
 version = '0.6'
 release = '0.6alpha1'
@@ -46,7 +46,7 @@ extlinks = {'issue': ('http://bugs.python.org/issue%s', 'issue %s'),
             'pyurl': ('http://python.org/%s', None)}
 
 # modify tags from conf.py
-tags.add('confpytag')  # NOQA
+tags.add('confpytag')
 
 
 # -- extension API

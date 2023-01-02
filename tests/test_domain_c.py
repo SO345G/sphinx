@@ -470,12 +470,12 @@ def test_domain_c_ast_function_definitions():
     cvrs = ['', 'const', 'volatile', 'restrict', 'restrict volatile const']
     for cvr in cvrs:
         space = ' ' if len(cvr) != 0 else ''
-        check('function', 'void f(int arr[{}*])'.format(cvr), {1: 'f'})
-        check('function', 'void f(int arr[{}])'.format(cvr), {1: 'f'})
-        check('function', 'void f(int arr[{}{}42])'.format(cvr, space), {1: 'f'})
-        check('function', 'void f(int arr[static{}{} 42])'.format(space, cvr), {1: 'f'})
-        check('function', 'void f(int arr[{}{}static 42])'.format(cvr, space), {1: 'f'},
-              output='void f(int arr[static{}{} 42])'.format(space, cvr))
+        check('function', f'void f(int arr[{cvr}*])', {1: 'f'})
+        check('function', f'void f(int arr[{cvr}])', {1: 'f'})
+        check('function', f'void f(int arr[{cvr}{space}42])', {1: 'f'})
+        check('function', f'void f(int arr[static{space}{cvr} 42])', {1: 'f'})
+        check('function', f'void f(int arr[{cvr}{space}static 42])', {1: 'f'},
+              output=f'void f(int arr[static{space}{cvr} 42])')
     check('function', 'void f(int arr[const static volatile 42])', {1: 'f'},
           output='void f(int arr[static volatile const 42])')
 
@@ -611,9 +611,9 @@ def split_warnigns(warning):
 
 def filter_warnings(warning, file):
     lines = split_warnigns(warning)
-    res = [l for l in lines if "domain-c" in l and "{}.rst".format(file) in l and
+    res = [l for l in lines if "domain-c" in l and f"{file}.rst" in l and
            "WARNING: document isn't included in any toctree" not in l]
-    print("Filtered warnings for file '{}':".format(file))
+    print(f"Filtered warnings for file '{file}':")
     for w in res:
         print(w)
     return res
@@ -652,7 +652,7 @@ def test_domain_c_build_namespace(app, status, warning):
     assert len(ws) == 0
     t = (app.outdir / "namespace.html").read_text(encoding='utf8')
     for id_ in ('NS.NSVar', 'NULLVar', 'ZeroVar', 'NS2.NS3.NS2NS3Var', 'PopVar'):
-        assert 'id="c.{}"'.format(id_) in t
+        assert f'id="c.{id_}"' in t
 
 
 @pytest.mark.sphinx(testroot='domain-c', confoverrides={'nitpicky': True})
@@ -729,9 +729,9 @@ def test_domain_c_build_intersphinx(tempdir, app, status, warning):
 .. c:macro:: _macro
 .. c:struct:: _struct
 
-	.. c:union:: @anon
+    .. c:union:: @anon
 
-		.. c:var:: int i
+        .. c:var:: int i
 
 .. c:union:: _union
 .. c:enum:: _enum
@@ -740,7 +740,7 @@ def test_domain_c_build_intersphinx(tempdir, app, status, warning):
 
 .. c:type:: _type
 .. c:function:: void _functionParam(int param)
-"""  # noqa
+"""  # noqa: F841
     inv_file = tempdir / 'inventory'
     inv_file.write_bytes(b'''\
 # Sphinx inventory version 2
@@ -762,7 +762,7 @@ _struct.@anon.i c:member 1 index.html#c.$ _struct.[anonymous].i
 _type c:type 1 index.html#c.$ -
 _union c:union 1 index.html#c.$ -
 _var c:member 1 index.html#c.$ -
-'''))  # noqa
+'''))  # noqa: W291
     app.config.intersphinx_mapping = {
         'https://localhost/intersphinx/c/': inv_file,
     }

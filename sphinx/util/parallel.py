@@ -1,27 +1,23 @@
 """Parallel building utilities."""
 
+from __future__ import annotations
+
 import os
-import sys
 import time
 import traceback
 from math import sqrt
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Sequence
 
 try:
     import multiprocessing
+    HAS_MULTIPROCESSING = True
 except ImportError:
-    multiprocessing = None
+    HAS_MULTIPROCESSING = False
 
 from sphinx.errors import SphinxParallelError
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
-
-if sys.platform != "win32":
-    ForkProcess = multiprocessing.context.ForkProcess
-else:
-    # For static typing, as ForkProcess doesn't exist on Windows
-    ForkProcess = multiprocessing.process.BaseProcess
 
 # our parallel functionality only works for the forking Process
 parallel_available = multiprocessing and os.name == 'posix'
@@ -33,7 +29,9 @@ class SerialTasks:
     def __init__(self, nproc: int = 1) -> None:
         pass
 
-    def add_task(self, task_func: Callable, arg: Any = None, result_func: Callable = None) -> None:  # NOQA
+    def add_task(
+        self, task_func: Callable, arg: Any = None, result_func: Callable | None = None
+    ) -> None:
         if arg is not None:
             res = task_func(arg)
         else:
@@ -51,15 +49,15 @@ class ParallelTasks:
     def __init__(self, nproc: int) -> None:
         self.nproc = nproc
         # (optional) function performed by each task on the result of main task
-        self._result_funcs: Dict[int, Callable] = {}
+        self._result_funcs: dict[int, Callable] = {}
         # task arguments
-        self._args: Dict[int, Optional[List[Any]]] = {}
+        self._args: dict[int, list[Any] | None] = {}
         # list of subprocesses (both started and waiting)
-        self._procs: Dict[int, ForkProcess] = {}
+        self._procs: dict[int, Any] = {}
         # list of receiving pipe connections of running subprocesses
-        self._precvs: Dict[int, Any] = {}
+        self._precvs: dict[int, Any] = {}
         # list of receiving pipe connections of waiting subprocesses
-        self._precvsWaiting: Dict[int, Any] = {}
+        self._precvsWaiting: dict[int, Any] = {}
         # number of working subprocesses
         self._pworking = 0
         # task number of each subprocess
@@ -82,14 +80,14 @@ class ParallelTasks:
         pipe.send((failed, collector.logs, ret))
 
     def add_task(
-        self, task_func: Callable, arg: Any = None, result_func: Optional[Callable] = None
+        self, task_func: Callable, arg: Any = None, result_func: Callable | None = None
     ) -> None:
         tid = self._taskid
         self._taskid += 1
         self._result_funcs[tid] = result_func or (lambda arg, result: None)
         self._args[tid] = arg
         precv, psend = multiprocessing.Pipe(False)
-        context = multiprocessing.get_context('fork')
+        context: Any = multiprocessing.get_context('fork')
         proc = context.Process(target=self._process, args=(psend, task_func, arg))
         self._procs[tid] = proc
         self._precvsWaiting[tid] = precv
@@ -138,7 +136,7 @@ class ParallelTasks:
         return joined_any
 
 
-def make_chunks(arguments: Sequence[str], nproc: int, maxbatch: int = 10) -> List[Any]:
+def make_chunks(arguments: Sequence[str], nproc: int, maxbatch: int = 10) -> list[Any]:
     # determine how many documents to read in one go
     nargs = len(arguments)
     chunksize = nargs // nproc
