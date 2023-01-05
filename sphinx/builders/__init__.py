@@ -388,6 +388,11 @@ class Builder:
         Store all environment docnames in the canonical format (ie using SEP as
         a separator in place of os.path.sep).
         """
+        docnames = self._get_docnames()
+        self._read_docnames(docnames)
+        return self._update_docnames(docnames)
+
+    def _get_docnames(self) -> list[str]:
         logger.info(bold(__('updating environment: ')), nonl=True)
 
         self.env.find_files(self.config, self)
@@ -422,6 +427,10 @@ class Builder:
         # allow changing and reordering the list of docs to read
         self.events.emit('env-before-read-docs', self.env, docnames)
 
+        return docnames
+
+    def _read_docnames(self, docnames: list[str]) -> None:
+
         # check if we should do parallel or serial read
         if parallel_available and len(docnames) > 5 and self.app.parallel > 1:
             par_ok = self.app.is_parallel_allowed('read')
@@ -437,6 +446,7 @@ class Builder:
             raise SphinxError('root file %s not found' %
                               self.env.doc2path(self.config.root_doc))
 
+    def _update_docnames(self, docnames: list[str]):
         for retval in self.events.emit('env-updated', self.env):
             if retval is not None:
                 docnames.extend(retval)
