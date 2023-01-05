@@ -365,15 +365,14 @@ class BuildEnvironment:
         for domain in self.domains.values():
             domain.clear_doc(docname)
 
-    def merge_info_from(self, docnames: list[str], other: BuildEnvironment,
-                        app: Sphinx) -> None:
+    def merge_info_from(self, docnames: list[str], other: BuildEnvironment) -> None:
         """Merge global information gathered about *docnames* while reading them
         from the *other* environment.
 
         This possibly comes from a parallel build process.
         """
-        docnames = set(docnames)  # type: ignore
-        for docname in docnames:
+        unique_docnames = set(docnames)
+        for docname in unique_docnames:
             self.all_docs[docname] = other.all_docs[docname]
             self.included[docname] = other.included[docname]
             if docname in other.reread_always:
@@ -381,7 +380,7 @@ class BuildEnvironment:
 
         for domainname, domain in self.domains.items():
             domain.merge_domaindata(docnames, other.domaindata[domainname])
-        self.events.emit('env-merge-info', self, docnames, other)
+        self.events.emit('env-merge-info', self, unique_docnames, other)
 
     def path2doc(self, filename: str) -> str | None:
         """Return the docname for the filename if the file is document.

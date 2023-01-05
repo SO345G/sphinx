@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Iterable, Sequence
 from docutils import nodes
 from docutils.nodes import Node
 from docutils.utils import DependencyList
+import dill  # NoQA: F401  # for side effects
 
 from sphinx.config import Config
 from sphinx.deprecation import RemovedInSphinx70Warning
@@ -23,7 +24,7 @@ from sphinx.locale import __
 from sphinx.util import UnicodeDecodeErrorHandler, get_filetype, import_object, logging, rst
 from sphinx.util.build_phase import BuildPhase
 from sphinx.util.console import bold  # type: ignore
-from sphinx.util.display import progress_message, status_iterator
+from sphinx.util.display import progress_message, status_iterator, display_chunk
 from sphinx.util.docutils import sphinx_domains
 from sphinx.util.i18n import CatalogInfo, CatalogRepository, docname_to_domain
 from sphinx.util.osutil import SEP, ensuredir, relative_uri, relpath
@@ -34,10 +35,6 @@ from sphinx.util.typing import NoneType
 # side effect: registers roles and directives
 from sphinx import directives  # noqa: F401  isort:skip
 from sphinx import roles  # noqa: F401  isort:skip
-try:
-    import multiprocessing
-except ImportError:
-    multiprocessing = None
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -361,7 +358,7 @@ class Builder:
             docnames = set(docnames) & self.env.found_docs
 
         # determine if we can write in parallel
-        if parallel_available and self.app.parallel > 1 and self.allow_parallel:
+        if self.app.parallel > 1:
             self.parallel_ok = self.app.is_parallel_allowed('write')
         else:
             self.parallel_ok = False
@@ -459,37 +456,40 @@ class Builder:
             self.read_doc(docname)
 
     def _read_parallel(self, docnames: list[str], nproc: int) -> None:
-        chunks = make_chunks(docnames, nproc)
+        import multiprocessing
 
-        # create a status_iterator to step progressbar after reading a document
-        # (see: ``merge()`` function)
-        progress = status_iterator(chunks, __('reading sources... '), "purple",
-                                   len(chunks), self.app.verbosity)
+        sphinx_init_kwargs = {
+            'srcdir': self.app.srcdir, 'confdir': self.app.confdir,
+            'outdir': self.app.outdir, 'doctreedir': self.app.doctreedir,
+            'buildername': self.app.builder.name, 'confoverrides': self.app._confoverrides,
+            'freshenv': self.app._freshenv, 'warningiserror': self.app.warningiserror,
+            'tags': self.app.tags, 'verbosity': self.app.verbosity,
+            'parallel': self.app.parallel, 'keep_going': self.app.keep_going,
+            'pdb': self.app.pdb,
+            'status': self.app._status, 'warning': self.app._warning,
+        }
+        chunks = make_chunks(docnames, nproc)
 
         # clear all outdated docs at once
         for docname in docnames:
             self.events.emit('env-purge-doc', self.env, docname)
             self.env.clear_doc(docname)
 
-        def read_process(docs: list[str]) -> bytes:
-            self.env.app = self.app
-            for docname in docs:
-                self.read_doc(docname)
-            # allow pickling self to send it back
-            return pickle.dumps(self.env, pickle.HIGHEST_PROTOCOL)
+        with multiprocessing.Pool(processes=self.app.parallel) as pool:
+            pickled_envs = pool.starmap(
+                _parallel_worker_read,
+                [(sphinx_init_kwargs, chunk) for chunk in chunks]
+            )
+        # make sure everything has finished
+        pool.join()
 
-        def merge(docs: list[str], otherenv: bytes) -> None:
-            env = pickle.loads(otherenv)
-            self.env.merge_info_from(docs, env, self.app)
+        for (processed_docnames, pickled_env) in status_iterator(
+                pickled_envs, __('reading sources... '), "purple",
+                len(pickled_envs), self.app.verbosity, (lambda p: display_chunk(p[0]))
+        ):
+            env = pickle.loads(pickled_env)
+            self.env.merge_info_from(processed_docnames, env)
 
-            next(progress)
-
-        tasks = ParallelTasks(nproc)
-        for chunk in chunks:
-            tasks.add_task(read_process, chunk, merge)
-
-        # make sure all threads have finished
-        tasks.join()
         logger.info('')
 
     def read_doc(self, docname: str) -> None:
@@ -593,6 +593,51 @@ class Builder:
                 self.write_doc(docname, doctree)
 
     def _write_parallel(self, docnames: Sequence[str], nproc: int) -> None:
+        import multiprocessing
+
+        sphinx_init_kwargs = {
+            'srcdir': self.app.srcdir, 'confdir': self.app.confdir,
+            'outdir': self.app.outdir, 'doctreedir': self.app.doctreedir,
+            'buildername': self.app.builder.name, 'confoverrides': self.app._confoverrides,
+            'freshenv': self.app._freshenv, 'warningiserror': self.app.warningiserror,
+            'tags': self.app.tags, 'verbosity': self.app.verbosity,
+            'parallel': self.app.parallel, 'keep_going': self.app.keep_going,
+            'pdb': self.app.pdb,
+            'status': self.app._status, 'warning': self.app._warning,
+        }
+        docname_chunks = make_chunks(docnames, nproc)
+
+        # warm up caches/compile templates using the first document
+        firstname, docnames = docnames[0], docnames[1:]
+        self.app.phase = BuildPhase.RESOLVING
+        doctree = self.env.get_and_resolve_doctree(firstname, self)
+        self.app.phase = BuildPhase.WRITING
+        self.write_doc_serialized(firstname, doctree)
+        self.write_doc(firstname, doctree)
+
+        self.app.phase = BuildPhase.RESOLVING
+
+        doctree_chunks = []
+        for chunk in docname_chunks:
+            arg = []
+            for docname in chunk:
+                self.app.phase = BuildPhase.RESOLVING
+                doctree = self.env.get_and_resolve_doctree(docname, self)
+                self.app.phase = BuildPhase.WRITING
+                self.write_doc_serialized(docname, doctree)
+                arg.append((docname, doctree))
+            doctree_chunks.append(arg)
+
+        self.app.phase = BuildPhase.WRITING
+        with multiprocessing.Pool(processes=self.app.parallel) as pool:
+            written_doc_chunks = pool.starmap(
+                _parallel_worker_write,
+                [(sphinx_init_kwargs, chunk) for chunk in doctree_chunks]
+            )
+        # make sure everything has finished
+        pool.join()
+        logger.info('')
+
         def write_process(docs: list[tuple[str, nodes.document]]) -> None:
             self.app.phase = BuildPhase.WRITING
             for docname, doctree in docs:
@@ -673,3 +718,34 @@ class Builder:
         except AttributeError:
             optname = f'{default}_{option}'
             return getattr(self.config, optname)
+
+
+
+
+def _parallel_worker_read(sphinx_kwargs, docnames: list[str]) -> tuple[list[str], bytes]:
+    from sphinx.application import Sphinx
+
+    worker_app = Sphinx(**sphinx_kwargs)
+    worker_app.phase = BuildPhase.READING
+    for docname in docnames:
+        # remove all inventory entries for that file
+        worker_app.events.emit('env-purge-doc', worker_app.env, docname)
+        worker_app.env.clear_doc(docname)
+        worker_app.builder.read_doc(docname)
+
+    # allow pickling self to send it back
+    return docnames, pickle.dumps(worker_app.env, pickle.HIGHEST_PROTOCOL)
+
+
+def _parallel_worker_write(sphinx_kwargs, docs: tuple[list[str], list[nodes.document]]) -> list[str]:
+    from sphinx.application import Sphinx
+
+    worker_app = Sphinx(**sphinx_kwargs)
+    worker_app.phase = BuildPhase.WRITING
+    with progress_message(__('preparing documents')):
+        worker_app.builder.prepare_writing([])
+
+    for (docname, doctree) in docs:
+        worker_app.builder.write_doc(docname, doctree)
+
+    return [docname for (docname, doctree) in docs]

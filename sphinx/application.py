@@ -267,6 +267,10 @@ class Sphinx:
         # set up the builder
         self._init_builder()
 
+        # save properties for parallel
+        self._confoverrides = confoverrides
+        self._freshenv = freshenv
+
     def _init_i18n(self) -> None:
         """Load translated strings from the configured localedirs if enabled in
         the configuration.
