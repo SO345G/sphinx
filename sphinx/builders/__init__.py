@@ -432,19 +432,13 @@ class Builder:
     def _read_docnames(self, docnames: list[str]) -> None:
 
         # check if we should do parallel or serial read
-        if parallel_available and len(docnames) > 5 and self.app.parallel > 1:
-            par_ok = self.app.is_parallel_allowed('read')
-        else:
-            par_ok = False
-
-        if par_ok:
+        if len(docnames) > 5 and bool(self.app.is_parallel_allowed('read')):
             self._read_parallel(docnames, nproc=self.app.parallel)
         else:
             self._read_serial(docnames)
 
         if self.config.root_doc not in self.env.all_docs:
-            raise SphinxError('root file %s not found' %
-                              self.env.doc2path(self.config.root_doc))
+            raise SphinxError(f'root file {self.env.doc2path(self.config.root_doc)} not found')
 
     def _update_docnames(self, docnames: list[str]):
         for retval in self.events.emit('env-updated', self.env):
