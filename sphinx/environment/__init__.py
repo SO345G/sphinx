@@ -35,6 +35,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
+def __getattr__(name: str) -> dict[int, str] | Any:
+    if name == 'CONFIG_CHANGED_REASON':
+        # defer internationalisation from module import
+        return {
+            CONFIG_NEW: __('new config'),
+            CONFIG_CHANGED: __('config changed'),
+            CONFIG_EXTENSIONS_CHANGED: __('extensions changed'),
+        }
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+
+
 default_settings: dict[str, Any] = {
     'auto_id_prefix': 'id',
     'image_loading': 'link',
@@ -62,13 +74,6 @@ CONFIG_OK = 1
 CONFIG_NEW = 2
 CONFIG_CHANGED = 3
 CONFIG_EXTENSIONS_CHANGED = 4
-
-CONFIG_CHANGED_REASON = {
-    CONFIG_NEW: __('new config'),
-    CONFIG_CHANGED: __('config changed'),
-    CONFIG_EXTENSIONS_CHANGED: __('extensions changed'),
-}
-
 
 versioning_conditions: dict[str, bool | Callable] = {
     'none': False,

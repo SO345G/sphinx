@@ -211,15 +211,18 @@ __ = get_translation('sphinx', 'console')
 
 
 # labels
-admonitionlabels = {
-    'attention': _('Attention'),
-    'caution':   _('Caution'),
-    'danger':    _('Danger'),
-    'error':     _('Error'),
-    'hint':      _('Hint'),
-    'important': _('Important'),
-    'note':      _('Note'),
-    'seealso':   _('See also'),
-    'tip':       _('Tip'),
-    'warning':   _('Warning'),
-}
+_admonitionlabels: dict[str, str] = {}
+
+
+def __getattr__(name: str) -> dict[str, str] | Any:
+    if name == 'admonitionlabels':
+        from sphinx.deprecation import _deprecation_warning
+        from sphinx.util import _admonition_labels
+
+        _deprecation_warning(__name__, name, '', remove=(8, 0))
+        if _admonition_labels.ADMONITION_TYPES.issubset(_admonitionlabels):
+            return _admonitionlabels
+        for label in _admonition_labels.ADMONITION_TYPES:
+            _admonitionlabels[label] = _admonition_labels.translated_label(label)
+        return _admonitionlabels
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')

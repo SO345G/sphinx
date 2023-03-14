@@ -14,8 +14,8 @@ from docutils.writers.html5_polyglot import HTMLTranslator as BaseTranslator
 
 from sphinx import addnodes
 from sphinx.builders import Builder
-from sphinx.locale import _, __, admonitionlabels
-from sphinx.util import logging
+from sphinx.locale import _, __
+from sphinx.util import _admonition_labels, logging
 from sphinx.util.docutils import SphinxTranslator
 from sphinx.util.images import get_image_size
 
@@ -314,7 +314,7 @@ class HTML5Translator(SphinxTranslator, BaseTranslator):
         self.body.append(self.starttag(
             node, 'div', CLASS=('admonition ' + name)))
         if name:
-            node.insert(0, nodes.title(name, admonitionlabels[name]))
+            node.insert(0, nodes.title(name, _admonition_labels.translated_label(name)))
 
     def depart_admonition(self, node: Element | None = None) -> None:
         self.body.append('</div>\n')

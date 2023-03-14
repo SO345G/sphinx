@@ -74,7 +74,10 @@ class GenericObject(ObjectDescription[str]):
 
 
 class EnvVar(GenericObject):
-    indextemplate = _('environment variable; %s')
+    def __getattr__(self, name: str) -> str | Any:
+        if name == 'indextemplate':
+            return _('environment variable; %s')
+        raise AttributeError(f'{self.__class__.__name__!r} object has no attribute {name!r}')
 
 
 class EnvVarXRefRole(XRefRole):
@@ -508,15 +511,7 @@ class StandardDomain(Domain):
     name = 'std'
     label = 'Default'
 
-    object_types: dict[str, ObjType] = {
-        'term': ObjType(_('glossary term'), 'term', searchprio=-1),
-        'token': ObjType(_('grammar token'), 'token', searchprio=-1),
-        'label': ObjType(_('reference label'), 'ref', 'keyword',
-                         searchprio=-1),
-        'envvar': ObjType(_('environment variable'), 'envvar'),
-        'cmdoption': ObjType(_('program option'), 'option'),
-        'doc': ObjType(_('document'), 'doc', searchprio=-1),
-    }
+    object_types: dict[str, ObjType]
 
     directives: dict[str, type[Directive]] = {
         'program': Program,
@@ -526,6 +521,7 @@ class StandardDomain(Domain):
         'glossary': Glossary,
         'productionlist': ProductionList,
     }
+
     roles: dict[str, RoleFunction | XRefRole] = {
         'option':  OptionXRefRole(warn_dangling=True),
         'envvar':  EnvVarXRefRole(),
@@ -546,26 +542,9 @@ class StandardDomain(Domain):
         'doc':     XRefRole(warn_dangling=True, innernodeclass=nodes.inline),
     }
 
-    initial_data: Final = {  # type: ignore[misc]
-        'progoptions': {},      # (program, name) -> docname, labelid
-        'objects': {},          # (type, name) -> docname, labelid
-        'labels': {             # labelname -> docname, labelid, sectionname
-            'genindex': ('genindex', '', _('Index')),
-            'modindex': ('py-modindex', '', _('Module Index')),
-            'search':   ('search', '', _('Search Page')),
-        },
-        'anonlabels': {         # labelname -> docname, labelid
-            'genindex': ('genindex', ''),
-            'modindex': ('py-modindex', ''),
-            'search':   ('search', ''),
-        },
-    }
+    initial_data: dict[str, dict[Any, Any]]
 
-    _virtual_doc_names: dict[str, tuple[str, str]] = {  # labelname -> docname, sectionname
-        'genindex': ('genindex', _('Index')),
-        'modindex': ('py-modindex', _('Module Index')),
-        'search': ('search', _('Search Page')),
-    }
+    _virtual_doc_names: dict[str, tuple[str, str]]
 
     dangling_warnings = {
         'term': 'term not in glossary: %(target)r',
@@ -583,6 +562,37 @@ class StandardDomain(Domain):
     }
 
     def __init__(self, env: BuildEnvironment) -> None:
+        self.object_types = {
+            'term': ObjType(_('glossary term'), 'term', searchprio=-1),
+            'token': ObjType(_('grammar token'), 'token', searchprio=-1),
+            'label': ObjType(_('reference label'), 'ref', 'keyword', searchprio=-1),
+            'envvar': ObjType(_('environment variable'), 'envvar'),
+            'cmdoption': ObjType(_('program option'), 'option'),
+            'doc': ObjType(_('document'), 'doc', searchprio=-1),
+        }
+
+        self.initial_data: Final = {  # type: ignore[misc]
+            'progoptions': {},  # (program, name) -> docname, labelid
+            'objects': {},  # (type, name) -> docname, labelid
+            'labels': {  # labelname -> docname, labelid, sectionname
+                'genindex': ('genindex', '', _('Index')),
+                'modindex': ('py-modindex', '', _('Module Index')),
+                'search': ('search', '', _('Search Page')),
+            },
+            'anonlabels': {  # labelname -> docname, labelid
+                'genindex': ('genindex', ''),
+                'modindex': ('py-modindex', ''),
+                'search': ('search', ''),
+            },
+        }
+
+        # labelname -> docname, sectionname
+        self._virtual_doc_names: dict[str, tuple[str, str]] = {
+            'genindex': ('genindex', _('Index')),
+            'modindex': ('py-modindex', _('Module Index')),
+            'search': ('search', _('Search Page')),
+        }
+
         super().__init__(env)
 
         # set up enumerable nodes

@@ -12,7 +12,9 @@ from docutils import nodes
 from docutils.nodes import Node
 from docutils.utils import DependencyList
 
+from sphinx import environment
 from sphinx.config import Config
+from sphinx.deprecation import RemovedInSphinx70Warning
 from sphinx.environment import CONFIG_CHANGED_REASON, CONFIG_OK, BuildEnvironment
 from sphinx.environment.adapters.asset import ImageAdapter
 from sphinx.errors import SphinxError
@@ -39,7 +41,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
-
+    from sphinx.environment import BuildEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -375,7 +377,7 @@ class Builder:
         logger.info(bold(__('updating environment: ')), nonl=True)
 
         self.env.find_files(self.config, self)
-        updated = (self.env.config_status != CONFIG_OK)
+        updated = (self.env.config_status != environment.CONFIG_OK)
         added, changed, removed = self.env.get_outdated_files(updated)
 
         # allow user intervention as well
@@ -389,8 +391,8 @@ class Builder:
             changed.update(self.env.glob_toctrees & self.env.found_docs)
 
         if updated:  # explain the change iff build config status was not ok
-            reason = (CONFIG_CHANGED_REASON.get(self.env.config_status, '') +
-                      (self.env.config_status_extra or ''))
+            reason = (environment.CONFIG_CHANGED_REASON.get(self.env.config_status, '')
+                      + (self.env.config_status_extra or ''))
             logger.info('[%s] ', reason, nonl=True)
 
         logger.info(__('%s added, %s changed, %s removed'),
@@ -426,7 +428,7 @@ class Builder:
                 docnames.extend(retval)
 
         # workaround: marked as okay to call builder.read() twice in same process
-        self.env.config_status = CONFIG_OK
+        self.env.config_status = environment.CONFIG_OK
 
         return sorted(docnames)
 

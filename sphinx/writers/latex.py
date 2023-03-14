@@ -18,8 +18,8 @@ from sphinx import addnodes, highlighting
 from sphinx.domains import IndexEntry
 from sphinx.domains.std import StandardDomain
 from sphinx.errors import SphinxError
-from sphinx.locale import _, __, admonitionlabels
-from sphinx.util import logging, split_into, texescape
+from sphinx.locale import _, __
+from sphinx.util import _admonition_labels, logging, split_into, texescape
 from sphinx.util.docutils import SphinxTranslator
 from sphinx.util.nodes import clean_astext, get_prev_node
 from sphinx.util.template import LaTeXRenderer
@@ -874,7 +874,8 @@ class LaTeXTranslator(SphinxTranslator):
 
     def visit_seealso(self, node: Element) -> None:
         self.body.append(BLANKLINE)
-        self.body.append(r'\begin{sphinxseealso}{%s:}' % admonitionlabels['seealso'] + CR)
+        self.body.append(r'\begin{sphinxseealso}{%s:}' %
+                         _admonition_labels.translated_label('seealso') + CR)
 
     def depart_seealso(self, node: Element) -> None:
         self.body.append(BLANKLINE)
@@ -1468,7 +1469,7 @@ class LaTeXTranslator(SphinxTranslator):
         self.no_latex_floats -= 1
 
     def _visit_named_admonition(self, node: Element) -> None:
-        label = admonitionlabels[node.tagname]
+        label = _admonition_labels.translated_label(node.tagname)
         self.body.append(CR + r'\begin{sphinxadmonition}{%s}{%s:}' %
                          (node.tagname, label))
         self.no_latex_floats += 1
