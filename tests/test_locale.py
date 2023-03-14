@@ -7,8 +7,12 @@ from sphinx import locale
 
 @pytest.fixture(autouse=True)
 def _cleanup_translations():
+    locale.translators.clear()
+    _patched_locale_init = locale.init
+    locale.init = locale._original_init
     yield
     locale.translators.clear()
+    locale.init = _patched_locale_init
 
 
 def test_init(rootdir):

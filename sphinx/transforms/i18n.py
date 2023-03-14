@@ -11,11 +11,11 @@ from typing import TYPE_CHECKING, Any, Sequence, TypeVar
 from docutils import nodes
 from docutils.io import StringInput
 
+import sphinx.locale
 from sphinx import addnodes
 from sphinx.config import Config
 from sphinx.domains.std import make_glossary_term, split_term_classifiers
 from sphinx.locale import __
-from sphinx.locale import init as init_locale
 from sphinx.transforms import SphinxTransform
 from sphinx.util import get_filetype, logging, split_index_msg
 from sphinx.util.i18n import docname_to_domain
@@ -345,7 +345,7 @@ class Locale(SphinxTransform):
         # fetch translations
         dirs = [path.join(self.env.srcdir, directory)
                 for directory in self.config.locale_dirs]
-        catalog, has_catalog = init_locale(dirs, self.config.language, textdomain)
+        catalog, has_catalog = sphinx.locale.init(dirs, self.config.language, textdomain)
         if not has_catalog:
             return
 

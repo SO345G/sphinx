@@ -12,7 +12,7 @@ from babel.messages import mofile, pofile
 from babel.messages.catalog import Catalog
 from docutils import nodes
 
-from sphinx import locale
+import sphinx.locale
 from sphinx.testing.util import (
     assert_node,
     assert_not_re_search,
@@ -42,12 +42,12 @@ def write_mo(pathname, po):
         return mofile.write_mo(f, po)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def _setup_intl(app_params):
     srcdir = path(app_params.kwargs['srcdir'])
     for dirpath, _dirs, files in os.walk(srcdir):
         dirpath = path(dirpath)
-        for f in [f for f in files if f.endswith('.po')]:
+        for f in (f for f in files if f.endswith('.po')):
             po = dirpath / f
             mo = srcdir / 'xx' / 'LC_MESSAGES' / (
                 os.path.relpath(po[:-3], srcdir) + '.mo')
@@ -59,15 +59,25 @@ def _setup_intl(app_params):
                 write_mo(mo, read_po(po))
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def _info(app):
     yield
     print('# language:', app.config.language)
     print('# locale_dirs:', app.config.locale_dirs)
 
 
+@pytest.fixture()
+def _cleanup_translations():
+    sphinx.locale.translators.clear()
+    _patched_locale_init = sphinx.locale.init
+    sphinx.locale.init = sphinx.locale._original_init
+    yield
+    sphinx.locale.translators.clear()
+    sphinx.locale.init = _patched_locale_init
+
+
 def elem_gettexts(elem):
-    return [_f for _f in [s.strip() for s in elem.itertext()] if _f]
+    return [_f for _f in (s.strip() for s in elem.itertext()) if _f]
 
 
 def elem_getref(elem):
@@ -92,6 +102,7 @@ def assert_count(expected_expr, result, count):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_emit_warnings(app, warning):
@@ -104,6 +115,7 @@ def test_text_emit_warnings(app, warning):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_warning_node(app):
@@ -117,6 +129,7 @@ def test_text_warning_node(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 @pytest.mark.xfail(os.name != 'posix', reason="Not working on windows")
@@ -131,6 +144,7 @@ def test_text_title_underline(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_subdirs(app):
@@ -141,6 +155,7 @@ def test_text_subdirs(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_inconsistency_warnings(app, warning):
@@ -191,6 +206,7 @@ def test_text_inconsistency_warnings(app, warning):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_noqa(app, warning):
@@ -217,6 +233,7 @@ TO TEST BARE noqa.
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_literalblock_warnings(app, warning):
@@ -239,6 +256,7 @@ def test_text_literalblock_warnings(app, warning):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_definition_terms(app):
@@ -259,6 +277,7 @@ def test_text_definition_terms(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_glossary_term(app, warning):
@@ -294,6 +313,7 @@ VVV
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_glossary_term_inconsistencies(app, warning):
@@ -315,6 +335,7 @@ def test_text_glossary_term_inconsistencies(app, warning):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_section(app):
@@ -322,11 +343,12 @@ def test_gettext_section(app):
     # --- section
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'section.po')
     actual = read_po(app.outdir / 'section.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_section(app):
@@ -334,11 +356,12 @@ def test_text_section(app):
     # --- section
     result = (app.outdir / 'section.txt').read_text(encoding='utf8')
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'section.po')
-    for expect_msg in [m for m in expect if m.id]:
+    for expect_msg in (m for m in expect if m.id):
         assert expect_msg.string in result
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_seealso(app):
@@ -356,6 +379,7 @@ def test_text_seealso(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_figure_captions(app):
@@ -400,6 +424,7 @@ def test_text_figure_captions(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_rubric(app):
@@ -418,6 +443,7 @@ def test_text_rubric(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_docfields(app):
@@ -447,6 +473,7 @@ def test_text_docfields(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_admonitions(app):
@@ -467,6 +494,7 @@ def test_text_admonitions(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_toctree(app):
@@ -474,16 +502,17 @@ def test_gettext_toctree(app):
     # --- toctree (index.rst)
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'index.po')
     actual = read_po(app.outdir / 'index.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
     # --- toctree (toctree.rst)
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'toctree.po')
     actual = read_po(app.outdir / 'toctree.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_table(app):
@@ -491,11 +520,12 @@ def test_gettext_table(app):
     # --- toctree
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'table.po')
     actual = read_po(app.outdir / 'table.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_table(app):
@@ -503,11 +533,12 @@ def test_text_table(app):
     # --- toctree
     result = (app.outdir / 'table.txt').read_text(encoding='utf8')
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'table.po')
-    for expect_msg in [m for m in expect if m.id]:
+    for expect_msg in (m for m in expect if m.id):
         assert expect_msg.string in result
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_toctree(app):
@@ -520,11 +551,12 @@ def test_text_toctree(app):
     # --- toctree (toctree.rst)
     result = (app.outdir / 'toctree.txt').read_text(encoding='utf8')
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'toctree.po')
-    for expect_msg in [m for m in expect if m.id]:
+    for expect_msg in (m for m in expect if m.id):
         assert expect_msg.string in result
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_topic(app):
@@ -532,11 +564,12 @@ def test_gettext_topic(app):
     # --- topic
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'topic.po')
     actual = read_po(app.outdir / 'topic.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_topic(app):
@@ -544,11 +577,12 @@ def test_text_topic(app):
     # --- topic
     result = (app.outdir / 'topic.txt').read_text(encoding='utf8')
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'topic.po')
-    for expect_msg in [m for m in expect if m.id]:
+    for expect_msg in (m for m in expect if m.id):
         assert expect_msg.string in result
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_definition_terms(app):
@@ -556,11 +590,12 @@ def test_gettext_definition_terms(app):
     # --- definition terms: regression test for #2198, #2205
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'definition_terms.po')
     actual = read_po(app.outdir / 'definition_terms.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_glossary_terms(app, warning):
@@ -568,13 +603,14 @@ def test_gettext_glossary_terms(app, warning):
     # --- glossary terms: regression test for #1090
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'glossary_terms.po')
     actual = read_po(app.outdir / 'glossary_terms.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
     warnings = warning.getvalue().replace(os.sep, '/')
     assert 'term not in glossary' not in warnings
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_glossary_term_inconsistencies(app):
@@ -582,11 +618,12 @@ def test_gettext_glossary_term_inconsistencies(app):
     # --- glossary term inconsistencies: regression test for #1090
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'glossary_terms_inconsistency.po')
     actual = read_po(app.outdir / 'glossary_terms_inconsistency.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_literalblock(app):
@@ -594,15 +631,16 @@ def test_gettext_literalblock(app):
     # --- gettext builder always ignores ``only`` directive
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'literalblock.po')
     actual = read_po(app.outdir / 'literalblock.pot')
-    for expect_msg in [m for m in expect if m.id]:
+    for expect_msg in (m for m in expect if m.id):
         if len(expect_msg.id.splitlines()) == 1:
             # compare translations only labels
-            assert expect_msg.id in [m.id for m in actual if m.id]
+            assert expect_msg.id in {m.id for m in actual if m.id}
         else:
             pass  # skip code-blocks and literalblocks
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('gettext')
 @pytest.mark.test_params(shared_result='test_intl_gettext')
 def test_gettext_buildr_ignores_only_directive(app):
@@ -610,11 +648,12 @@ def test_gettext_buildr_ignores_only_directive(app):
     # --- gettext builder always ignores ``only`` directive
     expect = read_po(app.srcdir / 'xx' / 'LC_MESSAGES' / 'only.po')
     actual = read_po(app.outdir / 'only.pot')
-    for expect_msg in [m for m in expect if m.id]:
-        assert expect_msg.id in [m.id for m in actual if m.id]
+    for expect_msg in (m for m in expect if m.id):
+        assert expect_msg.id in {m.id for m in actual if m.id}
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 # use individual shared_result directory to avoid "incompatible doctree" error
 @pytest.mark.sphinx(testroot='builder-gettext-dont-rebuild-mo')
 def test_gettext_dont_rebuild_mo(make_app, app_params):
@@ -655,6 +694,7 @@ def test_gettext_dont_rebuild_mo(make_app, app_params):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_meta(app):
@@ -670,6 +710,7 @@ def test_html_meta(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_footnotes(app):
@@ -680,6 +721,7 @@ def test_html_footnotes(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_undefined_refs(app):
@@ -702,6 +744,7 @@ def test_html_undefined_refs(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_index_entries(app):
@@ -733,6 +776,7 @@ def test_html_index_entries(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_versionchanges(app):
@@ -769,6 +813,7 @@ def test_html_versionchanges(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_docfields(app):
@@ -779,6 +824,7 @@ def test_html_docfields(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_template(app):
@@ -790,6 +836,7 @@ def test_html_template(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_html_rebuild_mo(app):
@@ -808,6 +855,7 @@ def test_html_rebuild_mo(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('xml')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_xml_footnotes(app, warning):
@@ -862,6 +910,7 @@ def test_xml_footnotes(app, warning):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('xml')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_xml_footnote_backlinks(app):
@@ -882,6 +931,7 @@ def test_xml_footnote_backlinks(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('xml')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_xml_refs_in_python_domain(app):
@@ -899,6 +949,7 @@ def test_xml_refs_in_python_domain(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('xml')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_xml_keep_external_links(app):
@@ -957,6 +1008,7 @@ def test_xml_keep_external_links(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('xml')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_xml_role_xref(app):
@@ -1007,6 +1059,7 @@ def test_xml_role_xref(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('xml')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_xml_warnings(app, warning):
@@ -1019,6 +1072,7 @@ def test_xml_warnings(app, warning):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('xml')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_xml_label_targets(app):
@@ -1076,6 +1130,7 @@ def test_xml_label_targets(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_additional_targets_should_not_be_translated(app):
@@ -1141,6 +1196,7 @@ def test_additional_targets_should_not_be_translated(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx(
     'html',
     srcdir='test_additional_targets_should_be_translated',
@@ -1222,6 +1278,7 @@ def test_additional_targets_should_be_translated(app):
 
 
 @sphinx_intl
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('text')
 @pytest.mark.test_params(shared_result='test_intl_basic')
 def test_text_references(app, warning):
@@ -1232,6 +1289,7 @@ def test_text_references(app, warning):
     assert_count(warning_expr, warnings, 0)
 
 
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx(
     'dummy', testroot='images',
     srcdir='test_intl_images',
@@ -1276,6 +1334,7 @@ def test_image_glob_intl(app):
                             'image/svg+xml': 'subdir/svgimg.xx.svg'})
 
 
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx(
     'dummy', testroot='images',
     srcdir='test_intl_images',
@@ -1327,6 +1386,7 @@ def getwarning(warnings):
     return strip_escseq(warnings.getvalue().replace(os.sep, '/'))
 
 
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html', testroot='basic',
                     srcdir='gettext_allow_fuzzy_translations',
                     confoverrides={
@@ -1346,6 +1406,7 @@ def test_gettext_allow_fuzzy_translations(app):
     assert 'FEATURES' in content
 
 
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('html', testroot='basic',
                     srcdir='gettext_disallow_fuzzy_translations',
                     confoverrides={
@@ -1365,33 +1426,32 @@ def test_gettext_disallow_fuzzy_translations(app):
     assert 'FEATURES' not in content
 
 
+@pytest.mark.usefixtures('_cleanup_translations', '_setup_intl', '_info')
 @pytest.mark.sphinx('html', testroot='basic', confoverrides={'language': 'de'})
 def test_customize_system_message(make_app, app_params, sphinx_test_tempdir):
-    try:
-        # clear translators cache
-        locale.translators.clear()
+    # clear translators cache
+    sphinx.locale.translators.clear()
 
-        # prepare message catalog (.po)
-        locale_dir = sphinx_test_tempdir / 'basic' / 'locales' / 'de' / 'LC_MESSAGES'
-        locale_dir.makedirs()
-        with (locale_dir / 'sphinx.po').open('wb') as f:
-            catalog = Catalog()
-            catalog.add('Quick search', 'QUICK SEARCH')
-            pofile.write_po(f, catalog)
+    # prepare message catalog (.po)
+    locale_dir = sphinx_test_tempdir / 'basic' / 'locales' / 'de' / 'LC_MESSAGES'
+    locale_dir.makedirs()
+    with (locale_dir / 'sphinx.po').open('wb') as f:
+        catalog = Catalog()
+        catalog.add('Quick search', 'QUICK SEARCH')
+        pofile.write_po(f, catalog)
 
-        # construct application and convert po file to .mo
-        args, kwargs = app_params
-        app = make_app(*args, **kwargs)
-        assert (locale_dir / 'sphinx.mo').exists()
-        assert app.translator.gettext('Quick search') == 'QUICK SEARCH'
+    # construct application and convert po file to .mo
+    args, kwargs = app_params
+    app = make_app(*args, **kwargs)
+    assert (locale_dir / 'sphinx.mo').exists()
+    assert app.translator.gettext('Quick search') == 'QUICK SEARCH'
 
-        app.build()
-        content = (app.outdir / 'index.html').read_text(encoding='utf8')
-        assert 'QUICK SEARCH' in content
-    finally:
-        locale.translators.clear()
+    app.build()
+    content = (app.outdir / 'index.html').read_text(encoding='utf8')
+    assert 'QUICK SEARCH' in content
 
 
+@pytest.mark.usefixtures('_setup_intl', '_info')
 @pytest.mark.sphinx('html', testroot='intl', confoverrides={'today_fmt': '%Y-%m-%d'})
 def test_customize_today_date_format(app, monkeypatch):
     with monkeypatch.context() as m:

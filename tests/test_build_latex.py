@@ -10,6 +10,7 @@ from subprocess import CalledProcessError
 
 import pytest
 
+import sphinx.locale
 from sphinx.builders.latex import default_latex_documents
 from sphinx.config import Config
 from sphinx.errors import SphinxError
@@ -39,6 +40,16 @@ LATEX_WARNINGS = ENV_WARNINGS + """\
 %(root)s/index.rst:\\d+: WARNING: a suitable image for latex builder not found: foo.\\*
 %(root)s/index.rst:\\d+: WARNING: Could not lex literal_block .* as "c". Highlighting skipped.
 """
+
+
+@pytest.fixture()
+def _cleanup_translations():
+    sphinx.locale.translators.clear()
+    _patched_locale_init = sphinx.locale.init
+    sphinx.locale.init = sphinx.locale._original_init
+    yield
+    sphinx.locale.translators.clear()
+    sphinx.locale.init = _patched_locale_init
 
 
 # only run latex if all needed packages are there
@@ -454,6 +465,7 @@ def test_numref_with_prefix2(app, status, warning):
 @pytest.mark.sphinx(
     'latex', testroot='numfig',
     confoverrides={'numfig': True, 'language': 'ja'})
+@pytest.mark.usefixtures('_cleanup_translations')
 def test_numref_with_language_ja(app, status, warning):
     app.build()
     result = (app.outdir / 'python.tex').read_text(encoding='utf8')
@@ -575,6 +587,7 @@ def test_babel_with_no_language_settings(app, status, warning):
 @pytest.mark.sphinx(
     'latex', testroot='latex-babel',
     confoverrides={'language': 'de'})
+@pytest.mark.usefixtures('_cleanup_translations')
 def test_babel_with_language_de(app, status, warning):
     app.builder.build_all()
     result = (app.outdir / 'python.tex').read_text(encoding='utf8')
@@ -600,6 +613,7 @@ def test_babel_with_language_de(app, status, warning):
 @pytest.mark.sphinx(
     'latex', testroot='latex-babel',
     confoverrides={'language': 'ru'})
+@pytest.mark.usefixtures('_cleanup_translations')
 def test_babel_with_language_ru(app, status, warning):
     app.builder.build_all()
     result = (app.outdir / 'python.tex').read_text(encoding='utf8')
@@ -625,6 +639,7 @@ def test_babel_with_language_ru(app, status, warning):
 @pytest.mark.sphinx(
     'latex', testroot='latex-babel',
     confoverrides={'language': 'tr'})
+@pytest.mark.usefixtures('_cleanup_translations')
 def test_babel_with_language_tr(app, status, warning):
     app.builder.build_all()
     result = (app.outdir / 'python.tex').read_text(encoding='utf8')
@@ -650,6 +665,7 @@ def test_babel_with_language_tr(app, status, warning):
 @pytest.mark.sphinx(
     'latex', testroot='latex-babel',
     confoverrides={'language': 'ja'})
+@pytest.mark.usefixtures('_cleanup_translations')
 def test_babel_with_language_ja(app, status, warning):
     app.builder.build_all()
     result = (app.outdir / 'python.tex').read_text(encoding='utf8')
@@ -701,6 +717,7 @@ def test_babel_with_unknown_language(app, status, warning):
 @pytest.mark.sphinx(
     'latex', testroot='latex-babel',
     confoverrides={'language': 'de', 'latex_engine': 'lualatex'})
+@pytest.mark.usefixtures('_cleanup_translations')
 def test_polyglossia_with_language_de(app, status, warning):
     app.builder.build_all()
     result = (app.outdir / 'python.tex').read_text(encoding='utf8')
@@ -727,6 +744,7 @@ def test_polyglossia_with_language_de(app, status, warning):
 @pytest.mark.sphinx(
     'latex', testroot='latex-babel',
     confoverrides={'language': 'de-1901', 'latex_engine': 'lualatex'})
+@pytest.mark.usefixtures('_cleanup_translations')
 def test_polyglossia_with_language_de_1901(app, status, warning):
     app.builder.build_all()
     result = (app.outdir / 'python.tex').read_text(encoding='utf8')

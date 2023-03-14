@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import gettext
 import os
 import shutil
 
@@ -10,17 +13,20 @@ from sphinx.testing import comparer
 from sphinx.testing.path import path
 
 
-def _init_console(locale_dir=sphinx.locale._LOCALE_DIR, catalog='sphinx'):
-    """Monkeypatch ``init_console`` to skip its action.
+def _locale_init(locale_dirs, language, catalog='sphinx', namespace='general'):
+    """Monkeypatch ``sphinx.locale.init`` to skip its action.
 
     Some tests rely on warning messages in English. We don't want
     CLI tests to bleed over those tests and make their warnings
     translated.
     """
-    return sphinx.locale.NullTranslations(), False
+    translator = gettext.NullTranslations()
+    sphinx.locale.translators[namespace, catalog] = translator
+    return translator, False
 
 
-sphinx.locale.init_console = _init_console
+sphinx.locale._original_init = sphinx.locale.init
+sphinx.locale.init = _locale_init
 
 pytest_plugins = 'sphinx.testing.fixtures'
 
