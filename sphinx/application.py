@@ -285,9 +285,11 @@ class Sphinx:
                     catalog.write_mo(self.config.language,
                                      self.config.gettext_allow_fuzzy_translations)
 
-            locale_dirs: list[str | None] = list(repo.locale_dirs)
-            locale_dirs += [None]
-            locale_dirs += [path.join(package_dir, 'locale')]
+            locale_dirs: list[str | None] = [
+                *repo.locale_dirs,
+                None,
+                path.join(package_dir, 'locale'),
+            ]
 
             self.translator, has_translation = locale.init(locale_dirs, self.config.language)
             if has_translation:
