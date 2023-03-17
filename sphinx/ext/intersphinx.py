@@ -30,26 +30,31 @@ from typing import IO, TYPE_CHECKING, Any, cast
 from urllib.parse import urlsplit, urlunsplit
 
 from docutils import nodes
-from docutils.nodes import Element, Node, TextElement, system_message
-from docutils.utils import Reporter
 
 import sphinx
 from sphinx.addnodes import pending_xref
-from sphinx.application import Sphinx
 from sphinx.builders.html import INVENTORY_FILENAME
-from sphinx.config import Config
-from sphinx.domains import Domain
-from sphinx.environment import BuildEnvironment
 from sphinx.errors import ExtensionError
 from sphinx.locale import __
 from sphinx.transforms.post_transforms import ReferencesResolver
 from sphinx.util import logging, requests
 from sphinx.util.docutils import CustomReSTDispatcher, SphinxRole
 from sphinx.util.inventory import InventoryFile, InventoryItemSet
-from sphinx.util.typing import Inventory, RoleFunction
 
 if TYPE_CHECKING:
     from types import ModuleType
+    from typing import Tuple, Union
+
+    from docutils.nodes import Node, TextElement, system_message
+    from docutils.utils import Reporter
+
+    from sphinx.application import Sphinx
+    from sphinx.config import Config
+    from sphinx.domains import Domain
+    from sphinx.environment import BuildEnvironment
+    from sphinx.util.typing import Inventory, RoleFunction
+
+    InventoryCacheEntry = Tuple[Union[str, None], int, Inventory]
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +112,7 @@ class EnvAdapter:
             self.env.intersphinx_by_domain_inventory[domain.name] = inv  # type: ignore
 
     @property
-    def cache(self) -> dict[str, tuple[str | None, int, Inventory]]:
+    def cache(self) -> dict[str, InventoryCacheEntry]:
         """Intersphinx cache.
 
         - Key is the URI of the remote inventory
@@ -209,7 +214,7 @@ def _get_safe_url(url: str) -> str:
         return urlunsplit(frags)
 
 
-def fetch_inventory(app: Sphinx, uri: str, inv: Any) -> Inventory:
+def fetch_inventory(app: Sphinx, uri: str, inv: str) -> Inventory:
     """Fetch, parse and return an intersphinx inventory file."""
     # both *uri* (base URI of the links to generate) and *inv* (actual
     # location of the inventory file) can be local or remote URIs
@@ -252,8 +257,8 @@ def fetch_inventory_group(
     name: str | None,
     uri: str,
     invs: tuple[str | None, ...],
-    cache: dict[str, tuple[str | None, int, Inventory]],
-    app: Any,
+    cache: dict[str, InventoryCacheEntry],
+    app: Sphinx,
     now: int,
 ) -> bool:
     cache_time = now - app.config.intersphinx_cache_limit * 86400
@@ -273,7 +278,7 @@ def fetch_inventory_group(
                     failures.append(err.args)
                     continue
                 if invdata:
-                    cache[uri] = (name, now, invdata)
+                    cache[uri] = name, now, invdata
                     return True
         return False
     finally:
@@ -297,6 +302,7 @@ def load_mappings(app: Sphinx) -> None:
     """Load all intersphinx mappings into the environment."""
     now = int(time.time())
     inventories = EnvAdapter(app.builder.env)
+    intersphinx_cache: dict[str, InventoryCacheEntry] = inventories.cache
 
     with concurrent.futures.ThreadPoolExecutor() as pool:
         futures = []
@@ -305,7 +311,7 @@ def load_mappings(app: Sphinx) -> None:
         invs: tuple[str | None, ...]
         for name, (uri, invs) in app.config.intersphinx_mapping.values():
             futures.append(pool.submit(
-                fetch_inventory_group, name, uri, invs, inventories.cache, app, now,
+                fetch_inventory_group, name, uri, invs, intersphinx_cache, app, now,
             ))
         updated = [f.result() for f in concurrent.futures.as_completed(futures)]
 
@@ -314,10 +320,14 @@ def load_mappings(app: Sphinx) -> None:
 
         if True:
             # old stuff, still used in the tests
-            cached_vals = list(inventories.cache.values())
-            named_vals = sorted(v for v in cached_vals if v[0])
-            unnamed_vals = [v for v in cached_vals if not v[0]]
-            for _name, _, invdata in named_vals + unnamed_vals:
+            named_vals = []
+            unnamed_vals = []
+            for name, _expiry, invdata in intersphinx_cache.values():
+                if name:
+                    named_vals.append((name, invdata))
+                else:
+                    unnamed_vals.append((name, invdata))
+            for _name, invdata in sorted(named_vals) + unnamed_vals:
                 for type, objects in invdata.items():
                     inventories.main_inventory.setdefault(type, {}).update(objects)
             # end of old stuff
@@ -385,7 +395,7 @@ def _resolve_reference_in_domain(env: BuildEnvironment,
 
 def _resolve_reference(env: BuildEnvironment, inv_name: str | None,
                        honor_disabled_refs: bool,
-                       node: pending_xref, contnode: TextElement) -> Element | None:
+                       node: pending_xref, contnode: TextElement) -> nodes.reference | None:
     # disabling should only be done if no inventory is given
     honor_disabled_refs = honor_disabled_refs and inv_name is None
 
@@ -421,7 +431,7 @@ def inventory_exists(env: BuildEnvironment, inv_name: str) -> bool:
 def resolve_reference_in_inventory(env: BuildEnvironment,
                                    inv_name: str,
                                    node: pending_xref, contnode: TextElement,
-                                   ) -> Element | None:
+                                   ) -> nodes.reference | None:
     """Attempt to resolve a missing reference via intersphinx references.
 
     Resolution is tried in the given inventory with the target as is.
@@ -435,7 +445,7 @@ def resolve_reference_in_inventory(env: BuildEnvironment,
 def resolve_reference_any_inventory(env: BuildEnvironment,
                                     honor_disabled_refs: bool,
                                     node: pending_xref, contnode: TextElement,
-                                    ) -> Element | None:
+                                    ) -> nodes.reference | None:
     """Attempt to resolve a missing reference via intersphinx references.
 
     Resolution is tried with the target as is in any inventory.
@@ -445,7 +455,7 @@ def resolve_reference_any_inventory(env: BuildEnvironment,
 
 def resolve_reference_detect_inventory(env: BuildEnvironment,
                                        node: pending_xref, contnode: TextElement,
-                                       ) -> Element | None:
+                                       ) -> nodes.reference | None:
     """Attempt to resolve a missing reference via intersphinx references.
 
     Resolution is tried first with the target as is in any inventory.
@@ -475,7 +485,7 @@ def resolve_reference_detect_inventory(env: BuildEnvironment,
 
 
 def missing_reference(app: Sphinx, env: BuildEnvironment, node: pending_xref,
-                      contnode: TextElement) -> Element | None:
+                      contnode: TextElement) -> nodes.reference | None:
     """Attempt to resolve a missing reference via intersphinx references."""
 
     return resolve_reference_detect_inventory(env, node, contnode)
@@ -632,13 +642,14 @@ def normalize_intersphinx_mapping(app: Sphinx, config: Config) -> None:
                 # old format, no name
                 # xref RemovedInSphinx80Warning
                 name, uri, inv = None, key, value
-                logger.warning(
+                msg = (
                     "The pre-Sphinx 1.0 'intersphinx_mapping' format is "
                     "deprecated and will be removed in Sphinx 8. Update to the "
                     "current format as described in the documentation. "
                     f"Hint: \"intersphinx_mapping = {{'<name>': {(uri, inv)!r}}}\"."
-                    "https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_mapping",  # NoQA: E501
+                    "https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_mapping"  # NoQA: E501
                 )
+                logger.warning(msg)
 
             if not isinstance(inv, tuple):
                 config.intersphinx_mapping[key] = (name, (uri, (inv,)))

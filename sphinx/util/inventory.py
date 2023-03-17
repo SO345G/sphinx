@@ -141,7 +141,7 @@ class InventoryFile:
             if location.endswith('$'):
                 location = location[:-1] + name
             location = join(uri, location)
-            inv_item: InventoryItem = (projname, version, location, dispname)
+            inv_item: InventoryItem = projname, version, location, dispname
             invdata.setdefault(type, {})[name] = inv_item
         return invdata
 
