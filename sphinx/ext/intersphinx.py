@@ -76,7 +76,7 @@ def process_disabled_reftypes(env: BuildEnvironment) -> None:
                     domain, []).append(typ)
 
 
-class EnvAdapter:
+class _EnvAdapter:
     """Adapter for environment to set inventory data and configuration settings."""
 
     def __init__(self, env: BuildEnvironment) -> None:
@@ -301,7 +301,7 @@ debug = False
 def load_mappings(app: Sphinx) -> None:
     """Load all intersphinx mappings into the environment."""
     now = int(time.time())
-    inventories = EnvAdapter(app.builder.env)
+    inventories = _EnvAdapter(app.builder.env)
     intersphinx_cache: dict[str, InventoryCacheEntry] = inventories.cache
 
     with concurrent.futures.ThreadPoolExecutor() as pool:
@@ -368,15 +368,16 @@ def _resolve_reference_in_domain(env: BuildEnvironment,
                                  domain: Domain,
                                  node: pending_xref, contnode: TextElement,
                                  ) -> nodes.reference | None:
+    inventories = _EnvAdapter(env)
+
     if honor_disabled_refs:
-        conf = EnvAdapter(env)  # make sure the disabled has been processed
-        assert not conf.all_objtypes_disabled
-        assert not conf.all_domain_objtypes_disabled(domain.name)
-        disabled_refs = conf.disabled_objtypes_in_domain(domain.name)
+        assert not inventories.all_objtypes_disabled
+        assert not inventories.all_domain_objtypes_disabled(domain.name)
+        disabled_refs = inventories.disabled_objtypes_in_domain(domain.name)
     else:
         disabled_refs = []
 
-    domain_store = EnvAdapter(env).by_domain_inventory[domain.name]
+    domain_store = inventories.by_domain_inventory[domain.name]
     inv_set = domain.intersphinx_resolve_xref(
         env, domain_store, node['reftype'], node['reftarget'], disabled_refs, node, contnode)
     if debug:
@@ -398,14 +399,16 @@ def _resolve_reference(env: BuildEnvironment, inv_name: str | None,
                        node: pending_xref, contnode: TextElement) -> nodes.reference | None:
     # disabling should only be done if no inventory is given
     honor_disabled_refs = honor_disabled_refs and inv_name is None
+    
+    inventories = _EnvAdapter(env)
 
-    if honor_disabled_refs and EnvAdapter(env).all_objtypes_disabled:
+    if honor_disabled_refs and inventories.all_objtypes_disabled:
         return None
 
     if node['reftype'] == 'any':
         for domain_name, domain in env.domains.items():
             if (honor_disabled_refs
-                    and EnvAdapter(env).all_domain_objtypes_disabled(domain_name)):
+                    and inventories.all_domain_objtypes_disabled(domain_name)):
                 continue
             res = _resolve_reference_in_domain(env, inv_name, honor_disabled_refs,
                                                domain, node, contnode)
@@ -417,7 +420,7 @@ def _resolve_reference(env: BuildEnvironment, inv_name: str | None,
         if not domain_name:
             # only objects in domains are in the inventory
             return None
-        if honor_disabled_refs and EnvAdapter(env).all_domain_objtypes_disabled(domain_name):
+        if honor_disabled_refs and inventories.all_domain_objtypes_disabled(domain_name):
             return None
         domain = env.get_domain(domain_name)
         return _resolve_reference_in_domain(env, inv_name, honor_disabled_refs,
@@ -425,7 +428,7 @@ def _resolve_reference(env: BuildEnvironment, inv_name: str | None,
 
 
 def inventory_exists(env: BuildEnvironment, inv_name: str) -> bool:
-    return inv_name in EnvAdapter(env).names
+    return inv_name in _EnvAdapter(env).names
 
 
 def resolve_reference_in_inventory(env: BuildEnvironment,
@@ -658,6 +661,23 @@ def normalize_intersphinx_mapping(app: Sphinx, config: Config) -> None:
         except Exception as exc:
             logger.warning(__('Failed to read intersphinx_mapping[%s], ignored: %r'), key, exc)
             config.intersphinx_mapping.pop(key)
+
+
+# deprecated name -> (object to return, removal version, canonical path or empty string)
+_DEPRECATED_OBJECTS = {
+    'InventoryAdapter': (_EnvAdapter, (8, 0), 'sphinx.ext.intersphinx._EnvAdapter'),
+}
+
+
+def __getattr__(name):
+    if name not in _DEPRECATED_OBJECTS:
+        raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+
+    from sphinx.deprecation import _deprecation_warning
+
+    deprecated_object, removal, canonical_name = _DEPRECATED_OBJECTS[name]
+    _deprecation_warning(__name__, name, canonical_name, remove=removal)
+    return deprecated_object
 
 
 def setup(app: Sphinx) -> dict[str, Any]:
