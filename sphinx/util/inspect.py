@@ -13,17 +13,27 @@ import types
 import typing
 from functools import cached_property, partial, partialmethod, singledispatchmethod
 from importlib import import_module
-from inspect import (Parameter, isasyncgenfunction, isclass, ismethod,  # noqa: F401
-                     ismethoddescriptor, ismodule)
+from inspect import (  # noqa: F401
+    Parameter,
+    isasyncgenfunction,
+    isclass,
+    ismethod,
+    ismethoddescriptor,
+    ismodule,
+)
 from io import StringIO
-from types import (ClassMethodDescriptorType, MethodDescriptorType, MethodType, ModuleType,
-                   WrapperDescriptorType)
+from types import (
+    ClassMethodDescriptorType,
+    MethodDescriptorType,
+    MethodType,
+    ModuleType,
+    WrapperDescriptorType,
+)
 from typing import Any, Callable, Dict, Mapping, Sequence, cast
 
 from sphinx.pycode.ast import unparse as ast_unparse
 from sphinx.util import logging
-from sphinx.util.typing import ForwardRef
-from sphinx.util.typing import stringify as stringify_annotation
+from sphinx.util.typing import ForwardRef, stringify_annotation
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +61,11 @@ def unwrap_all(obj: Any, *, stop: Callable | None = None) -> Any:
     while True:
         if stop and stop(obj):
             return obj
-        elif ispartial(obj):
+        if ispartial(obj):
             obj = obj.func
         elif inspect.isroutine(obj) and hasattr(obj, '__wrapped__'):
             obj = obj.__wrapped__
-        elif isclassmethod(obj):
-            obj = obj.__func__
-        elif isstaticmethod(obj):
+        elif isclassmethod(obj) or isstaticmethod(obj):
             obj = obj.__func__
         else:
             return obj
@@ -151,10 +159,7 @@ def isNewType(obj: Any) -> bool:
     else:
         __module__ = safe_getattr(obj, '__module__', None)
         __qualname__ = safe_getattr(obj, '__qualname__', None)
-        if __module__ == 'typing' and __qualname__ == 'NewType.<locals>.new_type':
-            return True
-        else:
-            return False
+        return __module__ == 'typing' and __qualname__ == 'NewType.<locals>.new_type'
 
 
 def isenumclass(x: Any) -> bool:
@@ -187,9 +192,9 @@ def isclassmethod(obj: Any, cls: Any = None, name: str | None = None) -> bool:
     """Check if the object is classmethod."""
     if isinstance(obj, classmethod):
         return True
-    elif inspect.ismethod(obj) and obj.__self__ is not None and isclass(obj.__self__):
+    if inspect.ismethod(obj) and obj.__self__ is not None and isclass(obj.__self__):
         return True
-    elif cls and name:
+    if cls and name:
         placeholder = object()
         for basecls in getmro(cls):
             meth = basecls.__dict__.get(name, placeholder)
@@ -210,10 +215,7 @@ def isstaticmethod(obj: Any, cls: Any = None, name: str | None = None) -> bool:
         for basecls in getattr(cls, '__mro__', [cls]):
             meth = basecls.__dict__.get(name)
             if meth:
-                if isinstance(meth, staticmethod):
-                    return True
-                else:
-                    return False
+                return isinstance(meth, staticmethod)
 
     return False
 
@@ -249,41 +251,36 @@ def isattributedescriptor(obj: Any) -> bool:
     if inspect.isdatadescriptor(obj):
         # data descriptor is kind of attribute
         return True
-    elif isdescriptor(obj):
+    if isdescriptor(obj):
         # non data descriptor
         unwrapped = unwrap(obj)
         if isfunction(unwrapped) or isbuiltin(unwrapped) or inspect.ismethod(unwrapped):
             # attribute must not be either function, builtin and method
             return False
-        elif is_cython_function_or_method(unwrapped):
+        if is_cython_function_or_method(unwrapped):
             # attribute must not be either function and method (for cython)
             return False
-        elif inspect.isclass(unwrapped):
+        if inspect.isclass(unwrapped):
             # attribute must not be a class
             return False
-        elif isinstance(unwrapped, (ClassMethodDescriptorType,
-                                    MethodDescriptorType,
-                                    WrapperDescriptorType)):
+        if isinstance(unwrapped, (ClassMethodDescriptorType,
+                                  MethodDescriptorType,
+                                  WrapperDescriptorType)):
             # attribute must not be a method descriptor
             return False
-        elif type(unwrapped).__name__ == "instancemethod":
+        if type(unwrapped).__name__ == "instancemethod":
             # attribute must not be an instancemethod (C-API)
             return False
-        else:
-            return True
-    else:
-        return False
+        return True
+    return False
 
 
 def is_singledispatch_function(obj: Any) -> bool:
     """Check if the object is singledispatch function."""
-    if (inspect.isfunction(obj) and
+    return (inspect.isfunction(obj) and
             hasattr(obj, 'dispatch') and
             hasattr(obj, 'register') and
-            obj.dispatch.__module__ == 'functools'):
-        return True
-    else:
-        return False
+            obj.dispatch.__module__ == 'functools')
 
 
 def is_singledispatch_method(obj: Any) -> bool:
@@ -314,18 +311,10 @@ def iscoroutinefunction(obj: Any) -> bool:
             # staticmethod, classmethod and partial method are not a wrapped coroutine-function
             # Note: Since 3.10, staticmethod and classmethod becomes a kind of wrappers
             return False
-        elif hasattr(obj, '__wrapped__'):
-            return True
-        else:
-            return False
+        return hasattr(obj, '__wrapped__')
 
     obj = unwrap_all(obj, stop=iswrappedcoroutine)
-    if hasattr(obj, '__code__') and inspect.iscoroutinefunction(obj):
-        # check obj.__code__ because iscoroutinefunction() crashes for custom method-like
-        # objects (see https://github.com/sphinx-doc/sphinx/issues/6605)
-        return True
-    else:
-        return False
+    return inspect.iscoroutinefunction(obj)
 
 
 def isproperty(obj: Any) -> bool:
@@ -337,14 +326,13 @@ def isgenericalias(obj: Any) -> bool:
     """Check if the object is GenericAlias."""
     if isinstance(obj, typing._GenericAlias):  # type: ignore
         return True
-    elif (hasattr(types, 'GenericAlias') and  # only for py39+
-          isinstance(obj, types.GenericAlias)):
+    if (hasattr(types, 'GenericAlias')  # only for py39+
+            and isinstance(obj, types.GenericAlias)):
         return True
-    elif (hasattr(typing, '_SpecialGenericAlias') and  # for py39+
-            isinstance(obj, typing._SpecialGenericAlias)):
+    if (hasattr(typing, '_SpecialGenericAlias')  # for py39+
+            and isinstance(obj, typing._SpecialGenericAlias)):
         return True
-    else:
-        return False
+    return False
 
 
 def safe_getattr(obj: Any, name: str, *defargs: Any) -> Any:
@@ -534,7 +522,7 @@ def _should_unwrap(subject: Callable) -> bool:
     return False
 
 
-def signature(subject: Callable, bound_method: bool = False, type_aliases: dict = {}
+def signature(subject: Callable, bound_method: bool = False, type_aliases: dict = {},
               ) -> inspect.Signature:
     """Return a Signature object for the given *subject*.
 
@@ -591,7 +579,7 @@ def signature(subject: Callable, bound_method: bool = False, type_aliases: dict 
 
 
 def evaluate_signature(sig: inspect.Signature, globalns: dict | None = None,
-                       localns: dict | None = None
+                       localns: dict | None = None,
                        ) -> inspect.Signature:
     """Evaluate unresolved type annotations in a signature object."""
     def evaluate_forwardref(ref: ForwardRef, globalns: dict, localns: dict) -> Any:
@@ -740,7 +728,7 @@ def signature_from_ast(node: ast.FunctionDef, code: str = '') -> inspect.Signatu
             default = Parameter.empty
         else:
             default = DefaultValue(
-                ast_unparse(defaults[i + posonlyargs], code)  # type: ignore
+                ast_unparse(defaults[i + posonlyargs], code),  # type: ignore
             )
 
         annotation = ast_unparse(arg.annotation, code) or Parameter.empty
@@ -776,7 +764,7 @@ def getdoc(
     attrgetter: Callable = safe_getattr,
     allow_inherited: bool = False,
     cls: Any = None,
-    name: str | None = None
+    name: str | None = None,
 ) -> str | None:
     """Get the docstring for the object.
 

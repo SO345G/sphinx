@@ -26,10 +26,14 @@ from sphinx.locale import _, __
 from sphinx.roles import XRefRole
 from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField, TypedField
-from sphinx.util.docutils import SphinxDirective, switch_source_input
+from sphinx.util.docutils import SphinxDirective
 from sphinx.util.inspect import signature_from_str
-from sphinx.util.nodes import (find_pending_xref_condition, make_id, make_refnode,
-                               nested_parse_with_titles)
+from sphinx.util.nodes import (
+    find_pending_xref_condition,
+    make_id,
+    make_refnode,
+    nested_parse_with_titles,
+)
 from sphinx.util.typing import OptionSpec, TextlikeNode
 
 logger = logging.getLogger(__name__)
@@ -71,7 +75,7 @@ class ModuleEntry(NamedTuple):
     deprecated: bool
 
 
-def parse_reftarget(reftarget: str, suppress_prefix: bool = False
+def parse_reftarget(reftarget: str, suppress_prefix: bool = False,
                     ) -> tuple[str, str, str, bool]:
     """Parse a type string and return (reftype, reftarget, title, refspecific flag)"""
     refspecific = False
@@ -124,40 +128,40 @@ def type_to_xref(target: str, env: BuildEnvironment | None = None,
                         refspecific=refspecific, **kwargs)
 
 
-def _parse_annotation(annotation: str, env: BuildEnvironment) -> list[Node]:
+def _parse_annotation(annotation: str, env: BuildEnvironment | None) -> list[Node]:
     """Parse type annotation."""
     def unparse(node: ast.AST) -> list[Node]:
         if isinstance(node, ast.Attribute):
             return [nodes.Text(f"{unparse(node.value)[0]}.{node.attr}")]
-        elif isinstance(node, ast.BinOp):
+        if isinstance(node, ast.BinOp):
             result: list[Node] = unparse(node.left)
             result.extend(unparse(node.op))
             result.extend(unparse(node.right))
             return result
-        elif isinstance(node, ast.BitOr):
+        if isinstance(node, ast.BitOr):
             return [addnodes.desc_sig_space(),
                     addnodes.desc_sig_punctuation('', '|'),
                     addnodes.desc_sig_space()]
-        elif isinstance(node, ast.Constant):
+        if isinstance(node, ast.Constant):
             if node.value is Ellipsis:
                 return [addnodes.desc_sig_punctuation('', "...")]
-            elif isinstance(node.value, bool):
+            if isinstance(node.value, bool):
                 return [addnodes.desc_sig_keyword('', repr(node.value))]
-            elif isinstance(node.value, int):
+            if isinstance(node.value, int):
                 return [addnodes.desc_sig_literal_number('', repr(node.value))]
-            elif isinstance(node.value, str):
+            if isinstance(node.value, str):
                 return [addnodes.desc_sig_literal_string('', repr(node.value))]
             else:
                 # handles None, which is further handled by type_to_xref later
                 # and fallback for other types that should be converted
                 return [nodes.Text(repr(node.value))]
-        elif isinstance(node, ast.Expr):
+        if isinstance(node, ast.Expr):
             return unparse(node.value)
-        elif isinstance(node, ast.Index):
+        if isinstance(node, ast.Index):
             return unparse(node.value)
-        elif isinstance(node, ast.Invert):
+        if isinstance(node, ast.Invert):
             return [addnodes.desc_sig_punctuation('', '~')]
-        elif isinstance(node, ast.List):
+        if isinstance(node, ast.List):
             result = [addnodes.desc_sig_punctuation('', '[')]
             if node.elts:
                 # check if there are elements in node.elts to only pop the
@@ -171,11 +175,13 @@ def _parse_annotation(annotation: str, env: BuildEnvironment) -> list[Node]:
                 result.pop()
             result.append(addnodes.desc_sig_punctuation('', ']'))
             return result
-        elif isinstance(node, ast.Module):
+        if isinstance(node, ast.Module):
             return sum((unparse(e) for e in node.body), [])
-        elif isinstance(node, ast.Name):
+        if isinstance(node, ast.Name):
             return [nodes.Text(node.id)]
-        elif isinstance(node, ast.Subscript):
+        if isinstance(node, ast.Subscript):
+            if getattr(node.value, 'id', '') in {'Optional', 'Union'}:
+                return _unparse_pep_604_annotation(node)
             result = unparse(node.value)
             result.append(addnodes.desc_sig_punctuation('', '['))
             result.extend(unparse(node.slice))
@@ -187,9 +193,9 @@ def _parse_annotation(annotation: str, env: BuildEnvironment) -> list[Node]:
                     if isinstance(subnode, nodes.Text):
                         result[i] = nodes.literal('', '', subnode)
             return result
-        elif isinstance(node, ast.UnaryOp):
+        if isinstance(node, ast.UnaryOp):
             return unparse(node.op) + unparse(node.operand)
-        elif isinstance(node, ast.Tuple):
+        if isinstance(node, ast.Tuple):
             if node.elts:
                 result = []
                 for elem in node.elts:
@@ -203,8 +209,29 @@ def _parse_annotation(annotation: str, env: BuildEnvironment) -> list[Node]:
                           addnodes.desc_sig_punctuation('', ')')]
 
             return result
+        raise SyntaxError  # unsupported syntax
+
+    def _unparse_pep_604_annotation(node: ast.Subscript) -> list[Node]:
+        subscript = node.slice
+        if isinstance(subscript, ast.Index):
+            # py38 only
+            subscript = subscript.value  # type: ignore[assignment]
+
+        flattened: list[Node] = []
+        if isinstance(subscript, ast.Tuple):
+            flattened.extend(unparse(subscript.elts[0]))
+            for elt in subscript.elts[1:]:
+                flattened.extend(unparse(ast.BitOr()))
+                flattened.extend(unparse(elt))
         else:
-            raise SyntaxError  # unsupported syntax
+            # e.g. a Union[] inside an Optional[]
+            flattened.extend(unparse(subscript))
+
+        if getattr(node.value, 'id', '') == 'Optional':
+            flattened.extend(unparse(ast.BitOr()))
+            flattened.append(nodes.Text('None'))
+
+        return flattened
 
     try:
         tree = ast.parse(annotation, type_comments=True)
@@ -227,7 +254,7 @@ def _parse_annotation(annotation: str, env: BuildEnvironment) -> list[Node]:
 
 
 def _parse_arglist(
-    arglist: str, env: BuildEnvironment | None = None
+    arglist: str, env: BuildEnvironment | None = None,
 ) -> addnodes.desc_parameterlist:
     """Parse a list of arguments using AST parser"""
     params = addnodes.desc_parameterlist(arglist)
@@ -330,10 +357,17 @@ def _pseudo_parse_arglist(signode: desc_signature, arglist: str) -> None:
 # This override allows our inline type specifiers to behave like :class: link
 # when it comes to handling "." and "~" prefixes.
 class PyXrefMixin:
-    def make_xref(self, rolename: str, domain: str, target: str,
-                  innernode: type[TextlikeNode] = nodes.emphasis,
-                  contnode: Node = None, env: BuildEnvironment = None,
-                  inliner: Inliner = None, location: Node = None) -> Node:
+    def make_xref(
+        self,
+        rolename: str,
+        domain: str,
+        target: str,
+        innernode: type[TextlikeNode] = nodes.emphasis,
+        contnode: Node | None = None,
+        env: BuildEnvironment | None = None,
+        inliner: Inliner | None = None,
+        location: Node | None = None,
+    ) -> Node:
         # we use inliner=None to make sure we get the old behaviour with a single
         # pending_xref node
         result = super().make_xref(rolename, domain, target,  # type: ignore
@@ -363,10 +397,17 @@ class PyXrefMixin:
 
         return result
 
-    def make_xrefs(self, rolename: str, domain: str, target: str,
-                   innernode: type[TextlikeNode] = nodes.emphasis,
-                   contnode: Node = None, env: BuildEnvironment = None,
-                   inliner: Inliner = None, location: Node = None) -> list[Node]:
+    def make_xrefs(
+        self,
+        rolename: str,
+        domain: str,
+        target: str,
+        innernode: type[TextlikeNode] = nodes.emphasis,
+        contnode: Node | None = None,
+        env: BuildEnvironment | None = None,
+        inliner: Inliner | None = None,
+        location: Node | None = None,
+    ) -> list[Node]:
         delims = r'(\s*[\[\]\(\),](?:\s*o[rf]\s)?\s*|\s+o[rf]\s+|\s*\|\s*|\.\.\.)'
         delims_re = re.compile(delims)
         sub_targets = re.split(delims, target)
@@ -503,8 +544,7 @@ class PyObject(ObjectDescription[Tuple[str, str]]):
                     "Python directive method get_signature_prefix()"
                     " must return a list of nodes."
                     f" Return value was '{sig_prefix}'.")
-            else:
-                signode += addnodes.desc_annotation(str(sig_prefix), '', *sig_prefix)
+            signode += addnodes.desc_annotation(str(sig_prefix), '', *sig_prefix)
 
         if prefix:
             signode += addnodes.desc_addname(prefix, prefix)
@@ -688,7 +728,7 @@ class PyFunction(PyObject):
                 text = f'{pairindextypes["builtin"]}; {name}()'
                 self.indexnode['entries'].append(('pair', text, node_id, '', None))
 
-    def get_index_text(self, modname: str, name_cls: tuple[str, str]) -> str:
+    def get_index_text(self, modname: str, name_cls: tuple[str, str]) -> str | None:
         # add index in own add_target_and_index() instead.
         return None
 
@@ -992,10 +1032,9 @@ class PyModule(SphinxDirective):
         self.env.ref_context['py:module'] = modname
 
         content_node: Element = nodes.section()
-        with switch_source_input(self.state, self.content):
-            # necessary so that the child nodes get the right source/line set
-            content_node.document = self.state.document
-            nested_parse_with_titles(self.state, self.content, content_node)
+        # necessary so that the child nodes get the right source/line set
+        content_node.document = self.state.document
+        nested_parse_with_titles(self.state, self.content, content_node, self.content_offset)
 
         ret: list[Node] = []
         if not noindex:
@@ -1100,7 +1139,7 @@ class PythonModuleIndex(Index):
     localname = _('Python Module Index')
     shortname = _('modules')
 
-    def generate(self, docnames: Iterable[str] = None
+    def generate(self, docnames: Iterable[str] | None = None,
                  ) -> tuple[list[tuple[str, list[IndexEntry]]], bool]:
         content: dict[str, list[IndexEntry]] = {}
         # list of prefixes to ignore
@@ -1260,7 +1299,7 @@ class PythonDomain(Domain):
             if mod.docname == docname:
                 del self.modules[modname]
 
-    def merge_domaindata(self, docnames: list[str], otherdata: dict) -> None:
+    def merge_domaindata(self, docnames: list[str], otherdata: dict[str, Any]) -> None:
         # XXX check duplicates?
         for fullname, obj in otherdata['objects'].items():
             if obj.docname in docnames:
@@ -1270,7 +1309,7 @@ class PythonDomain(Domain):
                 self.modules[modname] = mod
 
     def find_obj(self, env: BuildEnvironment, modname: str, classname: str,
-                 name: str, type: str, searchmode: int = 0
+                 name: str, type: str | None, searchmode: int = 0,
                  ) -> list[tuple[str, ObjectEntry]]:
         """Find a Python object for "name", perhaps using the given module
         and/or classname.  Returns a list of (name, object entry) tuples.
@@ -1326,7 +1365,7 @@ class PythonDomain(Domain):
         return matches
 
     def resolve_xref(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
-                     type: str, target: str, node: pending_xref, contnode: Element
+                     type: str, target: str, node: pending_xref, contnode: Element,
                      ) -> Element | None:
         modname = node.get('py:module')
         clsname = node.get('py:class')
@@ -1373,7 +1412,7 @@ class PythonDomain(Domain):
             return make_refnode(builder, fromdocname, obj[0], obj[1], children, name)
 
     def resolve_any_xref(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
-                         target: str, node: pending_xref, contnode: Element
+                         target: str, node: pending_xref, contnode: Element,
                          ) -> list[tuple[str, Element]]:
         modname = node.get('py:module')
         clsname = node.get('py:class')
@@ -1449,7 +1488,7 @@ class PythonDomain(Domain):
 
 
 def builtin_resolver(app: Sphinx, env: BuildEnvironment,
-                     node: pending_xref, contnode: Element) -> Element:
+                     node: pending_xref, contnode: Element) -> Element | None:
     """Do not emit nitpicky warnings for built-in types."""
     def istyping(s: str) -> bool:
         if s.startswith('typing.'):
@@ -1466,7 +1505,7 @@ def builtin_resolver(app: Sphinx, env: BuildEnvironment,
         if inspect.isclass(getattr(builtins, reftarget, None)):
             # built-in class
             return contnode
-        elif istyping(reftarget):
+        if istyping(reftarget):
             # typing class
             return contnode
 

@@ -11,7 +11,12 @@ from docutils.parsers import rst
 
 from sphinx.search import IndexBuilder
 
-DummyEnvironment = namedtuple('DummyEnvironment', ['version', 'domains'])
+
+class DummyEnvironment(namedtuple('DummyEnvironment', ['version', 'domains'])):
+    def __getattr__(self, name):
+        if name.startswith('_search_index_'):
+            setattr(self, name, {})
+        return getattr(self, name, {})
 
 
 class DummyDomain:
@@ -155,7 +160,7 @@ def test_IndexBuilder():
         'comment': {'docname1_1', 'docname1_2', 'docname2_1', 'docname2_2'},
         'non': {'docname1_1', 'docname1_2', 'docname2_1', 'docname2_2'},
         'index': {'docname1_1', 'docname1_2', 'docname2_1', 'docname2_2'},
-        'test': {'docname1_1', 'docname1_2', 'docname2_1', 'docname2_2'}
+        'test': {'docname1_1', 'docname1_2', 'docname2_1', 'docname2_2'},
     }
     assert index._title_mapping == {'section_titl': {'docname1_1', 'docname1_2', 'docname2_1', 'docname2_2'}}
     assert index._objtypes == {}
@@ -184,6 +189,8 @@ def test_IndexBuilder():
     assert index._objtypes == {('dummy1', 'objtype1'): 0, ('dummy2', 'objtype1'): 1}
     assert index._objnames == {0: ('dummy1', 'objtype1', 'objtype1'),
                                1: ('dummy2', 'objtype1', 'objtype1')}
+
+    env = DummyEnvironment('1.0', {'dummy1': domain1, 'dummy2': domain2})
 
     # dump / load
     stream = BytesIO()
@@ -215,7 +222,7 @@ def test_IndexBuilder():
         'comment': {'docname1_2', 'docname2_2'},
         'non': {'docname1_2', 'docname2_2'},
         'index': {'docname1_2', 'docname2_2'},
-        'test': {'docname1_2', 'docname2_2'}
+        'test': {'docname1_2', 'docname2_2'},
     }
     assert index._title_mapping == {'section_titl': {'docname1_2', 'docname2_2'}}
     assert index._objtypes == {('dummy1', 'objtype1'): 0, ('dummy2', 'objtype1'): 1}
@@ -260,7 +267,7 @@ def test_IndexBuilder_lookup():
 @pytest.mark.sphinx(
     testroot='search',
     confoverrides={'html_search_language': 'zh'},
-    srcdir='search_zh'
+    srcdir='search_zh',
 )
 def test_search_index_gen_zh(app, status, warning):
     app.builder.build_all()
@@ -279,3 +286,10 @@ def test_nosearch(app):
     assert 'latex' not in index['terms']
     assert 'zfs' in index['terms']
     assert index['terms']['zfs'] == []  # zfs on nosearch.rst is not registered to index
+
+
+@pytest.mark.sphinx(testroot='search', parallel=3, freshenv=True)
+def test_parallel(app):
+    app.build()
+    index = load_searchindex(app.outdir / 'searchindex.js')
+    assert index['docnames'] == ['index', 'nosearch', 'tocitem']

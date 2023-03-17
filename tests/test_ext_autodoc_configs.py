@@ -273,7 +273,7 @@ def test_autodoc_inherit_docstrings(app):
         '',
         '.. py:method:: Derived.inheritedmeth()',
         '   :module: target.inheritance',
-        ''
+        '',
     ]
 
 
@@ -662,7 +662,7 @@ def test_mocked_module_imports(app, warning):
                     confoverrides={'autodoc_typehints': "signature"})
 def test_autodoc_typehints_signature(app):
     if sys.version_info[:2] <= (3, 10):
-        type_o = "~typing.Optional[~typing.Any]"
+        type_o = "~typing.Any | None"
     else:
         type_o = "~typing.Any"
 
@@ -754,7 +754,7 @@ def test_autodoc_typehints_signature(app):
         '   :module: target.typehints',
         '',
         '',
-        '.. py:data:: T',
+        '.. py:class:: T',
         '   :module: target.typehints',
         '',
         '   docstring',
@@ -868,7 +868,7 @@ def test_autodoc_typehints_none(app):
         '   :module: target.typehints',
         '',
         '',
-        '.. py:data:: T',
+        '.. py:class:: T',
         '   :module: target.typehints',
         '',
         '   docstring',
@@ -997,7 +997,7 @@ def test_autodoc_typehints_description_no_undoc(app):
         '\n'
         '   :param x: arg\n'
         '   :return: another tuple\n',
-        encoding='utf8'
+        encoding='utf8',
     )
     app.build()
     context = (app.outdir / 'index.txt').read_text(encoding='utf8')
@@ -1050,7 +1050,7 @@ def test_autodoc_typehints_description_no_undoc_doc_rtype(app):
         '.. autofunction:: target.typehints.Math.horse\n'
         '\n'
         '   :return: nothing\n',
-        encoding='utf8'
+        encoding='utf8',
     )
     app.build()
     context = (app.outdir / 'index.txt').read_text(encoding='utf8')
@@ -1097,7 +1097,7 @@ def test_autodoc_typehints_description_with_documented_init(app):
     (app.srcdir / 'index.rst').write_text(
         '.. autoclass:: target.typehints._ClassWithDocumentedInit\n'
         '   :special-members: __init__\n',
-        encoding='utf8'
+        encoding='utf8',
     )
     app.build()
     context = (app.outdir / 'index.txt').read_text(encoding='utf8')
@@ -1136,7 +1136,7 @@ def test_autodoc_typehints_description_with_documented_init_no_undoc(app):
     (app.srcdir / 'index.rst').write_text(
         '.. autoclass:: target.typehints._ClassWithDocumentedInit\n'
         '   :special-members: __init__\n',
-        encoding='utf8'
+        encoding='utf8',
     )
     app.build()
     context = (app.outdir / 'index.txt').read_text(encoding='utf8')
@@ -1168,7 +1168,7 @@ def test_autodoc_typehints_description_with_documented_init_no_undoc_doc_rtype(a
     (app.srcdir / 'index.rst').write_text(
         '.. autoclass:: target.typehints._ClassWithDocumentedInit\n'
         '   :special-members: __init__\n',
-        encoding='utf8'
+        encoding='utf8',
     )
     app.build()
     context = (app.outdir / 'index.txt').read_text(encoding='utf8')
@@ -1206,7 +1206,7 @@ def test_autodoc_typehints_both(app):
         '.. autofunction:: target.typehints.tuple_args\n'
         '\n'
         '.. autofunction:: target.overload.sum\n',
-        encoding='utf8'
+        encoding='utf8',
     )
     app.build()
     context = (app.outdir / 'index.txt').read_text(encoding='utf8')
@@ -1304,7 +1304,7 @@ def test_autodoc_type_aliases(app):
         '',
         '.. py:data:: variable3',
         '   :module: target.autodoc_type_aliases',
-        '   :type: ~typing.Optional[int]',
+        '   :type: int | None',
         '',
         '   docstring',
         '',
@@ -1375,7 +1375,7 @@ def test_autodoc_type_aliases(app):
         '',
         '.. py:data:: variable3',
         '   :module: target.autodoc_type_aliases',
-        '   :type: ~typing.Optional[myint]',
+        '   :type: myint | None',
         '',
         '   docstring',
         '',
@@ -1409,7 +1409,7 @@ def test_autodoc_typehints_description_and_type_aliases(app):
                     confoverrides={'autodoc_typehints_format': "fully-qualified"})
 def test_autodoc_typehints_format_fully_qualified(app):
     if sys.version_info[:2] <= (3, 10):
-        type_o = "typing.Optional[typing.Any]"
+        type_o = "typing.Any | None"
     else:
         type_o = "typing.Any"
 
@@ -1501,7 +1501,7 @@ def test_autodoc_typehints_format_fully_qualified(app):
         '   :module: target.typehints',
         '',
         '',
-        '.. py:data:: T',
+        '.. py:class:: T',
         '   :module: target.typehints',
         '',
         '   docstring',
@@ -1564,10 +1564,10 @@ def test_autodoc_typehints_format_fully_qualified_for_generic_alias(app):
 @pytest.mark.sphinx('html', testroot='ext-autodoc',
                     confoverrides={'autodoc_typehints_format': "fully-qualified"})
 def test_autodoc_typehints_format_fully_qualified_for_newtype_alias(app):
-    actual = do_autodoc(app, 'data', 'target.typevar.T6')
+    actual = do_autodoc(app, 'class', 'target.typevar.T6')
     assert list(actual) == [
         '',
-        '.. py:data:: T6',
+        '.. py:class:: T6',
         '   :module: target.typevar',
         '',
         '   T6',
@@ -1613,7 +1613,7 @@ def test_autodoc_default_options(app):
     # Note that :members: must be *on* for :special-members: to work.
     app.config.autodoc_default_options = {
         'members': None,
-        'special-members': None
+        'special-members': None,
     }
     actual = do_autodoc(app, 'class', 'target.CustomIter')
     assert '   .. py:method:: CustomIter.__init__()' in actual
@@ -1698,7 +1698,7 @@ def test_autodoc_default_options_with_values(app):
     # with :exclude-members:
     app.config.autodoc_default_options = {
         'members': None,
-        'exclude-members': 'val1'
+        'exclude-members': 'val1',
     }
     actual = do_autodoc(app, 'class', 'target.enums.EnumCls')
     assert '   .. py:attribute:: EnumCls.val1' not in actual

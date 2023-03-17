@@ -20,10 +20,10 @@ from sphinx.environment.adapters.asset import ImageAdapter
 from sphinx.errors import SphinxError
 from sphinx.events import EventManager
 from sphinx.locale import __
-from sphinx.util import (UnicodeDecodeErrorHandler, get_filetype, import_object, logging,
-                         progress_message, rst, status_iterator)
+from sphinx.util import UnicodeDecodeErrorHandler, get_filetype, import_object, logging, rst
 from sphinx.util.build_phase import BuildPhase
 from sphinx.util.console import bold  # type: ignore
+from sphinx.util.display import progress_message, status_iterator
 from sphinx.util.docutils import sphinx_domains
 from sphinx.util.i18n import CatalogInfo, CatalogRepository, docname_to_domain
 from sphinx.util.osutil import SEP, ensuredir, relative_uri, relpath
@@ -313,7 +313,7 @@ class Builder:
                        len(to_build))
 
     def build(
-        self, docnames: Iterable[str], summary: str | None = None, method: str = 'update'
+        self, docnames: Iterable[str], summary: str | None = None, method: str = 'update',
     ) -> None:
         """Main build method.
 
@@ -542,11 +542,13 @@ class Builder:
         with open(doctree_filename, 'wb') as f:
             pickle.dump(doctree, f, pickle.HIGHEST_PROTOCOL)
 
+        self.env._write_doc_doctree_cache[docname] = doctree
+
     def write(
         self,
         build_docnames: Iterable[str],
         updated_docnames: Sequence[str],
-        method: str = 'update'
+        method: str = 'update',
     ) -> None:
         if build_docnames is None or build_docnames == ['__all__']:
             # build_all

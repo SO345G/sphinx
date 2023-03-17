@@ -26,8 +26,7 @@ import re
 import sys
 import time
 from os import path
-from types import ModuleType
-from typing import IO, Any, cast
+from typing import IO, TYPE_CHECKING, Any, cast
 from urllib.parse import urlsplit, urlunsplit
 
 from docutils import nodes
@@ -48,6 +47,9 @@ from sphinx.util import logging, requests
 from sphinx.util.docutils import CustomReSTDispatcher, SphinxRole
 from sphinx.util.inventory import InventoryFile, InventoryItemSet
 from sphinx.util.typing import Inventory, RoleFunction
+
+if TYPE_CHECKING:
+    from types import ModuleType
 
 logger = logging.getLogger(__name__)
 
@@ -303,7 +305,7 @@ def load_mappings(app: Sphinx) -> None:
         invs: tuple[str | None, ...]
         for name, (uri, invs) in app.config.intersphinx_mapping.values():
             futures.append(pool.submit(
-                fetch_inventory_group, name, uri, invs, inventories.cache, app, now
+                fetch_inventory_group, name, uri, invs, inventories.cache, app, now,
             ))
         updated = [f.result() for f in concurrent.futures.as_completed(futures)]
 
@@ -354,7 +356,7 @@ def _resolve_reference_in_domain(env: BuildEnvironment,
                                  inv_name: str | None,
                                  honor_disabled_refs: bool,
                                  domain: Domain,
-                                 node: pending_xref, contnode: TextElement
+                                 node: pending_xref, contnode: TextElement,
                                  ) -> nodes.reference | None:
     if honor_disabled_refs:
         conf = EnvAdapter(env)  # make sure the disabled has been processed
@@ -418,7 +420,7 @@ def inventory_exists(env: BuildEnvironment, inv_name: str) -> bool:
 
 def resolve_reference_in_inventory(env: BuildEnvironment,
                                    inv_name: str,
-                                   node: pending_xref, contnode: TextElement
+                                   node: pending_xref, contnode: TextElement,
                                    ) -> Element | None:
     """Attempt to resolve a missing reference via intersphinx references.
 
@@ -432,7 +434,7 @@ def resolve_reference_in_inventory(env: BuildEnvironment,
 
 def resolve_reference_any_inventory(env: BuildEnvironment,
                                     honor_disabled_refs: bool,
-                                    node: pending_xref, contnode: TextElement
+                                    node: pending_xref, contnode: TextElement,
                                     ) -> Element | None:
     """Attempt to resolve a missing reference via intersphinx references.
 
@@ -442,7 +444,7 @@ def resolve_reference_any_inventory(env: BuildEnvironment,
 
 
 def resolve_reference_detect_inventory(env: BuildEnvironment,
-                                       node: pending_xref, contnode: TextElement
+                                       node: pending_xref, contnode: TextElement,
                                        ) -> Element | None:
     """Attempt to resolve a missing reference via intersphinx references.
 
@@ -485,8 +487,9 @@ class IntersphinxDispatcher(CustomReSTDispatcher):
     This enables :external:***:/:external+***: roles on parsing reST document.
     """
 
-    def role(self, role_name: str, language_module: ModuleType, lineno: int, reporter: Reporter
-             ) -> tuple[RoleFunction, list[system_message]]:
+    def role(
+        self, role_name: str, language_module: ModuleType, lineno: int, reporter: Reporter,
+    ) -> tuple[RoleFunction, list[system_message]]:
         if len(role_name) > 9 and role_name.startswith(('external:', 'external+')):
             return IntersphinxRole(role_name), []
         else:
@@ -560,10 +563,7 @@ class IntersphinxRole(SphinxRole):
     def is_existent_role(self, domain_name: str, role_name: str) -> bool:
         try:
             domain = self.env.get_domain(domain_name)
-            if role_name in domain.roles:
-                return True
-            else:
-                return False
+            return role_name in domain.roles
         except ExtensionError:
             return False
 
@@ -660,7 +660,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
     return {
         'version': sphinx.__display_version__,
         'env_version': 2,
-        'parallel_read_safe': True
+        'parallel_read_safe': True,
     }
 
 

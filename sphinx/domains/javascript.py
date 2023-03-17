@@ -20,7 +20,7 @@ from sphinx.locale import _, __
 from sphinx.roles import XRefRole
 from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField, TypedField
-from sphinx.util.docutils import SphinxDirective, switch_source_input
+from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import make_id, make_refnode, nested_parse_with_titles
 from sphinx.util.typing import OptionSpec
 
@@ -297,10 +297,9 @@ class JSModule(SphinxDirective):
         noindex = 'noindex' in self.options
 
         content_node: Element = nodes.section()
-        with switch_source_input(self.state, self.content):
-            # necessary so that the child nodes get the right source/line set
-            content_node.document = self.state.document
-            nested_parse_with_titles(self.state, self.content, content_node)
+        # necessary so that the child nodes get the right source/line set
+        content_node.document = self.state.document
+        nested_parse_with_titles(self.state, self.content, content_node, self.content_offset)
 
         ret: list[Node] = []
         if not noindex:
@@ -412,7 +411,7 @@ class JavaScriptDomain(Domain):
             if pkg_docname == docname:
                 del self.modules[modname]
 
-    def merge_domaindata(self, docnames: list[str], otherdata: dict) -> None:
+    def merge_domaindata(self, docnames: list[str], otherdata: dict[str, Any]) -> None:
         # XXX check duplicates
         for fullname, (fn, node_id, objtype) in otherdata['objects'].items():
             if fn in docnames:
@@ -421,8 +420,15 @@ class JavaScriptDomain(Domain):
             if pkg_docname in docnames:
                 self.modules[mod_name] = (pkg_docname, node_id)
 
-    def find_obj(self, env: BuildEnvironment, mod_name: str, prefix: str, name: str,
-                 typ: str, searchorder: int = 0) -> tuple[str, tuple[str, str, str]]:
+    def find_obj(
+        self,
+        env: BuildEnvironment,
+        mod_name: str,
+        prefix: str,
+        name: str,
+        typ: str | None,
+        searchorder: int = 0,
+    ) -> tuple[str | None, tuple[str, str, str] | None]:
         if name[-2:] == '()':
             name = name[:-2]
 
@@ -446,7 +452,7 @@ class JavaScriptDomain(Domain):
         return newname, self.objects.get(newname)
 
     def resolve_xref(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
-                     typ: str, target: str, node: pending_xref, contnode: Element
+                     typ: str, target: str, node: pending_xref, contnode: Element,
                      ) -> Element | None:
         mod_name = node.get('js:module')
         prefix = node.get('js:object')
@@ -457,7 +463,7 @@ class JavaScriptDomain(Domain):
         return make_refnode(builder, fromdocname, obj[0], obj[1], contnode, name)
 
     def resolve_any_xref(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
-                         target: str, node: pending_xref, contnode: Element
+                         target: str, node: pending_xref, contnode: Element,
                          ) -> list[tuple[str, Element]]:
         mod_name = node.get('js:module')
         prefix = node.get('js:object')
@@ -471,7 +477,7 @@ class JavaScriptDomain(Domain):
         for refname, (docname, node_id, typ) in list(self.objects.items()):
             yield refname, refname, typ, docname, node_id, 1
 
-    def get_full_qualified_name(self, node: Element) -> str:
+    def get_full_qualified_name(self, node: Element) -> str | None:
         modname = node.get('js:module')
         prefix = node.get('js:object')
         target = node.get('reftarget')

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import copy
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, NamedTuple, Optional, cast
 
 from docutils import nodes
 from docutils.nodes import Element, Node, TextElement, system_message
@@ -22,6 +22,8 @@ from sphinx.util.inventory import InventoryItemSet
 from sphinx.util.typing import RoleFunction
 
 if TYPE_CHECKING:
+    from docutils.parsers.rst import Directive
+
     from sphinx.builders import Builder
     from sphinx.environment import BuildEnvironment
 
@@ -85,9 +87,9 @@ class Index(ABC):
        :rst:role:`ref` role.
     """
 
-    name: str = None
-    localname: str = None
-    shortname: str = None
+    name: str
+    localname: str
+    shortname: str | None = None
 
     def __init__(self, domain: Domain) -> None:
         if self.name is None or self.localname is None:
@@ -96,7 +98,7 @@ class Index(ABC):
         self.domain = domain
 
     @abstractmethod
-    def generate(self, docnames: Iterable[str] = None
+    def generate(self, docnames: Iterable[str] | None = None,
                  ) -> tuple[list[tuple[str, list[IndexEntry]]], bool]:
         """Get entries for the index.
 
@@ -150,6 +152,9 @@ class Index(ABC):
         raise NotImplementedError
 
 
+TitleGetter = Callable[[Node], Optional[str]]
+
+
 class Domain:
     """
     A Domain is meant to be a group of "object" description directives for
@@ -180,7 +185,7 @@ class Domain:
     #: type (usually directive) name -> ObjType instance
     object_types: dict[str, ObjType] = {}
     #: directive name -> directive class
-    directives: dict[str, Any] = {}
+    directives: dict[str, type[Directive]] = {}
     #: role name -> role callable
     roles: dict[str, RoleFunction | XRefRole] = {}
     #: a list of Index subclasses
@@ -188,8 +193,7 @@ class Domain:
     #: role name -> a warning message if reference is missing
     dangling_warnings: dict[str, str] = {}
     #: node_class -> (enum_node_type, title_getter)
-    enumerable_nodes: dict[type[Node], tuple[str, Callable]] = {}
-
+    enumerable_nodes: dict[type[Node], tuple[str, TitleGetter | None]] = {}
     #: data value for a fresh environment
     initial_data: dict = {}
     #: data value
@@ -265,7 +269,7 @@ class Domain:
         fullname = f'{self.name}:{name}'
 
         def role_adapter(typ: str, rawtext: str, text: str, lineno: int,
-                         inliner: Inliner, options: dict = {}, content: list[str] = []
+                         inliner: Inliner, options: dict = {}, content: list[str] = [],
                          ) -> tuple[list[Node], list[system_message]]:
             return self.roles[name](fullname, rawtext, text, lineno,
                                     inliner, options, content)
@@ -283,7 +287,7 @@ class Domain:
         fullname = f'{self.name}:{name}'
         BaseDirective = self.directives[name]
 
-        class DirectiveAdapter(BaseDirective):  # type: ignore
+        class DirectiveAdapter(BaseDirective):  # type: ignore[valid-type,misc]
             def run(self) -> list[Node]:
                 self.name = fullname
                 return super().run()
@@ -320,7 +324,7 @@ class Domain:
         pass
 
     def resolve_xref(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
-                     typ: str, target: str, node: pending_xref, contnode: Element
+                     typ: str, target: str, node: pending_xref, contnode: Element,
                      ) -> Element | None:
         """Resolve the pending_xref *node* with the given *typ* and *target*.
 
@@ -338,7 +342,7 @@ class Domain:
         pass
 
     def resolve_any_xref(self, env: BuildEnvironment, fromdocname: str, builder: Builder,
-                         target: str, node: pending_xref, contnode: Element
+                         target: str, node: pending_xref, contnode: Element,
                          ) -> list[tuple[str, Element]]:
         """Resolve the pending_xref *node* with the given *target*.
 
@@ -403,7 +407,7 @@ class Domain:
 
     def get_full_qualified_name(self, node: Element) -> str | None:
         """Return full qualified name for given node."""
-        return None
+        pass
 
     def intersphinx_add_entries(self, store: dict[str, dict[str, InventoryItemSet]],
                                 data: dict[str, dict[str, InventoryItemSet]]) -> None:

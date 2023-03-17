@@ -21,8 +21,9 @@ from sphinx.config import ENUM, Config
 from sphinx.environment.adapters.asset import ImageAdapter
 from sphinx.errors import NoUri, SphinxError
 from sphinx.locale import _, __
-from sphinx.util import logging, progress_message, status_iterator, texescape
+from sphinx.util import logging, texescape
 from sphinx.util.console import bold, darkgreen  # type: ignore
+from sphinx.util.display import progress_message, status_iterator
 from sphinx.util.docutils import SphinxFileOutput, new_document
 from sphinx.util.fileutil import copy_asset_file
 from sphinx.util.i18n import format_date
@@ -132,8 +133,7 @@ class LaTeXBuilder(Builder):
     def get_target_uri(self, docname: str, typ: str | None = None) -> str:
         if docname not in self.docnames:
             raise NoUri(docname, typ)
-        else:
-            return '%' + docname
+        return '%' + docname
 
     def get_relative_uri(self, from_: str, to: str, typ: str | None = None) -> str:
         # ignore source path
@@ -324,7 +324,7 @@ class LaTeXBuilder(Builder):
         self.context['wrapperclass'] = theme.wrapperclass
 
     def assemble_doctree(
-        self, indexfile: str, toctree_only: bool, appendices: list[str]
+        self, indexfile: str, toctree_only: bool, appendices: list[str],
     ) -> nodes.document:
         self.docnames = set([indexfile] + appendices)
         logger.info(darkgreen(indexfile) + " ", nonl=True)
@@ -427,8 +427,7 @@ class LaTeXBuilder(Builder):
         if self.config.latex_logo:
             if not path.isfile(path.join(self.confdir, self.config.latex_logo)):
                 raise SphinxError(__('logo file %r does not exist') % self.config.latex_logo)
-            else:
-                copy_asset_file(path.join(self.confdir, self.config.latex_logo), self.outdir)
+            copy_asset_file(path.join(self.confdir, self.config.latex_logo), self.outdir)
 
     def write_message_catalog(self) -> None:
         formats = self.config.numfig_format
@@ -436,7 +435,7 @@ class LaTeXBuilder(Builder):
             'addtocaptions': r'\@iden',
             'figurename': formats.get('figure', '').split('%s', 1),
             'tablename': formats.get('table', '').split('%s', 1),
-            'literalblockname': formats.get('code-block', '').split('%s', 1)
+            'literalblockname': formats.get('code-block', '').split('%s', 1),
         }
 
         if self.context['babel'] or self.context['polyglossia']:
@@ -472,12 +471,11 @@ def default_latex_engine(config: Config) -> str:
     """ Better default latex_engine settings for specific languages. """
     if config.language == 'ja':
         return 'uplatex'
-    elif config.language.startswith('zh'):
+    if config.language.startswith('zh'):
         return 'xelatex'
-    elif config.language == 'el':
+    if config.language == 'el':
         return 'xelatex'
-    else:
-        return 'pdflatex'
+    return 'pdflatex'
 
 
 def default_latex_docclass(config: Config) -> dict[str, str]:

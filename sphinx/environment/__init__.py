@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import os
 import pickle
 from collections import defaultdict
@@ -31,7 +32,6 @@ from sphinx.util.osutil import canon_path, os_path
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.builders import Builder
-
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +178,12 @@ class BuildEnvironment:
         # docnames to re-read unconditionally on next build
         self.reread_always: set[str] = set()
 
+        # docname -> pickled doctree
+        self._pickled_doctree_cache: dict[str, bytes] = {}
+
+        # docname -> doctree
+        self._write_doc_doctree_cache: dict[str, nodes.document] = {}
+
         # File metadata
         # docname -> dict of metadata items
         self.metadata: dict[str, dict[str, Any]] = defaultdict(dict)
@@ -228,6 +234,25 @@ class BuildEnvironment:
         # attributes of "any" cross references
         self.ref_context: dict[str, Any] = {}
 
+        # search index data
+
+        # docname -> title
+        self._search_index_titles: dict[str, str] = {}
+        # docname -> filename
+        self._search_index_filenames: dict[str, str] = {}
+        # stemmed words -> set(docname)
+        self._search_index_mapping: dict[str, set[str]] = {}
+        # stemmed words in titles -> set(docname)
+        self._search_index_title_mapping: dict[str, set[str]] = {}
+        # docname -> all titles in document
+        self._search_index_all_titles: dict[str, list[tuple[str, str]]] = {}
+        # docname -> list(index entry)
+        self._search_index_index_entries: dict[str, list[tuple[str, str, str]]] = {}
+        # objtype -> index
+        self._search_index_objtypes: dict[tuple[str, str], int] = {}
+        # objtype index -> (domain, type, objname (localized))
+        self._search_index_objnames: dict[int, tuple[str, str, str]] = {}
+
         # set up environment
         self.setup(app)
 
@@ -244,7 +269,7 @@ class BuildEnvironment:
         """Set up BuildEnvironment object."""
         if self.version and self.version != app.registry.get_envversion(app):
             raise BuildEnvironmentError(__('build environment version not current'))
-        elif self.srcdir and self.srcdir != app.srcdir:
+        if self.srcdir and self.srcdir != app.srcdir:
             raise BuildEnvironmentError(__('source directory has changed'))
 
         if self.project:
@@ -382,7 +407,7 @@ class BuildEnvironment:
         containing document.
         """
         filename = os_path(filename)
-        if filename.startswith('/') or filename.startswith(os.sep):
+        if filename.startswith(('/', os.sep)):
             rel_fn = filename[1:]
         else:
             docdir = path.dirname(self.doc2path(docname or self.docname,
@@ -558,12 +583,21 @@ class BuildEnvironment:
 
     def get_doctree(self, docname: str) -> nodes.document:
         """Read the doctree for a file from the pickle and return it."""
-        filename = path.join(self.doctreedir, docname + '.doctree')
-        with open(filename, 'rb') as f:
-            doctree = pickle.load(f)
+        try:
+            serialised = self._pickled_doctree_cache[docname]
+        except KeyError:
+            filename = path.join(self.doctreedir, docname + '.doctree')
+            with open(filename, 'rb') as f:
+                serialised = self._pickled_doctree_cache[docname] = f.read()
+
+        doctree = pickle.loads(serialised)
         doctree.settings.env = self
         doctree.reporter = LoggingReporter(self.doc2path(docname))
         return doctree
+
+    @functools.cached_property
+    def master_doctree(self) -> nodes.document:
+        return self.get_doctree(self.config.root_doc)
 
     def get_and_resolve_doctree(
         self,
@@ -571,13 +605,18 @@ class BuildEnvironment:
         builder: Builder,
         doctree: nodes.document | None = None,
         prune_toctrees: bool = True,
-        includehidden: bool = False
+        includehidden: bool = False,
     ) -> nodes.document:
         """Read the doctree from the pickle, resolve cross-references and
         toctrees and return it.
         """
         if doctree is None:
-            doctree = self.get_doctree(docname)
+            try:
+                doctree = self._write_doc_doctree_cache.pop(docname)
+                doctree.settings.env = self
+                doctree.reporter = LoggingReporter(self.doc2path(docname))
+            except KeyError:
+                doctree = self.get_doctree(docname)
 
         # resolve all pending cross-references
         self.apply_post_transforms(doctree, docname)
@@ -637,7 +676,7 @@ class BuildEnvironment:
         traversed = set()
 
         def traverse_toctree(
-            parent: str | None, docname: str
+            parent: str | None, docname: str,
         ) -> Iterator[tuple[str | None, str]]:
             if parent == docname:
                 logger.warning(__('self referenced toctree found. Ignored.'),
@@ -682,7 +721,7 @@ class BuildEnvironment:
                     continue
                 if 'orphan' in self.metadata[docname]:
                     continue
-                logger.warning(__('document isn\'t included in any toctree'),
+                logger.warning(__("document isn't included in any toctree"),
                                location=docname)
 
         # call check-consistency for all extensions

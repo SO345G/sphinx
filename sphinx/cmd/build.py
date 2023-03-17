@@ -20,14 +20,15 @@ from sphinx import __display_version__, package_dir
 from sphinx.application import Sphinx
 from sphinx.errors import SphinxError
 from sphinx.locale import __
-from sphinx.util import Tee, format_exception_cut_frames, save_traceback
+from sphinx.util import Tee
 from sphinx.util.console import color_terminal, nocolor, red, terminal_safe  # type: ignore
 from sphinx.util.docutils import docutils_namespace, patch_docutils
+from sphinx.util.exceptions import format_exception_cut_frames, save_traceback
 from sphinx.util.osutil import abspath, ensuredir
 
 
 def handle_exception(
-    app: Sphinx | None, args: Any, exception: BaseException, stderr: TextIO = sys.stderr
+    app: Sphinx | None, args: Any, exception: BaseException, stderr: TextIO = sys.stderr,
 ) -> None:
     if isinstance(exception, bdb.BdbQuit):
         return
@@ -53,7 +54,7 @@ def handle_exception(
         elif isinstance(exception, UnicodeError):
             print(red(__('Encoding error:')), file=stderr)
             print(terminal_safe(str(exception)), file=stderr)
-            tbpath = save_traceback(app)
+            tbpath = save_traceback(app, exception)
             print(red(__('The full traceback has been saved in %s, if you want '
                          'to report the issue to the developers.') % tbpath),
                   file=stderr)
@@ -68,7 +69,7 @@ def handle_exception(
         else:
             print(red(__('Exception occurred:')), file=stderr)
             print(format_exception_cut_frames().rstrip(), file=stderr)
-            tbpath = save_traceback(app)
+            tbpath = save_traceback(app, exception)
             print(red(__('The full traceback has been saved in %s, if you '
                          'want to report the issue to the developers.') % tbpath),
                   file=stderr)
@@ -136,12 +137,13 @@ files can be built by specifying individual filenames.
                        help=__('write all files (default: only write new and '
                                'changed files)'))
     group.add_argument('-E', action='store_true', dest='freshenv',
-                       help=__('don\'t use a saved environment, always read '
+                       help=__("don't use a saved environment, always read "
                                'all files'))
     group.add_argument('-d', metavar='PATH', dest='doctreedir',
                        help=__('path for the cached environment and doctree '
                                'files (default: OUTPUTDIR/.doctrees)'))
-    group.add_argument('-j', metavar='N', default=1, type=jobs_argument, dest='jobs',
+    group.add_argument('-j', '--jobs', metavar='N', default=1, type=jobs_argument,
+                       dest='jobs',
                        help=__('build in parallel with N processes where '
                                'possible (special value "auto" will set N to cpu-count)'))
     group = parser.add_argument_group('build configuration options')

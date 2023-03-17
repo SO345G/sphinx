@@ -19,8 +19,9 @@ from sphinx.config import Config
 from sphinx.environment.adapters.asset import ImageAdapter
 from sphinx.errors import NoUri
 from sphinx.locale import _, __
-from sphinx.util import logging, progress_message, status_iterator
+from sphinx.util import logging
 from sphinx.util.console import darkgreen  # type: ignore
+from sphinx.util.display import progress_message, status_iterator
 from sphinx.util.docutils import new_document
 from sphinx.util.fileutil import copy_asset_file
 from sphinx.util.nodes import inline_all_toctrees
@@ -57,8 +58,7 @@ class TexinfoBuilder(Builder):
     def get_target_uri(self, docname: str, typ: str | None = None) -> str:
         if docname not in self.docnames:
             raise NoUri(docname, typ)
-        else:
-            return '%' + docname
+        return '%' + docname
 
     def get_relative_uri(self, from_: str, to: str, typ: str | None = None) -> str:
         # ignore source path
@@ -125,7 +125,7 @@ class TexinfoBuilder(Builder):
                 self.copy_image_files(targetname[:-5])
 
     def assemble_doctree(
-        self, indexfile: str, toctree_only: bool, appendices: list[str]
+        self, indexfile: str, toctree_only: bool, appendices: list[str],
     ) -> nodes.document:
         self.docnames = set([indexfile] + appendices)
         logger.info(darkgreen(indexfile) + " ", nonl=True)
@@ -197,7 +197,7 @@ class TexinfoBuilder(Builder):
 
 
 def default_texinfo_documents(
-    config: Config
+    config: Config,
 ) -> list[tuple[str, str, str, str, str, str, str]]:
     """ Better default texinfo_documents settings. """
     filename = make_filename_from_project(config.project)
