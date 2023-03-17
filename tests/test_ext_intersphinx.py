@@ -12,13 +12,13 @@ from sphinx import addnodes
 from sphinx.ext.intersphinx import (
     INVENTORY_FILENAME,
     _get_safe_url,
+    _process_disabled_reftypes,
     _strip_basic_auth,
     fetch_inventory,
     inspect_main,
     load_mappings,
-    missing_reference,
+    _missing_reference,
     normalize_intersphinx_mapping,
-    process_disabled_reftypes,
 )
 from sphinx.ext.intersphinx import setup as intersphinx_setup
 
@@ -39,7 +39,7 @@ def fake_node(domain, type, target, content, **attrs):
 
 def reference_check(app, *args, **kwds):
     node, contnode = fake_node(*args, **kwds)
-    return missing_reference(app, app.env, node, contnode)
+    return _missing_reference(app, app.env, node, contnode)
 
 
 def set_config(app, mapping):
@@ -141,14 +141,14 @@ def test_missing_reference(tempdir, app, status, warning):
     # prefix given, target not found and nonexplicit title: prefix is not stripped
     node, contnode = fake_node('py', 'mod', 'py3k:unknown', 'py3k:unknown',
                                refexplicit=False)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn is None
     assert contnode[0].astext() == 'py3k:unknown'
 
     # prefix given, target not found and explicit title: nothing is changed
     node, contnode = fake_node('py', 'mod', 'py3k:unknown', 'py3k:unknown',
                                refexplicit=True)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn is None
     assert contnode[0].astext() == 'py3k:unknown'
 
@@ -185,19 +185,19 @@ def test_missing_reference_pydomain(tempdir, app, status, warning):
     # no context data
     kwargs = {}
     node, contnode = fake_node('py', 'func', 'func', 'func()', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn is None
 
     # py:module context helps to search objects
     kwargs = {'py:module': 'module1'}
     node, contnode = fake_node('py', 'func', 'func', 'func()', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'func()'
 
     # py:attr context helps to search objects
     kwargs = {'py:module': 'module1'}
     node, contnode = fake_node('py', 'attr', 'Foo.bar', 'Foo.bar', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'Foo.bar'
 
 
@@ -222,7 +222,7 @@ module1.Foo.bar py:method 1 index.html#foo.Bar.baz -
     # py:attr context helps to search objects
     kwargs = {'py:module': 'module1'}
     node, contnode = fake_node('py', 'attr', 'Foo.bar', 'Foo.bar', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'Foo.bar'
 
 
@@ -240,29 +240,29 @@ def test_missing_reference_stddomain(tempdir, app, status, warning):
     # no context data
     kwargs = {}
     node, contnode = fake_node('std', 'option', '-l', '-l', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn is None
 
     # std:program context helps to search objects
     kwargs = {'std:program': 'ls'}
     node, contnode = fake_node('std', 'option', '-l', 'ls -l', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'ls -l'
 
     # refers inventory by name
     kwargs = {}
     node, contnode = fake_node('std', 'option', 'cmd:ls -l', '-l', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == '-l'
 
     # term reference (normal)
     node, contnode = fake_node('std', 'term', 'a term', 'a term')
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'a term'
 
     # term reference (case insensitive)
     node, contnode = fake_node('std', 'term', 'A TERM', 'A TERM')
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'A TERM'
 
 
@@ -286,7 +286,7 @@ ls.-l std:option 1 index.html#cmdoption-ls-l -
 
     kwargs = {'std:program': 'ls'}
     node, contnode = fake_node('std', 'option', '-l', 'ls -l', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'ls -l'
 
 
@@ -331,13 +331,13 @@ def test_missing_reference_jsdomain(tempdir, app, status, warning):
     # no context data
     kwargs = {}
     node, contnode = fake_node('js', 'meth', 'baz', 'baz()', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn is None
 
     # js:module and js:object context helps to search objects
     kwargs = {'js:module': 'foo', 'js:object': 'bar'}
     node, contnode = fake_node('js', 'meth', 'baz', 'baz()', **kwargs)
-    rn = missing_reference(app, app.env, node, contnode)
+    rn = _missing_reference(app, app.env, node, contnode)
     assert rn.astext() == 'baz()'
 
 
@@ -362,48 +362,48 @@ def test_missing_reference_disabled_domain(tempdir, app, status, warning):
         kwargs = {}
 
         node, contnode = fake_node('std', 'term', 'a term', 'a term', **kwargs)
-        rn = missing_reference(app, app.env, node, contnode)
+        rn = _missing_reference(app, app.env, node, contnode)
         assert_(rn, 'a term' if term else None)
 
         node, contnode = fake_node('std', 'term', 'inv:a term', 'a term', **kwargs)
-        rn = missing_reference(app, app.env, node, contnode)
+        rn = _missing_reference(app, app.env, node, contnode)
         assert_(rn, 'a term')
 
         node, contnode = fake_node('std', 'doc', 'docname', 'docname', **kwargs)
-        rn = missing_reference(app, app.env, node, contnode)
+        rn = _missing_reference(app, app.env, node, contnode)
         assert_(rn, 'docname' if doc else None)
 
         node, contnode = fake_node('std', 'doc', 'inv:docname', 'docname', **kwargs)
-        rn = missing_reference(app, app.env, node, contnode)
+        rn = _missing_reference(app, app.env, node, contnode)
         assert_(rn, 'docname')
 
         # an arbitrary ref in another domain
         node, contnode = fake_node('py', 'func', 'module1.func', 'func()', **kwargs)
-        rn = missing_reference(app, app.env, node, contnode)
+        rn = _missing_reference(app, app.env, node, contnode)
         assert_(rn, 'func()' if py else None)
 
         node, contnode = fake_node('py', 'func', 'inv:module1.func', 'func()', **kwargs)
-        rn = missing_reference(app, app.env, node, contnode)
+        rn = _missing_reference(app, app.env, node, contnode)
         assert_(rn, 'func()')
 
     # the base case, everything should resolve
     assert app.config.intersphinx_disabled_reftypes == []
-    process_disabled_reftypes(app.env)
+    _process_disabled_reftypes(app.env)
     case(term=True, doc=True, py=True)
 
     # disabled a single ref type
     app.config.intersphinx_disabled_reftypes = ['std:doc']
-    process_disabled_reftypes(app.env)
+    _process_disabled_reftypes(app.env)
     case(term=True, doc=False, py=True)
 
     # disabled a whole domain
     app.config.intersphinx_disabled_reftypes = ['std:*']
-    process_disabled_reftypes(app.env)
+    _process_disabled_reftypes(app.env)
     case(term=False, doc=False, py=True)
 
     # disabled all domains
     app.config.intersphinx_disabled_reftypes = ['*']
-    process_disabled_reftypes(app.env)
+    _process_disabled_reftypes(app.env)
     case(term=False, doc=False, py=False)
 
 
