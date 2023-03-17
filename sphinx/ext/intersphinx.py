@@ -345,8 +345,8 @@ def load_mappings(app: Sphinx) -> None:
         # and then give the data to each domain
         for domain_name, domain_entries in entries.items():
             if debug:
-                print("intersphinx debug(load_mappings): domain={}".format(domain_name))
-                print("intersphinx debug(load_mappings): entries={}".format(domain_entries))
+                print(f"intersphinx debug(load_mappings): domain={domain_name}")
+                print(f"intersphinx debug(load_mappings): entries={domain_entries}")
             domain = app.env.domains[domain_name]
             domain_store = inventories.by_domain_inventory[domain_name]
             domain.intersphinx_add_entries(domain_store, domain_entries)
@@ -370,7 +370,7 @@ def _resolve_reference_in_domain(env: BuildEnvironment,
     inv_set = domain.intersphinx_resolve_xref(
         env, domain_store, node['reftype'], node['reftarget'], disabled_refs, node, contnode)
     if debug:
-        print("intersphinx debug(_resolve_reference_in_domain): inv_set={}".format(inv_set))
+        print(f"intersphinx debug(_resolve_reference_in_domain): inv_set={inv_set}")
     if inv_set is None:
         return None
     inv_set_restricted = inv_set.select_inventory(inv_name)
@@ -635,7 +635,7 @@ def normalize_intersphinx_mapping(app: Sphinx, config: Config) -> None:
                     "The pre-Sphinx 1.0 'intersphinx_mapping' format is "
                     "deprecated and will be removed. Update to the current "
                     "format as described in the documentation. "
-                    "https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_mapping"
+                    "https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_mapping",
                 )
 
             if not isinstance(inv, tuple):

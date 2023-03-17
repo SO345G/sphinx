@@ -196,7 +196,7 @@ class InventoryItemSet:
             self._items = __items
 
     def __repr__(self) -> str:
-        return "InventoryItemSet({})".format(self._items)
+        return f"InventoryItemSet({self._items})"
 
     def append(self, inventory_name: str | None, item: InventoryItem) -> None:
         self._items.setdefault(inventory_name, []).append(item)

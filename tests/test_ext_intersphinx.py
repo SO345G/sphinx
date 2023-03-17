@@ -2,7 +2,6 @@
 
 import http.server
 import os
-import unittest
 import zlib
 from unittest import mock
 

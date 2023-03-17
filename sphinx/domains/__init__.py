@@ -437,7 +437,7 @@ class Domain:
         pass
 
     def _intersphinx_resolve_xref_lookup(self, store: dict[str, dict[str, InventoryItemSet]],
-                                         target: str, objtypes: list[str]
+                                         target: str, objtypes: list[str],
                                          ) -> InventoryItemSet | None:
         for objtype in objtypes:
             if objtype not in store:
@@ -446,11 +446,11 @@ class Domain:
                 return store[objtype][target]
         return None
 
-    def intersphinx_resolve_xref(self, env: "BuildEnvironment",
+    def intersphinx_resolve_xref(self, env: BuildEnvironment,
                                  store: Any,
                                  typ: str, target: str,
                                  disabled_object_types: list[str],
-                                 node: pending_xref, contnode: TextElement
+                                 node: pending_xref, contnode: TextElement,
                                  ) -> InventoryItemSet | None:
         """Resolve the pending_xref *node* with the given *target* via intersphinx.
 

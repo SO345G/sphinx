@@ -1428,11 +1428,11 @@ class ASTIntersphinx(ASTBaseBase):
     def _stringify(self, transform: StringifyTransform) -> str:
         return transform(self.name) + " (has data)"
 
-    def get_id(self, version: int, objectType: str, symbol: "Symbol") -> str:
+    def get_id(self, version: int, objectType: str, symbol: Symbol) -> str:
         return symbol.get_full_nested_name().get_id(version)
 
     def describe_signature(self, signode: TextElement, mode: str,
-                           env: "BuildEnvironment", symbol: "Symbol") -> None:
+                           env: BuildEnvironment, symbol: Symbol) -> None:
         raise AssertionError()  # should not happen
 
     @property
@@ -3831,7 +3831,7 @@ class CDomain(Domain):
 
     def _resolve_xref_in_tree(
         self, env: BuildEnvironment, root: Symbol, softParent: bool, typ: str,
-        target: str, node: pending_xref
+        target: str, node: pending_xref,
     ) -> tuple[Symbol, ASTNestedName] | tuple[None, None]:
         parser = DefinitionParser(target, location=node, config=env.config)
         try:
@@ -3863,7 +3863,7 @@ class CDomain(Domain):
                             typ: str, target: str, node: pending_xref,
                             contnode: Element) -> tuple[Element, str] | tuple[None, None]:
         if Symbol.debug_lookup:
-            print("C._resolve_xref_inner(type={}, target={})".format(typ, target))
+            print(f"C._resolve_xref_inner(type={typ}, target={target})")
         s, name = self._resolve_xref_in_tree(env, self.data['root_symbol'],
                                              False, typ, target, node)
         if s is None:
@@ -3931,7 +3931,7 @@ class CDomain(Domain):
                                         node: pending_xref,
                                         typ: str) -> InventoryItemSet | None:
         if Symbol.debug_lookup:
-            print("C._intersphinx_resolve_xref_inner(type={}, target={})".format(typ, target))
+            print(f"C._intersphinx_resolve_xref_inner(type={typ}, target={target})")
         s, name = self._resolve_xref_in_tree(env, store['root_symbol'],
                                              True, typ, target, node)
         if s is None:
@@ -3940,11 +3940,11 @@ class CDomain(Domain):
         decl = cast(ASTIntersphinx, s.declaration.declaration)
         return decl.data
 
-    def intersphinx_resolve_xref(self, env: "BuildEnvironment",
+    def intersphinx_resolve_xref(self, env: BuildEnvironment,
                                  store: Any,
                                  typ: str, target: str,
                                  disabled_object_types: list[str],
-                                 node: pending_xref, contnode: TextElement
+                                 node: pending_xref, contnode: TextElement,
                                  ) -> InventoryItemSet | None:
         if typ == 'any':
             with logging.suppress_logging():

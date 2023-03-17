@@ -1033,7 +1033,7 @@ class StandardDomain(Domain):
             objtypes.append('option')
 
     def _intersphinx_resolve_xref_lookup(self, store: dict[str, dict[str, InventoryItemSet]],
-                                         target: str, objtypes: list[str]
+                                         target: str, objtypes: list[str],
                                          ) -> InventoryItemSet | None:
         # Semi-haxy overwriting of the private method in Domain, as we only need to do
         # case-insensitive lookup for std:term

@@ -96,9 +96,9 @@ def test_inventory_item_set_repr():
                 "project name",
                 "project version",
                 "https://project.example/page.html#anchor",
-                "display name"
+                "display name",
             ),
-        ]
+        ],
     }
 
     # Then
