@@ -235,6 +235,7 @@ class Autosummary(SphinxDirective):
 
             tree_prefix = self.options['toctree'].strip()
             docnames = []
+            included = Matcher(self.config.include_patterns)
             excluded = Matcher(self.config.exclude_patterns)
             filename_map = self.config.autosummary_filename_map
             for _name, _sig, _summary, real_name in items:
@@ -244,6 +245,8 @@ class Autosummary(SphinxDirective):
                 if docname not in self.env.found_docs:
                     if excluded(self.env.doc2path(docname, False)):
                         msg = __('autosummary references excluded document %r. Ignored.')
+                    elif not included(self.env.doc2path(docname, False)):
+                        msg = __('autosummary references non-included document %r. Ignored.')
                     else:
                         msg = __('autosummary: stub file not found %r. '
                                  'Check your autosummary_generate setting.')

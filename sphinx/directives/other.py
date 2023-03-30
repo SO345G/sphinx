@@ -87,6 +87,7 @@ class TocTree(SphinxDirective):
         all_docnames.remove(self.env.docname)  # remove current document
 
         ret: list[Node] = []
+        included = Matcher(self.config.include_patterns)
         excluded = Matcher(self.config.exclude_patterns)
         for entry in self.content:
             if not entry:
@@ -128,6 +129,9 @@ class TocTree(SphinxDirective):
                     if excluded(self.env.doc2path(docname, False)):
                         message = __('toctree contains reference to excluded document %r')
                         subtype = 'excluded'
+                    elif not included(self.env.doc2path(docname, False)):
+                        message = __('toctree contains reference to non-included document %r')
+                        subtype = 'not_included'
                     else:
                         message = __('toctree contains reference to nonexisting document %r')
                         subtype = 'not_readable'
