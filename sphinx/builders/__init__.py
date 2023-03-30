@@ -13,6 +13,7 @@ from docutils import nodes
 from docutils.nodes import Node
 from docutils.utils import DependencyList
 
+from sphinx._cli.util.colour import bold  # type: ignore
 from sphinx.config import Config
 from sphinx.deprecation import RemovedInSphinx70Warning
 from sphinx.environment import CONFIG_CHANGED_REASON, CONFIG_OK, BuildEnvironment
@@ -22,7 +23,6 @@ from sphinx.events import EventManager
 from sphinx.locale import __
 from sphinx.util import UnicodeDecodeErrorHandler, get_filetype, import_object, logging, rst
 from sphinx.util.build_phase import BuildPhase
-from sphinx.util.console import bold  # type: ignore
 from sphinx.util.display import progress_message, status_iterator
 from sphinx.util.docutils import sphinx_domains
 from sphinx.util.i18n import CatalogInfo, CatalogRepository, docname_to_domain

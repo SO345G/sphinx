@@ -20,6 +20,13 @@ from docutils import nodes
 from requests import Response
 from requests.exceptions import ConnectionError, HTTPError, TooManyRedirects
 
+from sphinx._cli.util.colour import (  # type: ignore
+    darkgray,
+    darkgreen,
+    purple,
+    red,
+    turquoise,
+)
 from sphinx.application import Sphinx
 from sphinx.builders.dummy import DummyBuilder
 from sphinx.config import Config
@@ -27,7 +34,6 @@ from sphinx.environment import BuildEnvironment
 from sphinx.locale import __
 from sphinx.transforms.post_transforms import SphinxPostTransform
 from sphinx.util import encode_uri, logging, requests
-from sphinx.util.console import darkgray, darkgreen, purple, red, turquoise  # type: ignore
 from sphinx.util.nodes import get_node_line
 
 logger = logging.getLogger(__name__)

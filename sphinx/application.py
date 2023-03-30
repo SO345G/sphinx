@@ -22,6 +22,7 @@ from pygments.lexer import Lexer
 
 import sphinx
 from sphinx import locale, package_dir
+from sphinx._cli.util.colour import bold  # type: ignore
 from sphinx.config import Config
 from sphinx.domains import Domain, Index
 from sphinx.environment import BuildEnvironment
@@ -37,7 +38,6 @@ from sphinx.roles import XRefRole
 from sphinx.theming import Theme
 from sphinx.util import docutils, logging
 from sphinx.util.build_phase import BuildPhase
-from sphinx.util.console import bold  # type: ignore
 from sphinx.util.display import progress_message
 from sphinx.util.i18n import CatalogRepository
 from sphinx.util.logging import prefixed_warnings

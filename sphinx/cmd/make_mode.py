@@ -15,8 +15,8 @@ import sys
 from os import path
 
 import sphinx
+from sphinx._cli.util.colour import blue, bold, color_terminal, nocolor  # type: ignore
 from sphinx.cmd.build import build_main
-from sphinx.util.console import blue, bold, color_terminal, nocolor  # type: ignore
 from sphinx.util.osutil import rmtree
 
 try:

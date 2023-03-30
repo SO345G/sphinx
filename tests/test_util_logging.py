@@ -7,10 +7,10 @@ import os.path
 import pytest
 from docutils import nodes
 
+from sphinx._cli.util.colour import darkgray, darkred, red, white
 from sphinx.errors import SphinxWarning
 from sphinx.testing.util import strip_escseq
 from sphinx.util import logging, osutil
-from sphinx.util.console import colorize
 from sphinx.util.logging import is_suppressed_warning, prefixed_warnings
 from sphinx.util.parallel import ParallelTasks
 
@@ -230,7 +230,7 @@ def test_warning_location(app, status, warning):
     assert 'index.txt:10: WARNING: message2' in warning.getvalue()
 
     logger.warning('message3', location=None)
-    assert colorize('red', 'WARNING: message3') in warning.getvalue()
+    assert red('WARNING: message3') in warning.getvalue()
 
     node = nodes.Node()
     node.source, node.line = ('index.txt', 10)
@@ -247,7 +247,7 @@ def test_warning_location(app, status, warning):
 
     node.source, node.line = (None, None)
     logger.warning('message7', location=node)
-    assert colorize('red', 'WARNING: message7') in warning.getvalue()
+    assert red('WARNING: message7') in warning.getvalue()
 
 
 def test_suppress_logging(app, status, warning):
@@ -294,18 +294,18 @@ def test_colored_logs(app, status, warning):
     logger.critical('message5')
     logger.error('message6')
 
-    assert colorize('darkgray', 'message1') in status.getvalue()
+    assert darkgray('message1') in status.getvalue()
     assert 'message2\n' in status.getvalue()  # not colored
     assert 'message3\n' in status.getvalue()  # not colored
-    assert colorize('red', 'WARNING: message4') in warning.getvalue()
+    assert red('WARNING: message4') in warning.getvalue()
     assert 'CRITICAL: message5\n' in warning.getvalue()  # not colored
-    assert colorize('darkred', 'ERROR: message6') in warning.getvalue()
+    assert darkred('ERROR: message6') in warning.getvalue()
 
     # color specification
     logger.debug('message7', color='white')
     logger.info('message8', color='red')
-    assert colorize('white', 'message7') in status.getvalue()
-    assert colorize('red', 'message8') in status.getvalue()
+    assert white('message7') in status.getvalue()
+    assert red('message8') in status.getvalue()
 
 
 @pytest.mark.xfail(os.name != 'posix', reason="Not working on windows")

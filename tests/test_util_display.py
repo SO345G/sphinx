@@ -23,7 +23,7 @@ def test_display_chunk():
 
 
 @pytest.mark.sphinx('dummy')
-@patch('sphinx.util.console._tw', 40)  # terminal width = 40
+@patch('sphinx._cli.util.terminal_width._tw', 40)  # terminal width = 40
 def test_status_iterator(app, status, warning):
     logging.setup(app, status, warning)
 

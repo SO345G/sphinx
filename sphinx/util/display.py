@@ -3,9 +3,10 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, Iterable, Iterator, TypeVar
 
+from sphinx._cli.util.colour import bold, colorize  # type: ignore
+from sphinx._cli.util.terminal_width import term_width_line  # type: ignore
 from sphinx.locale import __
 from sphinx.util import logging
-from sphinx.util.console import bold, colorize, term_width_line  # type: ignore
 
 if False:
     from types import TracebackType
@@ -35,16 +36,18 @@ def status_iterator(
     if length == 0:
         logger.info(bold(summary), nonl=True)
     for i, item in enumerate(iterable, start=1):
-        item_str = colorize(color, stringify_func(item))
+        item_str = stringify_func(item)
         if length == 0:
-            logger.info(item_str, nonl=True)
+            logger.info(colorize(color, item_str), nonl=True)
             logger.info(' ', nonl=True)
         else:
-            s = f'{bold(summary)}[{int(100 * i / length): >3d}%] {item_str}'
+            template = f'{{0}}[{int(100 * i / length): >3d}%] {{1}}'
+            formatted = template.format(bold(summary), colorize(color, item_str))
             if verbosity:
-                logger.info(s + '\n', nonl=True)
+                logger.info(formatted + '\n', nonl=True)
             else:
-                logger.info(term_width_line(s), nonl=True)
+                raw = template.format(summary, item_str)
+                logger.info(term_width_line(formatted, raw), nonl=True)
         yield item
     logger.info('')
 

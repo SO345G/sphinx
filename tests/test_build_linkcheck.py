@@ -16,9 +16,9 @@ from unittest import mock
 
 import pytest
 
+from sphinx._cli.util.colour import strip_colors
 from sphinx.builders.linkcheck import HyperlinkAvailabilityCheckWorker, RateLimit
 from sphinx.testing.util import strip_escseq
-from sphinx.util.console import strip_colors
 
 from .utils import CERT_FILE, http_server, https_server
 
