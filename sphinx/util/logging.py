@@ -6,14 +6,14 @@ import logging
 import logging.handlers
 from collections import defaultdict
 from contextlib import contextmanager
-from typing import IO, TYPE_CHECKING, Any, Callable, Generator
+from typing import IO, TYPE_CHECKING, Any, Generator
 
 from docutils import nodes
 from docutils.nodes import Node
 from docutils.utils import get_source_line
 
-from sphinx._cli.util.colour import blue, darkgray, darkred, red
 from sphinx.errors import SphinxWarning
+from sphinx.util.console import colorize
 from sphinx.util.osutil import abspath
 
 if TYPE_CHECKING:
@@ -39,10 +39,10 @@ VERBOSITY_MAP: defaultdict[int, int] = defaultdict(lambda: logging.NOTSET, {
     2: logging.DEBUG,
 })
 
-COLOR_MAP: defaultdict[int, Callable[[str], str]] = defaultdict(lambda: blue, {
-    logging.ERROR: darkred,
-    logging.WARNING: red,
-    logging.DEBUG: darkgray,
+COLOR_MAP: defaultdict[int, str] = defaultdict(lambda: 'blue', {
+    logging.ERROR: 'darkred',
+    logging.WARNING: 'red',
+    logging.DEBUG: 'darkgray',
 })
 
 
@@ -528,12 +528,12 @@ def get_node_location(node: Node) -> str | None:
 class ColorizeFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         message = super().format(record)
-        color: Callable[[str], str] = getattr(record, 'color', None)
+        color = getattr(record, 'color', None)
         if color is None:
             color = COLOR_MAP.get(record.levelno)
 
         if color:
-            return color(message)
+            return colorize(color, message)
         else:
             return message
 
@@ -593,6 +593,7 @@ def setup(app: Sphinx, status: IO, warning: IO) -> None:
     messagelog_handler = logging.StreamHandler(LastMessagesWriter(app, status))
     messagelog_handler.addFilter(InfoFilter())
     messagelog_handler.setLevel(VERBOSITY_MAP[app.verbosity])
+    messagelog_handler.setFormatter(ColorizeFormatter())
 
     logger.addHandler(info_handler)
     logger.addHandler(warning_handler)

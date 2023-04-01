@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import os
 import sys
 
 
 def get_terminal_width() -> int:
     """Return the width of the terminal in columns."""
+    import os
+
     try:
         columns = int(os.environ.get('COLUMNS', 0))
     except ValueError:

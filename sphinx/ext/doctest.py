@@ -20,10 +20,10 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import Version
 
 import sphinx
-from sphinx._cli.util.colour import bold  # type: ignore
 from sphinx.builders import Builder
 from sphinx.locale import __
 from sphinx.util import logging
+from sphinx.util.console import bold  # type: ignore
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.osutil import relpath
 from sphinx.util.typing import OptionSpec

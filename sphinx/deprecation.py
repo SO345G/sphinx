@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import warnings
 
 
@@ -62,3 +63,11 @@ def _deprecation_warning(
 
     warnings.warn(message + " Check CHANGES for Sphinx API modifications.",
                   warning_class, stacklevel=3)
+
+
+# by default, all DeprecationWarning under sphinx package will be emitted.
+# Users can avoid this by using environment variable: PYTHONWARNINGS=
+if 'PYTHONWARNINGS' not in os.environ:
+    warnings.filterwarnings('default', category=RemovedInNextVersionWarning)
+warnings.filterwarnings('ignore', 'The frontend.Option class .*',
+                        DeprecationWarning, module='docutils.frontend')

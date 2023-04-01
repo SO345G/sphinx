@@ -1,25 +1,17 @@
 from __future__ import annotations
 
-import re
 import sys
-import tempfile
-from typing import TYPE_CHECKING, TextIO
 
-from sphinx.errors import SphinxParallelError
-
+TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from sphinx.application import Sphinx
+    from typing import TextIO
 
-_ansi_re: re.Pattern[str] = re.compile('\x1b.*?m')
+    from sphinx.application import Sphinx
 
 
 def terminal_safe(s: str) -> str:
     """Safely encode a string for printing to the terminal."""
     return s.encode('ascii', 'backslashreplace').decode('ascii')
-
-
-def strip_colors(s: str) -> str:
-    return _ansi_re.sub('', s).strip()
 
 
 def error_info(
@@ -65,6 +57,10 @@ Traceback
 
 def save_traceback(app: Sphinx | None, exc: BaseException) -> str:
     """Save the given exception's traceback in a temporary file."""
+    from tempfile import NamedTemporaryFile
+
+    from sphinx.errors import SphinxParallelError
+
     if isinstance(exc, SphinxParallelError):
         exc_format = '(Error in parallel process)\n' + exc.traceback
     else:
@@ -74,12 +70,17 @@ def save_traceback(app: Sphinx | None, exc: BaseException) -> str:
 
     last_msgs = exts_list = ''
     if app is not None:
+        import re
+
+        ansi_codes_re: re.Pattern[str] = re.compile('\x1b.*?m')
+
         extensions = app.extensions.values()
-        last_msgs = '\n'.join(f'* {strip_colors(s)}' for s in app.messagelog)
+        stripped_msgs = (ansi_codes_re.sub('', s).strip() for s in app.messagelog)
+        last_msgs = '\n'.join(f'* {stripped_msg}' for stripped_msg in stripped_msgs)
         exts_list = '\n'.join(f'* {ext.name} ({ext.version})' for ext in extensions
                               if ext.version != 'builtin')
 
-    with tempfile.NamedTemporaryFile(suffix='.log', prefix='sphinx-err-', delete=False) as f:
+    with NamedTemporaryFile(suffix='.log', prefix='sphinx-err-', delete=False) as f:
         f.write(error_info(last_msgs, exts_list, exc_format))
 
     return f.name

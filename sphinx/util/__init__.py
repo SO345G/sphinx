@@ -13,7 +13,6 @@ from os import path
 from typing import IO, Any, Iterable
 from urllib.parse import parse_qsl, quote_plus, urlencode, urlsplit, urlunsplit
 
-from sphinx._cli.util.colour import strip_colors  # NoQA: F401
 from sphinx.deprecation import RemovedInSphinx70Warning
 from sphinx.errors import ExtensionError, FiletypeNotFoundError
 from sphinx.locale import __
@@ -22,6 +21,7 @@ from sphinx.util import exceptions as _exceptions
 from sphinx.util import http_date as _http_date
 from sphinx.util import logging
 from sphinx.util import osutil as _osutil
+from sphinx.util.console import strip_colors  # NoQA: F401
 from sphinx.util.matching import patfilter  # noqa: F401
 from sphinx.util.nodes import (  # noqa: F401
     caption_ref_re,

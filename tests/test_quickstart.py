@@ -7,8 +7,8 @@ from os import path
 import pytest
 
 from sphinx import application
-from sphinx._cli.util.colour import coloron, nocolor
 from sphinx.cmd import quickstart as qs
+from sphinx.util.console import coloron, nocolor
 
 warnfile = StringIO()
 

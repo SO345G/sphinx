@@ -7,6 +7,7 @@ from os import path
 from typing import TYPE_CHECKING
 
 from sphinx.locale import __
+from sphinx.util.console import bold, color_terminal, colorize, nocolor, red  # type: ignore
 from sphinx.util.colour import bold, color_terminal, colorize, nocolor, red  # type: ignore
 from sphinx.util.template import SphinxRenderer
 

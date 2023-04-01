@@ -11,10 +11,10 @@ import warnings
 from io import StringIO
 from typing import Any
 
-from sphinx._cli.util.colour import color_terminal, nocolor
 from sphinx.application import Sphinx
 from sphinx.cmd.build import handle_exception
 from sphinx.deprecation import RemovedInSphinx70Warning
+from sphinx.util.console import color_terminal, nocolor
 from sphinx.util.docutils import docutils_namespace, patch_docutils
 from sphinx.util.osutil import abspath
 

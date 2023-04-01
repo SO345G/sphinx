@@ -15,11 +15,11 @@ from os import path
 from typing import IO, Any
 
 import sphinx
-from sphinx._cli.util.colour import red  # type: ignore
 from sphinx.application import Sphinx
 from sphinx.builders import Builder
 from sphinx.locale import __
 from sphinx.util import logging
+from sphinx.util.console import red  # type: ignore
 from sphinx.util.inspect import safe_getattr
 
 logger = logging.getLogger(__name__)

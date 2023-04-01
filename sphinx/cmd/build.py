@@ -17,16 +17,11 @@ from docutils.utils import SystemMessage
 
 import sphinx.locale
 from sphinx import __display_version__
-from sphinx._cli.util.colour import (  # type: ignore
-    color_terminal,
-    nocolor,
-    red,
-    terminal_safe,
-)
 from sphinx.application import Sphinx
 from sphinx.errors import SphinxError
 from sphinx.locale import __
 from sphinx.util import Tee
+from sphinx.util.console import color_terminal, nocolor, red, terminal_safe  # type: ignore
 from sphinx.util.docutils import docutils_namespace, patch_docutils
 from sphinx.util.exceptions import format_exception_cut_frames, save_traceback
 from sphinx.util.osutil import abspath, ensuredir

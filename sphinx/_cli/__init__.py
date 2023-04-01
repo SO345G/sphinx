@@ -13,8 +13,8 @@ All subcommand modules must define three attributes:
   function is responsible for running the main body of the subcommand and
   returning the exit status.
 
-The entire ``sphinx._cli`` namespace is private, only the command line interface
-has backwards-compatability guarantees.
+.. caution:: The entire ``sphinx._cli`` namespace is private. Only the command
+             line interface has backwards-compatability guarantees.
 """
 
 from __future__ import annotations
@@ -22,26 +22,22 @@ from __future__ import annotations
 import argparse
 import locale
 import sys
-from typing import TYPE_CHECKING, Callable
 
-from sphinx._cli.util.colour import color_terminal, nocolor
 from sphinx.locale import __, init_console
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from typing import Iterator, Sequence
+    from typing import Callable, Iterator, Sequence
 
-_PARSER_SETUP = Callable[[argparse.ArgumentParser], argparse.ArgumentParser]
-_RUNNER = Callable[[argparse.Namespace], int]
+    _PARSER_SETUP = Callable[[argparse.ArgumentParser], argparse.ArgumentParser]
+    _RUNNER = Callable[[argparse.Namespace], int]
 
-if sys.version_info[:2] > (3, 8):
     from typing import Protocol
 
     class _SubcommandModule(Protocol):
         parser_description: str
         set_up_parser: _PARSER_SETUP  # takes and returns argument parser
         run: _RUNNER  # takes parsed args, returns exit code
-else:
-    from typing import Any as _SubcommandModule
 
 
 # Command name -> import path
@@ -141,6 +137,8 @@ def _parse_command(argv: Sequence[str] = ()) -> tuple[str, Sequence[str]]:
         sys.stderr.write(__(f'sphinx: {command_name!r} is not a sphinx command. '
                             "See 'sphinx --help'.\n"))
         raise SystemExit(2)
+
+    from sphinx._cli.util.colour import color_terminal, nocolor
 
     if not color_terminal() or not args.colour:
         nocolor()
