@@ -22,26 +22,21 @@ from __future__ import annotations
 import argparse
 import locale
 import sys
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from sphinx._cli.util.colour import color_terminal, nocolor
 from sphinx.locale import __, init_console
 
 if TYPE_CHECKING:
-    from typing import Iterator, Sequence
+    from typing import Callable, Iterator, Protocol, Sequence
 
-_PARSER_SETUP = Callable[[argparse.ArgumentParser], argparse.ArgumentParser]
-_RUNNER = Callable[[argparse.Namespace], int]
-
-if sys.version_info[:2] > (3, 8):
-    from typing import Protocol
+    _PARSER_SETUP = Callable[[argparse.ArgumentParser], argparse.ArgumentParser]
+    _RUNNER = Callable[[argparse.Namespace], int]
 
     class _SubcommandModule(Protocol):
         parser_description: str
         set_up_parser: _PARSER_SETUP  # takes and returns argument parser
         run: _RUNNER  # takes parsed args, returns exit code
-else:
-    from typing import Any as _SubcommandModule
 
 
 # Command name -> import path

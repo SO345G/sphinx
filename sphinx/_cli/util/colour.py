@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Callable
 
 if sys.platform == 'win32':
     import colorama
 
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from typing import Callable
 
 _COLOURING_DISABLED = False
 
