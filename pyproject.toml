@@ -292,6 +292,7 @@ addopts = [
 #    "--pythonwarnings=error",
     "--strict-config",
     "--strict-markers",
+    "--random-order-bucket=module",
 ]
 empty_parameter_set_mark = "xfail"
 filterwarnings = [

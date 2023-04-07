@@ -16,7 +16,7 @@ from sphinx.testing.util import SphinxTestApp, SphinxTestAppWrapperForSkipBuildi
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from pathlib import Path
-    from typing import Any
+    from typing import Any, Callable, Generator
 
 DEFAULT_ENABLED_MARKERS = [
     # The marker signature differs from the constructor signature
@@ -75,6 +75,7 @@ def app_params(
     shared_result: SharedResult,
     sphinx_test_tempdir: str,
     rootdir: str,
+    tmp_path: Path,
 ) -> _app_params:
     """
     Parameters that are specified by 'pytest.mark.sphinx' for
@@ -105,6 +106,7 @@ def app_params(
 
     testroot = kwargs.pop('testroot', 'root')
     kwargs['srcdir'] = srcdir = sphinx_test_tempdir / kwargs.get('srcdir', testroot)
+    kwargs['srcdir'] = srcdir = util.path(tmp_path) / kwargs.get('srcdir', testroot)  # 6m45s
 
     # special support for sphinx/tests
     if rootdir and not srcdir.exists():
