@@ -11,9 +11,6 @@ concurrency:
 
 env:
   FORCE_COLOR: "1"
-  PYTHONDEVMODE: "1"  # -X dev
-  PYTHONWARNDEFAULTENCODING: "1"  # -X warn_default_encoding
-  PYTHONWARNINGS: "error,always:unclosed:ResourceWarning"
 
 jobs:
   ubuntu:
@@ -31,6 +28,9 @@ jobs:
         docutils:
         - "0.18"
         - "0.19"
+        include:
+        - python: "3"
+          docutils: "HEAD"
 
     steps:
     - uses: actions/checkout@v3
@@ -44,8 +44,6 @@ jobs:
       if: "endsWith(matrix.python, '-dev')"
       with:
         python-version: ${{ matrix.python }}
-      env:
-        PYTHONWARNINGS: ""
     - name: Check Python version
       run: python --version
     - name: Install graphviz
@@ -53,19 +51,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install .[test]
-      env:
-        PYTHONWARNINGS: ""
-    - name: Install Docutils ${{ matrix.docutils }}
-      run: python -m pip install --upgrade "docutils==${{ matrix.docutils }}.*"
-      if: "!endsWith(matrix.python, '-dev')"
-    - name: Install Docutils ${{ matrix.docutils }} (ignore warnings)
-      run: python -m pip install --upgrade "docutils==${{ matrix.docutils }}.*"
-      if: "endsWith(matrix.python, '-dev')"
-      env:
-        PYTHONWARNINGS: ""
+        python -m pip install nox
     - name: Test with pytest
-      run: python -m pytest -vv --durations 25
+      run: python -I -m nox --session tests-ci(docutils-${{ matrix.docutils }})
 
   windows:
     runs-on: windows-2019
@@ -80,35 +68,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install .[test]
-      env:
-        PYTHONWARNINGS: ""
+        python -m pip install nox
     - name: Test with pytest
-      run: python -m pytest -vv --durations 25
-
-  docutils-latest:
-    runs-on: ubuntu-latest
-    name: Docutils HEAD
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3"
-    - name: Check Python version
-      run: python --version
-    - name: Install graphviz
-      run: sudo apt-get install graphviz
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install .[test]
-      env:
-        PYTHONWARNINGS: ""
-    - name: Install Docutils' HEAD
-      run: python -m pip install git+https://repo.or.cz/docutils.git\#subdirectory=docutils
-      env:
-        PYTHONWARNINGS: ""
-    - name: Test with pytest
-      run: python -m pytest -vv
+      run: python -I -m nox --session tests-ci(docutils-default)
