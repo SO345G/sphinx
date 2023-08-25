@@ -1299,8 +1299,8 @@ class PyModule(SphinxDirective):
             indextext = f'module; {modname}'
             inode = addnodes.index(entries=[('pair', indextext, node_id, '', None)])
             # The node order is: index node first, then target node.
-            ret.append(inode)
             ret.append(target)
+            ret.append(inode)
         ret.extend(content_node.children)
         return ret
 
