@@ -1,6 +1,22 @@
 name: CI (node.js)
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - ".github/workflows/main.yml"
+      - "sphinx/themes/**.js"
+      - "tests/js"
+      - "karma.conf.js"
+      - "package.json"
+      - "package-lock.json"
+  pull_request:
+    paths:
+      - ".github/workflows/main.yml"
+      - "sphinx/themes/**.js"
+      - "tests/js"
+      - "karma.conf.js"
+      - "package.json"
+      - "package-lock.json"
 
 permissions:
   contents: read

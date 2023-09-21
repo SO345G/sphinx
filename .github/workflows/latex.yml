@@ -1,6 +1,16 @@
 name: CI (LaTeX)
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - ".github/workflows/latex.yml"
+      - "sphinx/**"
+      - "tests/**"
+  pull_request:
+    paths:
+      - ".github/workflows/latex.yml"
+      - "sphinx/**"
+      - "tests/**"
 
 permissions:
   contents: read

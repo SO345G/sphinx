@@ -1,6 +1,11 @@
 name: Coverage
 
-on: [push]
+on:
+  push:
+    paths:
+      - ".github/workflows/coverage.yml"
+      - "sphinx/**"
+      - "tests/**"
 
 permissions:
   contents: read
