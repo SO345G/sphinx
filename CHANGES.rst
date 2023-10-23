@@ -22,6 +22,11 @@ Features added
 
   .. _`<search>`: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/search
 
+* #10779 and #11448: Parallel execution of post-transformation and
+  write_doc_serialized as an experimental feature.
+  Speeds up builds featuring expensive post-transforms by a factor of at least 2.
+  Patch by Marco Heinemann.
+
 Bugs fixed
 ----------
 
