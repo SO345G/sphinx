@@ -21,6 +21,8 @@ Features added
   Patch by Bénédikt Tran.
 
   .. _`<search>`: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/search
+* #11803: autodoc: Use an overriden ``__repr__()`` function in an enum,
+  if defined. Patch by Shengyu Zhang.
 
 * #10779 and #11448: Parallel execution of post-transformation and
   write_doc_serialized as an experimental feature.
@@ -68,6 +70,8 @@ Bugs fixed
   Patch by James Addison.
 * #11874: Configure a default 30-second value for ``linkcheck_timeout``.
   Patch by James Addison.
+* #11886: Print the Jinja2 template path chain in ``TemplateNotFound`` exceptions.
+  Patch by Colin Marquardt.
 
 Testing
 -------
