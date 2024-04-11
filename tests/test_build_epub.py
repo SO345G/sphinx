@@ -1,22 +1,27 @@
 """Test the HTML builder and check output against XPath."""
 
-import os
+import shutil
 import subprocess
 
-import pytest
+from sphinx.testing.util import SphinxTestApp
 
 
-@pytest.mark.sphinx('epub')
-def test_run_epubcheck(app):
+def test_run_epubcheck(tmp_path, rootdir):
+    shutil.copytree((rootdir / 'test-root'), tmp_path)
+
+    app = SphinxTestApp(
+        'epub',
+        srcdir=tmp_path,
+    )
     app.build()
 
-    epubcheck = os.environ.get('EPUBCHECK_PATH', '/usr/share/java/epubcheck.jar')
-    if not os.path.exists(epubcheck):
-        pytest.skip("Could not find epubcheck; skipping test")
-
     try:
-        subprocess.run(['java', '-jar', epubcheck, app.outdir / 'SphinxTests.epub'],
-                       check=True)
+        subprocess.run(
+            ('java', '-jar', '/usr/share/java/epubcheck.jar', app.outdir / 'SphinxTests.epub'),
+            check=True
+        )
     except subprocess.CalledProcessError as exc:
         msg = f'epubcheck exited with return code {exc.returncode}'
         raise AssertionError(msg) from exc
+    finally:
+        app.cleanup()
