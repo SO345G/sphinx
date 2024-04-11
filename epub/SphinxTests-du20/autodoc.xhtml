@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>19. Autodoc tests</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/epub.css" />
+
+<meta name="hc" content="hcval" />
+
+<meta name="hc_co" content="wrong_hcval_co" />
+ 
+
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="autodoc-tests">
+<h1><span class="section-number">19. </span>Autodoc tests</h1>
+<p>Just testing a few autodoc possibilities…</p>
+<dl class="py class" id="module-autodoc_target">
+<dt class="sig sig-object py" id="autodoc_target.Class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">Class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Class to document.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.attr">
+<span class="sig-name descname"><span class="pre">attr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'bar'</span></em></dt>
+<dd><p>should be documented – süß</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.descr">
+<span class="sig-name descname"><span class="pre">descr</span></span></dt>
+<dd><p>Descriptor instance docstring.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.docattr">
+<span class="sig-name descname"><span class="pre">docattr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'baz'</span></em></dt>
+<dd><p>should likewise be documented – süß</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autodoc_target.Class.excludemeth">
+<span class="sig-name descname"><span class="pre">excludemeth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Method that should be excluded.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.inst_attr_comment">
+<span class="sig-name descname"><span class="pre">inst_attr_comment</span></span></dt>
+<dd><p>a documented instance attribute</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.inst_attr_inline">
+<span class="sig-name descname"><span class="pre">inst_attr_inline</span></span></dt>
+<dd><p>an inline documented instance attr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.inst_attr_string">
+<span class="sig-name descname"><span class="pre">inst_attr_string</span></span></dt>
+<dd><p>a documented instance attribute</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.mdocattr">
+<span class="sig-name descname"><span class="pre">mdocattr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_io.StringIO</span> <span class="pre">object&gt;</span></em></dt>
+<dd><p>should be documented as well - süß</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autodoc_target.Class.meth">
+<span class="sig-name descname"><span class="pre">meth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autodoc_target.Class.moore">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">happiness</span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="autodoc_target.Class.prop">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prop</span></span></dt>
+<dd><p>Property.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autodoc_target.Class.skipmeth">
+<span class="sig-name descname"><span class="pre">skipmeth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Method that should be skipped.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.Class.udocattr">
+<span class="sig-name descname"><span class="pre">udocattr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'quux'</span></em></dt>
+<dd><p>should be documented as well - süß</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="autodoc_target.function">
+<span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">foo</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return spam.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">Class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Class to document.</p>
+<p>Additional content.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">attr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'bar'</span></em></dt>
+<dd><p>should be documented – süß</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">descr</span></span></dt>
+<dd><p>Descriptor instance docstring.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">docattr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'baz'</span></em></dt>
+<dd><p>should likewise be documented – süß</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">excludemeth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Method that should be excluded.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="autodoc_target.Class.inheritedmeth">
+<span class="sig-name descname"><span class="pre">inheritedmeth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Inherited function.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">inst_attr_comment</span></span></dt>
+<dd><p>a documented instance attribute</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">inst_attr_inline</span></span></dt>
+<dd><p>an inline documented instance attr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">inst_attr_string</span></span></dt>
+<dd><p>a documented instance attribute</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">mdocattr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_io.StringIO</span> <span class="pre">object&gt;</span></em></dt>
+<dd><p>should be documented as well - süß</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">meth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">happiness</span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id11">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prop</span></span></dt>
+<dd><p>Property.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">skipmeth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Method that should be skipped.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">udocattr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'quux'</span></em></dt>
+<dd><p>should be documented as well - süß</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="autodoc_target.Outer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">Outer</span></span></dt>
+<dd><p>Foo</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="autodoc_target.Outer.Inner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Inner</span></span></dt>
+<dd><p>Foo</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="autodoc_target.Outer.Inner.meth">
+<span class="sig-name descname"><span class="pre">meth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Foo</p>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-prename descclassname"><span class="pre">Class.</span></span><span class="sig-name descname"><span class="pre">docattr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'baz'</span></em></dt>
+<dd><p>should likewise be documented – süß</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="autodoc_target.CustomEx">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">CustomEx</span></span></dt>
+<dd><p>My custom exception.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="autodoc_target.CustomEx.f">
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Exception method.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="autodoc_target.CustomDict">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">CustomDict</span></span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+<p>Docstring.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="autodoc_target.InstAttCls">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">InstAttCls</span></span></dt>
+<dd><p>Class with documented class and instance attributes.</p>
+<p>All members (5 total)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.InstAttCls.ca1">
+<span class="sig-name descname"><span class="pre">ca1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'a'</span></em></dt>
+<dd><p>Doc comment for class attribute InstAttCls.ca1.
+It can have multiple lines.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.InstAttCls.ca2">
+<span class="sig-name descname"><span class="pre">ca2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'b'</span></em></dt>
+<dd><p>Doc comment for InstAttCls.ca2. One line only.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.InstAttCls.ca3">
+<span class="sig-name descname"><span class="pre">ca3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'c'</span></em></dt>
+<dd><p>Docstring for class attribute InstAttCls.ca3.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.InstAttCls.ia1">
+<span class="sig-name descname"><span class="pre">ia1</span></span></dt>
+<dd><p>Doc comment for instance attribute InstAttCls.ia1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="autodoc_target.InstAttCls.ia2">
+<span class="sig-name descname"><span class="pre">ia2</span></span></dt>
+<dd><p>Docstring for instance attribute InstAttCls.ia2.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="id15">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">autodoc_target.</span></span><span class="sig-name descname"><span class="pre">InstAttCls</span></span></dt>
+<dd><p>Class with documented class and instance attributes.</p>
+<p>Specific members (2 total)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">ca1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'a'</span></em></dt>
+<dd><p>Doc comment for class attribute InstAttCls.ca1.
+It can have multiple lines.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">ia1</span></span></dt>
+<dd><p>Doc comment for instance attribute InstAttCls.ia1</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

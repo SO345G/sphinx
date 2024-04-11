@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>10. Testing object descriptions</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/epub.css" />
+
+<meta name="hc" content="hcval" />
+
+<meta name="hc_co" content="wrong_hcval_co" />
+ 
+
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="testing-object-descriptions">
+<h1><span class="section-number">10. </span>Testing object descriptions</h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="func_without_module">
+<span class="sig-name descname"><span class="pre">func_without_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*c</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span></dt>
+<dd><p>Does something.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="func_without_body">
+<span class="sig-name descname"><span class="pre">func_without_body</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="func_with_unknown_field">
+<span class="sig-name descname"><span class="pre">func_with_unknown_field</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>: :</p>
+<p>: empty field name:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Field_name<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">Field_name all lower<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">FIELD_NAME<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">FIELD_NAME ALL CAPS<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">Field_Name<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">Field_Name All Word Caps<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">Field_name<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">Field_name First word cap<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">FIELd_name<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">FIELd_name PARTial caps<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">func_noindex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="foolib.func_with_module">
+<span class="sig-prename descclassname"><span class="pre">foolib.</span></span><span class="sig-name descname"><span class="pre">func_with_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>Referring to <code class="xref py py-func docutils literal notranslate"><span class="pre">func</span> <span class="pre">with</span> <span class="pre">no</span> <span class="pre">index</span></code>.
+Referring to <code class="xref py py-func docutils literal notranslate"><span class="pre">nothing</span></code>.</p>
+<dl class="py function" id="module-mod">
+<dt class="sig sig-object py" id="mod.func_in_module">
+<span class="sig-prename descclassname"><span class="pre">mod.</span></span><span class="sig-name descname"><span class="pre">func_in_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mod.Cls">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mod.</span></span><span class="sig-name descname"><span class="pre">Cls</span></span></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mod.Cls.meth1">
+<span class="sig-name descname"><span class="pre">meth1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mod.Cls.meths">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mod.Cls.attr">
+<span class="sig-name descname"><span class="pre">attr</span></span></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mod.Cls.meth2">
+<span class="sig-prename descclassname"><span class="pre">Cls.</span></span><span class="sig-name descname"><span class="pre">meth2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="errmod.Error">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">errmod.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="mod.var">
+<span class="sig-prename descclassname"><span class="pre">mod.</span></span><span class="sig-name descname"><span class="pre">var</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="func_without_module2">
+<span class="sig-name descname"><span class="pre">func_without_module2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">annotation</span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="object">
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">long(parameter,</span>&#160;&#160; <span class="pre">list)</span></span></dt>
+<dt class="sig sig-object">
+<span class="sig-name descname"><span class="pre">another</span> <span class="pre">one</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="TimeInt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeInt</span></span></dt>
+<dd><p>Has only one parameter (triggers special behavior…)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>moo</strong> (Moo) – Moo</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Time">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hour</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isdst</span></span></em><span class="sig-paren">)</span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year</strong> (<a class="reference internal" href="#TimeInt" title="TimeInt"><em>TimeInt</em></a>) – The year.</p></li>
+<li><p><strong>minute</strong> (<a class="reference internal" href="#TimeInt" title="TimeInt"><em>TimeInt</em></a>) – The minute.</p></li>
+<li><p><strong>isdst</strong> – whether it’s DST</p></li>
+<li><p><strong>hour</strong> (<em>DuplicateType</em>) – Some parameter</p></li>
+<li><p><strong>hour</strong> – Duplicate param.  Should not lead to crashes.</p></li>
+<li><p><strong>extcls</strong> (<em>.Cls</em>) – A class from another module.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a new <a class="reference internal" href="#Time" title="Time"><code class="xref py py-class docutils literal notranslate"><span class="pre">Time</span></code></a> instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#Time" title="Time">Time</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#errmod.Error" title="errmod.Error"><strong>Error</strong></a> – if the values are out of range</p>
+</dd>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hour</strong> (<em>int</em>) – like <em>hour</em></p></li>
+<li><p><strong>minute</strong> (<em>int</em>) – like <em>minute</em></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="MyClass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MyClass</span></span></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="MyClass.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">sphinx.config.Config</span></em></dt>
+<dd><p>A configuration object.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="c-items">
+<h1><span class="section-number">11. </span>C items</h1>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Sphinx_DoSomething">
+<span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Sphinx_DoSomething</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c member">
+<dt class="sig sig-object c" id="c.SphinxStruct.member">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">SphinxStruct</span></span><span class="p"><span class="pre">.</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">member</span></span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c macro">
+<dt class="sig sig-object c" id="c.SPHINX_USE_PYTHON">
+<span class="sig-name descname"><span class="n"><span class="pre">SPHINX_USE_PYTHON</span></span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c type">
+<dt class="sig sig-object c" id="c.SphinxType">
+<span class="k"><span class="pre">type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SphinxType</span></span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c var">
+<dt class="sig sig-object c" id="c.sphinx_global">
+<span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sphinx_global</span></span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.Py_SphinxFoo">
+<span class="n"><span class="pre">PyObject</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Py_SphinxFoo</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</section>
+<section id="javascript-items">
+<h1><span class="section-number">12. </span>Javascript items</h1>
+<dl class="js function">
+<dt class="sig sig-object js" id="foo">
+<span class="sig-name descname"><span class="n"><span class="pre">foo</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="js data">
+<dt class="sig sig-object js" id="bar">
+<span class="sig-name descname"><span class="n"><span class="pre">bar</span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="js function">
+<dt class="sig sig-object js" id="bar.baz">
+<span class="sig-prename descclassname"><span class="n"><span class="pre">bar</span></span><span class="p"><span class="pre">.</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">baz</span></span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">href</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">errback</span></span></em><span class="optional">]</span><span class="sig-paren">)</span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>href</strong> (<span><code class="xref js js-func docutils literal notranslate"><span class="pre">string()</span></code></span>) – The location of the resource.</p></li>
+<li><p><strong>callback</strong> – Gets called with the data returned by the resource.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Throws<span class="colon">:</span></dt>
+<dd class="field-even"><p><span><code class="xref js js-func docutils literal notranslate"><span class="pre">InvalidHref()</span></code></span> – If the <cite>href</cite> is invalid.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>undefined</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="js attribute">
+<dt class="sig sig-object js" id="bar.spam">
+<span class="sig-prename descclassname"><span class="n"><span class="pre">bar</span></span><span class="p"><span class="pre">.</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">spam</span></span></span></dt>
+<dd></dd></dl>
+
+</section>
+<section id="references">
+<h1><span class="section-number">13. </span>References</h1>
+<p>Referencing <a class="reference internal" href="#mod.Cls" title="mod.Cls"><code class="xref py py-class docutils literal notranslate"><span class="pre">mod.Cls</span></code></a> or <a class="reference internal" href="#mod.Cls" title="mod.Cls"><code class="xref py py-class docutils literal notranslate"><span class="pre">mod.Cls</span></code></a> should be the same.</p>
+<p>With target: <a class="reference internal" href="#c.Sphinx_DoSomething" title="Sphinx_DoSomething"><code class="xref c c-func docutils literal notranslate"><span class="pre">Sphinx_DoSomething()</span></code></a> (parentheses are handled),
+<a class="reference internal" href="#c.SphinxStruct.member" title="SphinxStruct.member"><code class="xref c c-member docutils literal notranslate"><span class="pre">SphinxStruct.member</span></code></a>, <a class="reference internal" href="#c.SPHINX_USE_PYTHON" title="SPHINX_USE_PYTHON"><code class="xref c c-macro docutils literal notranslate"><span class="pre">SPHINX_USE_PYTHON</span></code></a>,
+<code class="xref c c-type docutils literal notranslate"><span class="pre">SphinxType</span> <span class="pre">*</span></code> (pointer is handled), <a class="reference internal" href="#c.sphinx_global" title="sphinx_global"><code class="xref c c-data docutils literal notranslate"><span class="pre">sphinx_global</span></code></a>.</p>
+<p>Without target: <code class="xref c c-func docutils literal notranslate"><span class="pre">CFunction()</span></code>. <code class="xref c c-func docutils literal notranslate"><span class="pre">malloc()</span></code>.</p>
+<p><a class="reference internal" href="#foo" title="foo"><code class="xref js js-func docutils literal notranslate"><span class="pre">foo()</span></code></a>
+<a class="reference internal" href="#foo" title="foo"><code class="xref js js-func docutils literal notranslate"><span class="pre">foo()</span></code></a></p>
+<p><a class="reference internal" href="#bar" title="bar"><code class="xref js js-data docutils literal notranslate"><span class="pre">bar</span></code></a>
+<a class="reference internal" href="#bar.baz" title="bar.baz"><code class="xref js js-func docutils literal notranslate"><span class="pre">bar.baz()</span></code></a>
+<a class="reference internal" href="#bar.baz" title="bar.baz"><code class="xref js js-func docutils literal notranslate"><span class="pre">bar.baz()</span></code></a>
+<a class="reference internal" href="#bar.baz" title="bar.baz"><code class="xref js js-func docutils literal notranslate"><span class="pre">baz()</span></code></a></p>
+<p><a class="reference internal" href="#bar.baz" title="bar.baz"><code class="xref js js-attr docutils literal notranslate"><span class="pre">bar.baz</span></code></a></p>
+</section>
+<section id="others">
+<h1><span class="section-number">14. </span>Others</h1>
+<dl class="std envvar">
+<dt class="sig sig-object std" id="envvar-HOME">
+<span class="sig-name descname"><span class="pre">HOME</span></span></dt>
+<dd></dd></dl>
+
+<dl class="std cmdoption">
+<dt class="sig sig-object std" id="cmdoption-python-c">
+<span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"> <span class="pre">command</span></span></dt>
+<dd></dd></dl>
+
+<dl class="std cmdoption">
+<dt class="sig sig-object std" id="cmdoption-perl-c">
+<span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-perl-arg-p">
+<span class="sig-name descname"><span class="pre">+p</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-perl-ObjC">
+<span class="sig-name descname"><span class="pre">--ObjC++</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-perl-plugin.option">
+<span class="sig-name descname"><span class="pre">--plugin.option</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-perl-arg-create-auth-token">
+<span class="sig-name descname"><span class="pre">create-auth-token</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-perl-arg-arg">
+<span class="sig-name descname"><span class="pre">arg</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-perl-j">
+<span class="sig-name descname"><span class="pre">-j</span></span><span class="sig-prename descclassname"><span class="pre">[=N]</span></span></dt>
+<dd></dd></dl>
+
+<p>Link to <a class="reference internal" href="#cmdoption-perl-arg-p"><code class="xref std std-option docutils literal notranslate"><span class="pre">perl</span> <span class="pre">+p</span></code></a>, <a class="reference internal" href="#cmdoption-perl-ObjC"><code class="xref std std-option docutils literal notranslate"><span class="pre">--ObjC++</span></code></a>, <a class="reference internal" href="#cmdoption-perl-plugin.option"><code class="xref std std-option docutils literal notranslate"><span class="pre">--plugin.option</span></code></a>, <a class="reference internal" href="#cmdoption-perl-arg-create-auth-token"><code class="xref std std-option docutils literal notranslate"><span class="pre">create-auth-token</span></code></a>, <a class="reference internal" href="#cmdoption-perl-arg-arg"><code class="xref std std-option docutils literal notranslate"><span class="pre">arg</span></code></a> and <a class="reference internal" href="#cmdoption-perl-j"><code class="xref std std-option docutils literal notranslate"><span class="pre">-j</span></code></a></p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-hg-arg-commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-git-commit-p">
+<span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"></span></dt>
+<dd></dd></dl>
+
+<p>Link to <a class="reference internal" href="#cmdoption-hg-arg-commit"><code class="xref std std-option docutils literal notranslate"><span class="pre">hg</span> <span class="pre">commit</span></code></a> and <a class="reference internal" href="#cmdoption-git-commit-p"><code class="xref std std-option docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">-p</span></code></a>.</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-git-commit-abi">
+<span class="sig-name descname"><span class="pre">--abi</span></span><span class="sig-prename descclassname"><span class="pre">={TYPE}</span></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-git-commit-test">
+<span class="sig-name descname"><span class="pre">--test</span></span><span class="sig-prename descclassname"><span class="pre">={WHERE}-{COUNT}</span></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-git-commit-wrap">
+<span class="sig-name descname"><span class="pre">--wrap</span></span><span class="sig-prename descclassname"><span class="pre">=\{\{value\}\}</span></span></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-git-commit-allowable_client">
+<span class="sig-name descname"><span class="pre">-allowable_client</span></span><span class="sig-prename descclassname"> <span class="pre">{client_name}</span></span></dt>
+<dd></dd></dl>
+
+<p>Foo bar.</p>
+<p>Test repeated option directive.</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-git-commit-mapi">
+<span class="sig-name descname"><span class="pre">-mapi</span></span><span class="sig-prename descclassname"></span></dt>
+<dd><p>My API.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-git-commit-0">
+<span class="sig-name descname"><span class="pre">-mapi</span></span><span class="sig-prename descclassname"><span class="pre">=secret</span></span></dt>
+<dd><p>My secret API.</p>
+</dd></dl>
+
+<p>Reference the first option <a class="reference internal" href="#cmdoption-git-commit-mapi"><code class="xref std std-option docutils literal notranslate"><span class="pre">-mapi=secret</span></code></a>, <a class="reference internal" href="#cmdoption-git-commit-mapi"><code class="xref std std-option docutils literal notranslate"><span class="pre">-mapi[=xxx]</span></code></a>
+or <a class="reference internal" href="#cmdoption-git-commit-mapi"><code class="xref std std-option docutils literal notranslate"><span class="pre">-mapi</span> <span class="pre">with_space</span></code></a>.</p>
+</section>
+<section id="user-markup">
+<h1><span class="section-number">15. </span>User markup</h1>
+<dl class="std userdesc">
+<dt class="sig sig-object std" id="userdesc-myobj">
+<span class="sig-name descname"><span class="pre">myobj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">parameter</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Description of userdesc.</p>
+</dd></dl>
+
+<p>Referencing <a class="reference internal" href="#userdesc-myobj"><code class="xref std std-userdescrole docutils literal notranslate"><span class="pre">myobj</span></code></a>.</p>
+</section>
+<section id="cpp-domain">
+<h1><span class="section-number">16. </span>CPP domain</h1>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4N1n5ArrayE">
+<span id="_CPPv3N1n5ArrayE"></span><span id="_CPPv2N1n5ArrayE"></span><span id="n--Array"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-prename descclassname"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">Array</span></span></span><br /></dt>
+<dd><dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N1n5ArrayixEj">
+<span id="_CPPv3N1n5ArrayixEj"></span><span id="_CPPv2N1n5ArrayixEj"></span><span id="n--Array--subscript-operator__unsigned"></span><span class="n"><span class="pre">T</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">[]</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">j</span></span><span class="sig-paren">)</span><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv4NK1n5ArrayixEj">
+<span id="_CPPv3NK1n5ArrayixEj"></span><span id="_CPPv2NK1n5ArrayixEj"></span><span id="n--Array--subscript-operator__unsignedC"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">T</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">[]</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">j</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I00EIQ1AI2T12T2EE1fvv">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T1</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T2</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="k"><span class="pre">requires</span></span><span class="w"> </span><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EIQ1AI2T12T2EE1fvv" title="f::T1"><span class="n"><span class="pre">T1</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EIQ1AI2T12T2EE1fvv" title="f::T2"><span class="n"><span class="pre">T2</span></span></a><span class="p"><span class="pre">&gt;</span></span><br /><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">f</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<ul class="simple">
+<li><p><span class="cpp-expr sig sig-inline cpp"><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span></span></p></li>
+</ul>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

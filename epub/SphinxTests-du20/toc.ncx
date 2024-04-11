@@ -1,0 +1,860 @@
+<?xml version="1.0"?>
+<ncx version="2005-1" xmlns="http://www.daisy.org/z3986/2005/ncx/">
+  <head>
+    <meta name="dtb:uid" content="unknown"/>
+    <meta name="dtb:depth" content="3"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle>
+    <text>Sphinx &lt;Tests&gt;</text>
+  </docTitle>
+  <navMap>    
+    <navPoint id="navPoint1" playOrder="1">
+      <navLabel>
+        <text>Welcome to Sphinx Tests’s documentation!</text>
+      </navLabel>
+      <content src="index.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint2" playOrder="2">
+      <navLabel>
+        <text>Extension API tests</text>
+      </navLabel>
+      <content src="extapi.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint3" playOrder="3">
+      <navLabel>
+        <text>Sphinx image handling</text>
+      </navLabel>
+      <content src="images.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint4" playOrder="4">
+      <navLabel>
+        <text>Image including source in subdir</text>
+      </navLabel>
+      <content src="subdir/images.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint5" playOrder="5">
+      <navLabel>
+        <text>Including in subdir</text>
+      </navLabel>
+      <content src="subdir/includes.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint6" playOrder="6">
+      <navLabel>
+        <text>Testing downloadable files</text>
+      </navLabel>
+      <content src="includes.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint7" playOrder="7">
+      <navLabel>
+        <text>Test file and literal inclusion</text>
+      </navLabel>
+      <content src="includes.xhtml#test-file-and-literal-inclusion" />  
+    </navPoint>
+    <navPoint id="navPoint8" playOrder="8">
+      <navLabel>
+        <text>Literalinclude options</text>
+      </navLabel>
+      <content src="includes.xhtml#literalinclude-options" />  
+    </navPoint>
+    <navPoint id="navPoint9" playOrder="9">
+      <navLabel>
+        <text>Docutils include with “literal”</text>
+      </navLabel>
+      <content src="includes.xhtml#docutils-include-with-literal" />  
+    </navPoint>
+    <navPoint id="navPoint10" playOrder="10">
+      <navLabel>
+        <text>Testing various markup</text>
+      </navLabel>
+      <content src="markup.xhtml" />  
+      <navPoint id="navPoint11" playOrder="10">
+        <navLabel>
+          <text>Testing various markup</text>
+        </navLabel>
+        <content src="markup.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint12" playOrder="11">
+        <navLabel>
+          <text>Meta markup</text>
+        </navLabel>
+        <content src="markup.xhtml#meta-markup" />  
+      </navPoint>
+      <navPoint id="navPoint13" playOrder="12">
+        <navLabel>
+          <text>Generic reST</text>
+        </navLabel>
+        <content src="markup.xhtml#generic-rest" />  
+      </navPoint>
+      <navPoint id="navPoint14" playOrder="13">
+        <navLabel>
+          <text>Inline markup</text>
+        </navLabel>
+        <content src="markup.xhtml#inline-markup" />  
+      </navPoint>
+      <navPoint id="navPoint15" playOrder="14">
+        <navLabel>
+          <text>With</text>
+        </navLabel>
+        <content src="markup.xhtml#with" />  
+      </navPoint>
+      <navPoint id="navPoint16" playOrder="15">
+        <navLabel>
+          <text>Tables</text>
+        </navLabel>
+        <content src="markup.xhtml#tables" />  
+      </navPoint>
+      <navPoint id="navPoint17" playOrder="16">
+        <navLabel>
+          <text>Figures</text>
+        </navLabel>
+        <content src="markup.xhtml#figures" />  
+      </navPoint>
+      <navPoint id="navPoint18" playOrder="17">
+        <navLabel>
+          <text>Version markup</text>
+        </navLabel>
+        <content src="markup.xhtml#version-markup" />  
+      </navPoint>
+      <navPoint id="navPoint19" playOrder="18">
+        <navLabel>
+          <text>Code blocks</text>
+        </navLabel>
+        <content src="markup.xhtml#code-blocks" />  
+      </navPoint>
+      <navPoint id="navPoint20" playOrder="19">
+        <navLabel>
+          <text>Misc stuff</text>
+        </navLabel>
+        <content src="markup.xhtml#misc-stuff" />  
+      </navPoint>
+      <navPoint id="navPoint21" playOrder="20">
+        <navLabel>
+          <text>Index markup</text>
+        </navLabel>
+        <content src="markup.xhtml#index-markup" />  
+      </navPoint>
+      <navPoint id="navPoint22" playOrder="21">
+        <navLabel>
+          <text>Ö… Some strange characters</text>
+        </navLabel>
+        <content src="markup.xhtml#o-some-strange-characters" />  
+      </navPoint>
+      <navPoint id="navPoint23" playOrder="22">
+        <navLabel>
+          <text>Only directive</text>
+        </navLabel>
+        <content src="markup.xhtml#only-directive" />  
+      </navPoint>
+      <navPoint id="navPoint24" playOrder="23">
+        <navLabel>
+          <text>Any role</text>
+        </navLabel>
+        <content src="markup.xhtml#any-role" />  
+      </navPoint>
+      <navPoint id="navPoint25" playOrder="24">
+        <navLabel>
+          <text>Smart quotes</text>
+        </navLabel>
+        <content src="markup.xhtml#smart-quotes" />  
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint26" playOrder="25">
+      <navLabel>
+        <text>Testing object descriptions</text>
+      </navLabel>
+      <content src="objects.xhtml" />  
+      <navPoint id="navPoint27" playOrder="25">
+        <navLabel>
+          <text>Testing object descriptions</text>
+        </navLabel>
+        <content src="objects.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint28" playOrder="26">
+        <navLabel>
+          <text>func_without_module()</text>
+        </navLabel>
+        <content src="objects.xhtml#func_without_module" />  
+      </navPoint>
+      <navPoint id="navPoint29" playOrder="27">
+        <navLabel>
+          <text>func_without_body()</text>
+        </navLabel>
+        <content src="objects.xhtml#func_without_body" />  
+      </navPoint>
+      <navPoint id="navPoint30" playOrder="28">
+        <navLabel>
+          <text>func_with_unknown_field()</text>
+        </navLabel>
+        <content src="objects.xhtml#func_with_unknown_field" />  
+      </navPoint>
+      <navPoint id="navPoint31" playOrder="29">
+        <navLabel>
+          <text>func_with_module()</text>
+        </navLabel>
+        <content src="objects.xhtml#foolib.func_with_module" />  
+      </navPoint>
+      <navPoint id="navPoint32" playOrder="30">
+        <navLabel>
+          <text>func_in_module()</text>
+        </navLabel>
+        <content src="objects.xhtml#mod.func_in_module" />  
+      </navPoint>
+      <navPoint id="navPoint33" playOrder="31">
+        <navLabel>
+          <text>Cls</text>
+        </navLabel>
+        <content src="objects.xhtml#mod.Cls" />  
+        <navPoint id="navPoint34" playOrder="31">
+          <navLabel>
+            <text>Cls</text>
+          </navLabel>
+          <content src="objects.xhtml#mod.Cls" />  
+        </navPoint>
+        <navPoint id="navPoint35" playOrder="32">
+          <navLabel>
+            <text>Cls.meth1()</text>
+          </navLabel>
+          <content src="objects.xhtml#mod.Cls.meth1" />  
+        </navPoint>
+        <navPoint id="navPoint36" playOrder="33">
+          <navLabel>
+            <text>Cls.meths()</text>
+          </navLabel>
+          <content src="objects.xhtml#mod.Cls.meths" />  
+        </navPoint>
+        <navPoint id="navPoint37" playOrder="34">
+          <navLabel>
+            <text>Cls.attr</text>
+          </navLabel>
+          <content src="objects.xhtml#mod.Cls.attr" />  
+        </navPoint>
+        <navPoint id="navPoint38" playOrder="35">
+          <navLabel>
+            <text>Cls.meth2()</text>
+          </navLabel>
+          <content src="objects.xhtml#mod.Cls.meth2" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint39" playOrder="36">
+        <navLabel>
+          <text>Error</text>
+        </navLabel>
+        <content src="objects.xhtml#errmod.Error" />  
+      </navPoint>
+      <navPoint id="navPoint40" playOrder="37">
+        <navLabel>
+          <text>var</text>
+        </navLabel>
+        <content src="objects.xhtml#mod.var" />  
+      </navPoint>
+      <navPoint id="navPoint41" playOrder="38">
+        <navLabel>
+          <text>func_without_module2()</text>
+        </navLabel>
+        <content src="objects.xhtml#func_without_module2" />  
+      </navPoint>
+      <navPoint id="navPoint42" playOrder="39">
+        <navLabel>
+          <text>TimeInt</text>
+        </navLabel>
+        <content src="objects.xhtml#TimeInt" />  
+      </navPoint>
+      <navPoint id="navPoint43" playOrder="40">
+        <navLabel>
+          <text>Time</text>
+        </navLabel>
+        <content src="objects.xhtml#Time" />  
+      </navPoint>
+      <navPoint id="navPoint44" playOrder="41">
+        <navLabel>
+          <text>MyClass</text>
+        </navLabel>
+        <content src="objects.xhtml#MyClass" />  
+        <navPoint id="navPoint45" playOrder="41">
+          <navLabel>
+            <text>MyClass</text>
+          </navLabel>
+          <content src="objects.xhtml#MyClass" />  
+        </navPoint>
+        <navPoint id="navPoint46" playOrder="42">
+          <navLabel>
+            <text>MyClass.config</text>
+          </navLabel>
+          <content src="objects.xhtml#MyClass.config" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint47" playOrder="43">
+      <navLabel>
+        <text>C items</text>
+      </navLabel>
+      <content src="objects.xhtml#c-items" />  
+    </navPoint>
+    <navPoint id="navPoint48" playOrder="44">
+      <navLabel>
+        <text>Javascript items</text>
+      </navLabel>
+      <content src="objects.xhtml#javascript-items" />  
+      <navPoint id="navPoint49" playOrder="44">
+        <navLabel>
+          <text>Javascript items</text>
+        </navLabel>
+        <content src="objects.xhtml#javascript-items" />  
+      </navPoint>
+      <navPoint id="navPoint50" playOrder="45">
+        <navLabel>
+          <text>foo()</text>
+        </navLabel>
+        <content src="objects.xhtml#foo" />  
+      </navPoint>
+      <navPoint id="navPoint51" playOrder="46">
+        <navLabel>
+          <text>bar</text>
+        </navLabel>
+        <content src="objects.xhtml#bar" />  
+        <navPoint id="navPoint52" playOrder="46">
+          <navLabel>
+            <text>bar</text>
+          </navLabel>
+          <content src="objects.xhtml#bar" />  
+        </navPoint>
+        <navPoint id="navPoint53" playOrder="47">
+          <navLabel>
+            <text>bar.baz()</text>
+          </navLabel>
+          <content src="objects.xhtml#bar.baz" />  
+        </navPoint>
+        <navPoint id="navPoint54" playOrder="48">
+          <navLabel>
+            <text>bar.spam</text>
+          </navLabel>
+          <content src="objects.xhtml#bar.spam" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint55" playOrder="49">
+      <navLabel>
+        <text>References</text>
+      </navLabel>
+      <content src="objects.xhtml#references" />  
+    </navPoint>
+    <navPoint id="navPoint56" playOrder="50">
+      <navLabel>
+        <text>Others</text>
+      </navLabel>
+      <content src="objects.xhtml#others" />  
+    </navPoint>
+    <navPoint id="navPoint57" playOrder="51">
+      <navLabel>
+        <text>User markup</text>
+      </navLabel>
+      <content src="objects.xhtml#user-markup" />  
+    </navPoint>
+    <navPoint id="navPoint58" playOrder="52">
+      <navLabel>
+        <text>CPP domain</text>
+      </navLabel>
+      <content src="objects.xhtml#cpp-domain" />  
+      <navPoint id="navPoint59" playOrder="52">
+        <navLabel>
+          <text>CPP domain</text>
+        </navLabel>
+        <content src="objects.xhtml#cpp-domain" />  
+      </navPoint>
+      <navPoint id="navPoint60" playOrder="53">
+        <navLabel>
+          <text>Array</text>
+        </navLabel>
+        <content src="objects.xhtml#_CPPv4N1n5ArrayE" />  
+        <navPoint id="navPoint61" playOrder="53">
+          <navLabel>
+            <text>Array</text>
+          </navLabel>
+          <content src="objects.xhtml#_CPPv4N1n5ArrayE" />  
+        </navPoint>
+        <navPoint id="navPoint62" playOrder="54">
+          <navLabel>
+            <text>Array::operator[]()</text>
+          </navLabel>
+          <content src="objects.xhtml#_CPPv4N1n5ArrayixEj" />  
+        </navPoint>
+        <navPoint id="navPoint63" playOrder="55">
+          <navLabel>
+            <text>Array::operator[]()</text>
+          </navLabel>
+          <content src="objects.xhtml#_CPPv4NK1n5ArrayixEj" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint64" playOrder="56">
+        <navLabel>
+          <text>f()</text>
+        </navLabel>
+        <content src="objects.xhtml#_CPPv4I00EIQ1AI2T12T2EE1fvv" />  
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint65" playOrder="57">
+      <navLabel>
+        <text>File with UTF-8 BOM</text>
+      </navLabel>
+      <content src="bom.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint66" playOrder="58">
+      <navLabel>
+        <text>Test math extensions E = m c^2</text>
+      </navLabel>
+      <content src="math.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint67" playOrder="59">
+      <navLabel>
+        <text>Autodoc tests</text>
+      </navLabel>
+      <content src="autodoc.xhtml" />  
+      <navPoint id="navPoint68" playOrder="59">
+        <navLabel>
+          <text>Autodoc tests</text>
+        </navLabel>
+        <content src="autodoc.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint69" playOrder="60">
+        <navLabel>
+          <text>Class</text>
+        </navLabel>
+        <content src="autodoc.xhtml#autodoc_target.Class" />  
+        <navPoint id="navPoint70" playOrder="60">
+          <navLabel>
+            <text>Class</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class" />  
+        </navPoint>
+        <navPoint id="navPoint71" playOrder="61">
+          <navLabel>
+            <text>Class.attr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.attr" />  
+        </navPoint>
+        <navPoint id="navPoint72" playOrder="62">
+          <navLabel>
+            <text>Class.descr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.descr" />  
+        </navPoint>
+        <navPoint id="navPoint73" playOrder="63">
+          <navLabel>
+            <text>Class.docattr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.docattr" />  
+        </navPoint>
+        <navPoint id="navPoint74" playOrder="64">
+          <navLabel>
+            <text>Class.excludemeth()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.excludemeth" />  
+        </navPoint>
+        <navPoint id="navPoint75" playOrder="65">
+          <navLabel>
+            <text>Class.inst_attr_comment</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.inst_attr_comment" />  
+        </navPoint>
+        <navPoint id="navPoint76" playOrder="66">
+          <navLabel>
+            <text>Class.inst_attr_inline</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.inst_attr_inline" />  
+        </navPoint>
+        <navPoint id="navPoint77" playOrder="67">
+          <navLabel>
+            <text>Class.inst_attr_string</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.inst_attr_string" />  
+        </navPoint>
+        <navPoint id="navPoint78" playOrder="68">
+          <navLabel>
+            <text>Class.mdocattr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.mdocattr" />  
+        </navPoint>
+        <navPoint id="navPoint79" playOrder="69">
+          <navLabel>
+            <text>Class.meth()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.meth" />  
+        </navPoint>
+        <navPoint id="navPoint80" playOrder="70">
+          <navLabel>
+            <text>Class.moore()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.moore" />  
+        </navPoint>
+        <navPoint id="navPoint81" playOrder="71">
+          <navLabel>
+            <text>Class.prop</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.prop" />  
+        </navPoint>
+        <navPoint id="navPoint82" playOrder="72">
+          <navLabel>
+            <text>Class.skipmeth()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.skipmeth" />  
+        </navPoint>
+        <navPoint id="navPoint83" playOrder="73">
+          <navLabel>
+            <text>Class.udocattr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.udocattr" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint84" playOrder="74">
+        <navLabel>
+          <text>function()</text>
+        </navLabel>
+        <content src="autodoc.xhtml#autodoc_target.function" />  
+      </navPoint>
+      <navPoint id="navPoint85" playOrder="75">
+        <navLabel>
+          <text>Class</text>
+        </navLabel>
+        <content src="autodoc.xhtml#id0" />  
+        <navPoint id="navPoint86" playOrder="75">
+          <navLabel>
+            <text>Class</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id0" />  
+        </navPoint>
+        <navPoint id="navPoint87" playOrder="76">
+          <navLabel>
+            <text>Class.attr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id1" />  
+        </navPoint>
+        <navPoint id="navPoint88" playOrder="77">
+          <navLabel>
+            <text>Class.descr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id2" />  
+        </navPoint>
+        <navPoint id="navPoint89" playOrder="78">
+          <navLabel>
+            <text>Class.docattr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id3" />  
+        </navPoint>
+        <navPoint id="navPoint90" playOrder="79">
+          <navLabel>
+            <text>Class.excludemeth()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id4" />  
+        </navPoint>
+        <navPoint id="navPoint91" playOrder="80">
+          <navLabel>
+            <text>Class.inheritedmeth()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Class.inheritedmeth" />  
+        </navPoint>
+        <navPoint id="navPoint92" playOrder="81">
+          <navLabel>
+            <text>Class.inst_attr_comment</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id5" />  
+        </navPoint>
+        <navPoint id="navPoint93" playOrder="82">
+          <navLabel>
+            <text>Class.inst_attr_inline</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id6" />  
+        </navPoint>
+        <navPoint id="navPoint94" playOrder="83">
+          <navLabel>
+            <text>Class.inst_attr_string</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id7" />  
+        </navPoint>
+        <navPoint id="navPoint95" playOrder="84">
+          <navLabel>
+            <text>Class.mdocattr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id8" />  
+        </navPoint>
+        <navPoint id="navPoint96" playOrder="85">
+          <navLabel>
+            <text>Class.meth()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id9" />  
+        </navPoint>
+        <navPoint id="navPoint97" playOrder="86">
+          <navLabel>
+            <text>Class.moore()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id10" />  
+        </navPoint>
+        <navPoint id="navPoint98" playOrder="87">
+          <navLabel>
+            <text>Class.prop</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id11" />  
+        </navPoint>
+        <navPoint id="navPoint99" playOrder="88">
+          <navLabel>
+            <text>Class.skipmeth()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id12" />  
+        </navPoint>
+        <navPoint id="navPoint100" playOrder="89">
+          <navLabel>
+            <text>Class.udocattr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id13" />  
+        </navPoint>
+        <navPoint id="navPoint101" playOrder="90">
+          <navLabel>
+            <text>Class.docattr</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id14" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint102" playOrder="91">
+        <navLabel>
+          <text>Outer</text>
+        </navLabel>
+        <content src="autodoc.xhtml#autodoc_target.Outer" />  
+        <navPoint id="navPoint103" playOrder="91">
+          <navLabel>
+            <text>Outer</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Outer" />  
+        </navPoint>
+        <navPoint id="navPoint104" playOrder="92">
+          <navLabel>
+            <text>Outer.Inner</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.Outer.Inner" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint105" playOrder="93">
+        <navLabel>
+          <text>CustomEx</text>
+        </navLabel>
+        <content src="autodoc.xhtml#autodoc_target.CustomEx" />  
+        <navPoint id="navPoint106" playOrder="93">
+          <navLabel>
+            <text>CustomEx</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.CustomEx" />  
+        </navPoint>
+        <navPoint id="navPoint107" playOrder="94">
+          <navLabel>
+            <text>CustomEx.f()</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.CustomEx.f" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint108" playOrder="95">
+        <navLabel>
+          <text>CustomDict</text>
+        </navLabel>
+        <content src="autodoc.xhtml#autodoc_target.CustomDict" />  
+      </navPoint>
+      <navPoint id="navPoint109" playOrder="96">
+        <navLabel>
+          <text>InstAttCls</text>
+        </navLabel>
+        <content src="autodoc.xhtml#autodoc_target.InstAttCls" />  
+        <navPoint id="navPoint110" playOrder="96">
+          <navLabel>
+            <text>InstAttCls</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.InstAttCls" />  
+        </navPoint>
+        <navPoint id="navPoint111" playOrder="97">
+          <navLabel>
+            <text>InstAttCls.ca1</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.InstAttCls.ca1" />  
+        </navPoint>
+        <navPoint id="navPoint112" playOrder="98">
+          <navLabel>
+            <text>InstAttCls.ca2</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.InstAttCls.ca2" />  
+        </navPoint>
+        <navPoint id="navPoint113" playOrder="99">
+          <navLabel>
+            <text>InstAttCls.ca3</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.InstAttCls.ca3" />  
+        </navPoint>
+        <navPoint id="navPoint114" playOrder="100">
+          <navLabel>
+            <text>InstAttCls.ia1</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.InstAttCls.ia1" />  
+        </navPoint>
+        <navPoint id="navPoint115" playOrder="101">
+          <navLabel>
+            <text>InstAttCls.ia2</text>
+          </navLabel>
+          <content src="autodoc.xhtml#autodoc_target.InstAttCls.ia2" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint116" playOrder="102">
+        <navLabel>
+          <text>InstAttCls</text>
+        </navLabel>
+        <content src="autodoc.xhtml#id15" />  
+        <navPoint id="navPoint117" playOrder="102">
+          <navLabel>
+            <text>InstAttCls</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id15" />  
+        </navPoint>
+        <navPoint id="navPoint118" playOrder="103">
+          <navLabel>
+            <text>InstAttCls.ca1</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id16" />  
+        </navPoint>
+        <navPoint id="navPoint119" playOrder="104">
+          <navLabel>
+            <text>InstAttCls.ia1</text>
+          </navLabel>
+          <content src="autodoc.xhtml#id17" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint120" playOrder="105">
+      <navLabel>
+        <text>Test for diverse extensions</text>
+      </navLabel>
+      <content src="extensions.xhtml" />  
+      <navPoint id="navPoint121" playOrder="105">
+        <navLabel>
+          <text>Test for diverse extensions</text>
+        </navLabel>
+        <content src="extensions.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint122" playOrder="106">
+        <navLabel>
+          <text>extlinks</text>
+        </navLabel>
+        <content src="extensions.xhtml#extlinks" />  
+      </navPoint>
+      <navPoint id="navPoint123" playOrder="107">
+        <navLabel>
+          <text>todo</text>
+        </navLabel>
+        <content src="extensions.xhtml#todo" />  
+        <navPoint id="navPoint124" playOrder="107">
+          <navLabel>
+            <text>todo</text>
+          </navLabel>
+          <content src="extensions.xhtml#todo" />  
+        </navPoint>
+        <navPoint id="navPoint125" playOrder="108">
+          <navLabel>
+            <text>list of all todos</text>
+          </navLabel>
+          <content src="extensions.xhtml#list-of-all-todos" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint126" playOrder="109">
+      <navLabel>
+        <text>Testing footnote and citation</text>
+      </navLabel>
+      <content src="footnote.xhtml" />  
+      <navPoint id="navPoint127" playOrder="109">
+        <navLabel>
+          <text>Testing footnote and citation</text>
+        </navLabel>
+        <content src="footnote.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint128" playOrder="110">
+        <navLabel>
+          <text>numbered footnote</text>
+        </navLabel>
+        <content src="footnote.xhtml#numbered-footnote" />  
+      </navPoint>
+      <navPoint id="navPoint129" playOrder="111">
+        <navLabel>
+          <text>auto-numbered footnote</text>
+        </navLabel>
+        <content src="footnote.xhtml#auto-numbered-footnote" />  
+      </navPoint>
+      <navPoint id="navPoint130" playOrder="112">
+        <navLabel>
+          <text>named footnote</text>
+        </navLabel>
+        <content src="footnote.xhtml#named-footnote" />  
+      </navPoint>
+      <navPoint id="navPoint131" playOrder="113">
+        <navLabel>
+          <text>citation</text>
+        </navLabel>
+        <content src="footnote.xhtml#citation" />  
+      </navPoint>
+      <navPoint id="navPoint132" playOrder="114">
+        <navLabel>
+          <text>footnotes in table</text>
+        </navLabel>
+        <content src="footnote.xhtml#footnotes-in-table" />  
+      </navPoint>
+      <navPoint id="navPoint133" playOrder="115">
+        <navLabel>
+          <text>footenotes</text>
+        </navLabel>
+        <content src="footnote.xhtml#footenotes" />  
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint134" playOrder="116">
+      <navLabel>
+        <text>Various kinds of lists</text>
+      </navLabel>
+      <content src="lists.xhtml" />  
+      <navPoint id="navPoint135" playOrder="116">
+        <navLabel>
+          <text>Various kinds of lists</text>
+        </navLabel>
+        <content src="lists.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint136" playOrder="117">
+        <navLabel>
+          <text>nested enumerated lists</text>
+        </navLabel>
+        <content src="lists.xhtml#nested-enumerated-lists" />  
+      </navPoint>
+      <navPoint id="navPoint137" playOrder="118">
+        <navLabel>
+          <text>enumerated lists with non-default start values</text>
+        </navLabel>
+        <content src="lists.xhtml#enumerated-lists-with-non-default-start-values" />  
+      </navPoint>
+      <navPoint id="navPoint138" playOrder="119">
+        <navLabel>
+          <text>enumerated lists using letters</text>
+        </navLabel>
+        <content src="lists.xhtml#enumerated-lists-using-letters" />  
+      </navPoint>
+      <navPoint id="navPoint139" playOrder="120">
+        <navLabel>
+          <text>definition lists</text>
+        </navLabel>
+        <content src="lists.xhtml#definition-lists" />  
+      </navPoint>
+      <navPoint id="navPoint140" playOrder="121">
+        <navLabel>
+          <text>Samp tests</text>
+        </navLabel>
+        <content src="lists.xhtml#samp-tests" />  
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint141" playOrder="122">
+      <navLabel>
+        <text>Generated section</text>
+      </navLabel>
+      <content src="otherext.xhtml" />  
+    </navPoint>
+  </navMap>
+</ncx>
