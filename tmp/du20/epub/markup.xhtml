@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="Me" name="author" />
+<meta content="docs, sphinx" name="keywords" />
+
+    <title>set by title directive</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="testing-various-markup">
+<span id="id1"></span><h1><a class="toc-backref" href="#id10" role="doc-backlink">Testing various markup</a></h1>
+<section id="meta-markup">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Meta markup</a></h2>
+<nav class="contents" id="toc">
+<p class="topic-title">TOC</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#testing-various-markup" id="id10">Testing various markup</a></p>
+<ul>
+<li><p><a class="reference internal" href="#meta-markup" id="id11">Meta markup</a></p></li>
+<li><p><a class="reference internal" href="#generic-rest" id="id12">Generic reST</a></p>
+<ul>
+<li><p><a class="reference internal" href="#body-directives" id="id13">Body directives</a></p></li>
+<li><p><a class="reference internal" href="#admonitions" id="id14">Admonitions</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#inline-markup" id="id15">Inline markup</a></p></li>
+<li><p><a class="reference internal" href="#with" id="id16">With</a></p></li>
+<li><p><a class="reference internal" href="#tables" id="id17">Tables</a></p></li>
+<li><p><a class="reference internal" href="#figures" id="id18">Figures</a></p></li>
+<li><p><a class="reference internal" href="#version-markup" id="id19">Version markup</a></p></li>
+<li><p><a class="reference internal" href="#code-blocks" id="id20">Code blocks</a></p></li>
+<li><p><a class="reference internal" href="#misc-stuff" id="id21">Misc stuff</a></p></li>
+<li><p><a class="reference internal" href="#index-markup" id="id22">Index markup</a></p></li>
+<li><p><a class="reference internal" href="#o-some-strange-characters" id="id23">Ö… Some strange characters</a></p></li>
+<li><p><a class="reference internal" href="#only-directive" id="id24">Only directive</a></p></li>
+<li><p><a class="reference internal" href="#smart-quotes" id="id25">Smart quotes</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+</section>
+<section id="generic-rest">
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Generic reST</a></h2>
+<p>A global substitution!</p>
+<div class="highlight-none notranslate" id="label"><div class="highlight"><pre><span></span>some code
+</pre></div>
+</div>
+<p>Option list:</p>
+<dl class="option-list">
+<dt><kbd><span class="option">-h</span></kbd></dt>
+<dd><p>help</p>
+</dd>
+<dt><kbd><span class="option">--help</span></kbd></dt>
+<dd><p>also help</p>
+</dd>
+</dl>
+<p>Line block:</p>
+<div class="line-block">
+<div class="line">line1</div>
+<div class="line-block">
+<div class="line">line2</div>
+<div class="line-block">
+<div class="line">line3</div>
+<div class="line-block">
+<div class="line">line4</div>
+</div>
+</div>
+<div class="line">line5</div>
+</div>
+<div class="line">line6</div>
+<div class="line-block">
+<div class="line">line7</div>
+</div>
+</div>
+<section id="body-directives">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">Body directives</a></h3>
+<aside class="topic">
+<p class="topic-title">Title</p>
+<p>Topic body.</p>
+</aside>
+<aside class="sidebar">
+<p class="sidebar-title">Sidebar</p>
+<p class="sidebar-subtitle">Sidebar subtitle</p>
+<p>Sidebar body.</p>
+</aside>
+<p class="rubric">Test rubric</p>
+<blockquote class="epigraph">
+<div><p>Epigraph title</p>
+<p>Epigraph body.</p>
+<p class="attribution">—Author</p>
+</div></blockquote>
+<blockquote class="highlights">
+<div><p>Highlights</p>
+<p>Highlights body.</p>
+</div></blockquote>
+<blockquote class="pull-quote">
+<div><p>Pull-quote</p>
+<p>Pull quote body.</p>
+</div></blockquote>
+<div class="compound">
+<p>a</p>
+<p>b</p>
+</div>
+<pre class="literal-block">with some <em>markup</em> inside</pre>
+</section>
+<section id="admonitions">
+<span id="admonition-section"></span><h3><a class="toc-backref" href="#id14" role="doc-backlink">Admonitions</a></h3>
+<div class="admonition-my-admonition admonition">
+<p class="admonition-title">My Admonition</p>
+<p>Admonition text.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note text.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Warning text.</p>
+</div>
+<div class="admonition tip" id="some-label">
+<p class="admonition-title">Tip</p>
+<p>Tip text.</p>
+</div>
+<p>Indirect hyperlink targets</p>
+</section>
+</section>
+<section id="inline-markup">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">Inline markup</a></h2>
+<p><em>Generic inline markup</em></p>
+<p>Adding n to test unescaping.</p>
+<ul class="simple">
+<li><p><strong class="command">command\n</strong></p></li>
+<li><p><em class="dfn">dfn\n</em></p></li>
+<li><p><span class="guilabel">guilabel with <span class="accelerator">a</span>ccelerator and \n</span></p></li>
+<li><p><kbd class="kbd docutils literal notranslate">kbd\n</kbd></p></li>
+<li><p><em class="mailheader">mailheader\n</em></p></li>
+<li><p><strong class="makevar">makevar\n</strong></p></li>
+<li><p><em class="manpage">manpage\n</em></p></li>
+<li><p><em class="mimetype">mimetype\n</em></p></li>
+<li><p><em class="newsgroup">newsgroup\n</em></p></li>
+<li><p><strong class="program">program\n</strong></p></li>
+<li><p><code class="regexp docutils literal notranslate"><span class="pre">regexp\n</span></code></p></li>
+<li><p><span class="menuselection">File ‣ Close\n</span></p></li>
+<li><p><span class="menuselection"><span class="accelerator">F</span>ile ‣ <span class="accelerator">P</span>rint</span></p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">a/</span><em><span class="pre">varpart</span></em><span class="pre">/b\n</span></code></p></li>
+<li><p><code class="samp docutils literal notranslate"><span class="pre">print</span> <em><span class="pre">i</span></em><span class="pre">\n</span></code></p></li>
+</ul>
+<p><em>Linking inline markup</em></p>
+<ul class="simple">
+<li><p><span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0008/"><strong>PEP 8</strong></a><span class="link-target"> [https://peps.python.org/pep-0008/]</span></p></li>
+<li><p><span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0008/"><strong>Python Enhancement Proposal #8</strong></a><span class="link-target"> [https://peps.python.org/pep-0008/]</span></p></li>
+<li><p><span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1.html"><strong>RFC 1</strong></a><span class="link-target"> [https://datatracker.ietf.org/doc/html/rfc1.html]</span></p></li>
+<li><p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1.html"><strong>Request for Comments #1</strong></a><span class="link-target"> [https://datatracker.ietf.org/doc/html/rfc1.html]</span></p></li>
+<li><p><span class="target" id="index-4"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">HOME</span></code></p></li>
+<li><p><a class="reference internal" href="#with"><code class="xref std std-keyword docutils literal notranslate"><span class="pre">with</span></code></a></p></li>
+<li><p><a class="reference internal" href="#grammar-token-try_stmt"><code class="xref std std-token docutils literal notranslate"><span class="pre">try</span> <span class="pre">statement</span></code></a></p></li>
+<li><p><a class="reference internal" href="#admonition-section"><span class="std std-ref">Admonitions</span></a></p></li>
+<li><p><a class="reference internal" href="#some-label"><span class="std std-ref">here</span></a></p></li>
+<li><p><a class="reference internal" href="#some-label"><span class="std std-ref">there</span></a></p></li>
+<li><p><a class="reference internal" href="#my-figure"><span class="std std-ref">My caption of the figure</span></a></p></li>
+<li><p><a class="reference internal" href="#my-figure-name"><span class="std std-ref">My caption of the figure</span></a></p></li>
+<li><p><a class="reference internal" href="#my-table"><span class="std std-ref">my table</span></a></p></li>
+<li><p><a class="reference internal" href="#my-table-name"><span class="std std-ref">my table</span></a></p></li>
+<li><p><a class="reference internal" href="#my-code-block"><span class="std std-ref">my ruby code</span></a></p></li>
+<li><p><a class="reference internal" href="#my-code-block-name"><span class="std std-ref">my ruby code</span></a></p></li>
+<li><p><a class="reference internal" href="#id1"><span class="std std-ref">Testing various markup</span></a></p></li>
+<li><p><a class="reference internal" href="#my-figure"><span class="std std-numref">Fig. 2</span></a></p></li>
+<li><p><a class="reference internal" href="#my-figure-name"><span class="std std-numref">Fig. 2</span></a></p></li>
+<li><p><a class="reference internal" href="#my-table"><span class="std std-numref">Table 1</span></a></p></li>
+<li><p><a class="reference internal" href="#my-table-name"><span class="std std-numref">Table 1</span></a></p></li>
+<li><p><a class="reference internal" href="#my-code-block"><span class="std std-numref">Listing 1</span></a></p></li>
+<li><p><a class="reference internal" href="#my-code-block-name"><span class="std std-numref">Listing 1</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:download:</span></code> is tested in includes.txt</p></li>
+</ul>
+<p>Test <abbr title="abbreviation">abbr</abbr> and another <abbr title="abbreviation">abbr</abbr>.</p>
+<p>Testing the <span class="target" id="index-5"></span>index role, also available with
+<span class="target" id="index-6"></span>explicit title.</p>
+</section>
+<section id="with">
+<span id="id2"></span><h2><a class="toc-backref" href="#id16" role="doc-backlink">With</a></h2>
+<p>(Empty section.)</p>
+</section>
+<section id="tables">
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">Tables</a></h2>
+<span id="my-table"></span><table class="docutils align-default" id="my-table-name">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">my table</span></caption>
+<tbody>
+<tr class="row-odd"><td><p>1</p></td>
+<td><ul class="simple">
+<li><p>Block elems</p></li>
+<li><p>In table</p></li>
+</ul>
+</td>
+<td><p>x</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>Empty cells:</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-number">Table 2 </span><span class="caption-text">empty cell in table header</span></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>4</p></td>
+</tr>
+</tbody>
+</table>
+<p>Tables with multirow and multicol:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id6">
+<img alt="_images/img.png" src="_images/img.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">figure in table</span></p>
+</figcaption>
+</figure>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="figures">
+<h2><a class="toc-backref" href="#id18" role="doc-backlink">Figures</a></h2>
+<figure class="align-default" id="my-figure-name">
+<span id="my-figure"></span><img alt="_images/img.png" src="_images/img.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">My caption of the figure</span></p>
+<div class="legend">
+<p>My description paragraph of the figure.</p>
+<p>Description paragraph is wrapped with legend node.</p>
+</div>
+</figcaption>
+</figure>
+<figure class="align-right" id="id7">
+<img alt="_images/rimg.png" src="_images/rimg.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">figure with align option</span></p>
+</figcaption>
+</figure>
+<figure class="align-right" id="id8" style="width: 50%">
+<img alt="_images/rimg.png" src="_images/rimg.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">figure with align &amp; figwidth option</span></p>
+</figcaption>
+</figure>
+<figure class="align-right" id="id9">
+<img alt="_images/rimg.png" src="_images/rimg.png" style="width: 3cm;" />
+<figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">figure with align &amp; width option</span></p>
+</figcaption>
+</figure>
+</section>
+<section id="version-markup">
+<h2><a class="toc-backref" href="#id19" role="doc-backlink">Version markup</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.6: </span>Some funny <strong>stuff</strong>.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 0.6: </span>Even more funny stuff.</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.6: </span>Boring stuff.</p>
+</div>
+<div class="versionremoved">
+<p><span class="versionmodified removed">Removed in version 0.6: </span>Goodbye boring stuff.</p>
+</div>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.2: </span>First paragraph of versionadded.</p>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.2: </span>First paragraph of versionchanged.</p>
+<p>Second paragraph of versionchanged.</p>
+</div>
+</section>
+<section id="code-blocks">
+<h2><a class="toc-backref" href="#id20" role="doc-backlink">Code blocks</a></h2>
+<div class="literal-block-wrapper docutils container" id="my-code-block-name">
+<span id="my-code-block"></span><div class="code-block-caption"><span class="caption-number">Listing 1 </span><span class="caption-text">my ruby code</span></div>
+<div class="highlight-ruby notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">def</span><span class="w"> </span><span class="nf">ruby?</span>
+<span class="linenos">2</span><span class="w">    </span><span class="kp">false</span>
+<span class="linenos">3</span><span class="k">end</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="misc-stuff">
+<h2><a class="toc-backref" href="#id21" role="doc-backlink">Misc stuff</a></h2>
+<p>Stuff <a class="footnote-reference brackets" href="#id4" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>something, something else, something more</p>
+<dl class="simple">
+<dt><a class="reference external" href="https://www.google.com">Google</a><span class="link-target"> [https://www.google.com]</span></dt><dd><p>For everything.</p>
+</dd>
+</dl>
+</div>
+<table class="hlist"><tr><td><ul class="simple">
+<li><p>This</p></li>
+<li><p>is</p></li>
+</ul>
+</td><td><ul class="simple">
+<li><p>a horizontal</p></li>
+<li><p>list</p></li>
+</ul>
+</td><td><ul class="simple">
+<li><p>with several</p></li>
+</ul>
+</td><td><ul class="simple">
+<li><p>items</p></li>
+</ul>
+</td></tr></table>
+<p class="rubric">Side note</p>
+<p>This is a side note.</p>
+<p>This tests <code class="xref py py-class docutils literal notranslate"><span class="pre">role</span> <span class="pre">names</span> <span class="pre">in</span> <span class="pre">uppercase</span></code>.</p>
+<p class="centered">
+<strong>LICENSE AGREEMENT</strong></p><ul class="simple">
+<li><p>Terry Pratchett</p></li>
+<li><ol class="upperalpha simple" start="10">
+<li><ol class="upperalpha simple" start="18">
+<li><ol class="upperalpha simple" start="18">
+<li><p>Tolkien</p></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>Monty Python</p></li>
+</ul>
+<dl class="simple glossary">
+<dt id="term-ahnlich">ähnlich</dt><dd><p>Dinge</p>
+</dd>
+<dt id="term-boson">boson</dt><dd><p>Particle with integer spin.</p>
+</dd>
+<dt id="term-fermion"><em>fermion</em></dt><dd><p>Particle with half-integer spin.</p>
+</dd>
+<dt id="term-tauon">tauon</dt><dt id="term-myon">myon</dt><dt id="term-electron">electron</dt><dd><p>Examples for fermions.</p>
+</dd>
+<dt id="term-uber">über</dt><dd><p>Gewisse</p>
+</dd>
+</dl>
+<pre>
+<strong id="grammar-token-try_stmt">try_stmt </strong> ::=  <a class="reference internal" href="#grammar-token-try1_stmt"><code class="xref docutils literal notranslate"><span class="pre">try1_stmt</span></code></a> | <a class="reference internal" href="#grammar-token-try2_stmt"><code class="xref docutils literal notranslate"><span class="pre">try2_stmt</span></code></a>
+<strong id="grammar-token-try1_stmt">try1_stmt</strong> ::=  &quot;try&quot; &quot;:&quot; <code class="xref docutils literal notranslate"><span class="pre">suite</span></code>
+               (&quot;except&quot; [<code class="xref docutils literal notranslate"><span class="pre">expression</span></code> [&quot;,&quot; <code class="xref docutils literal notranslate"><span class="pre">target</span></code>]] &quot;:&quot; <code class="xref docutils literal notranslate"><span class="pre">suite</span></code>)+
+               [&quot;else&quot; &quot;:&quot; <code class="xref docutils literal notranslate"><span class="pre">suite</span></code>]
+               [&quot;finally&quot; &quot;:&quot; <code class="xref docutils literal notranslate"><span class="pre">suite</span></code>]
+<strong id="grammar-token-try2_stmt">try2_stmt</strong> ::=  &quot;try&quot; &quot;:&quot; <code class="xref docutils literal notranslate"><span class="pre">suite</span></code>
+               &quot;finally&quot; &quot;:&quot; <code class="xref docutils literal notranslate"><span class="pre">suite</span></code>
+</pre>
+</section>
+<section id="index-markup">
+<h2><a class="toc-backref" href="#id22" role="doc-backlink">Index markup</a></h2>
+<p id="index-8"><span id="index-7"></span><span class="target" id="index-9"></span>Main</p>
+</section>
+<section id="o-some-strange-characters">
+<span id="olabel"></span><h2><a class="toc-backref" href="#id23" role="doc-backlink">Ö… Some strange characters</a></h2>
+<p>Testing öäü…</p>
+</section>
+<section id="only-directive">
+<h2><a class="toc-backref" href="#id24" role="doc-backlink">Only directive</a></h2>
+<p>In HTML.</p>
+<p>In both.</p>
+</section>
+<section id="smart-quotes">
+<h2><a class="toc-backref" href="#id25" role="doc-backlink">Smart quotes</a></h2>
+<ul class="simple">
+<li><p>Smart “quotes” in English ‘text’.</p></li>
+<li><p>Smart — long and – short dashes.</p></li>
+<li><p>Ellipsis…</p></li>
+<li><p>No smartypants in literal blocks: <code class="docutils literal notranslate"><span class="pre">foo--&quot;bar&quot;...</span></code>.</p></li>
+</ul>
+<p lang="ru">Этот «абзац» должен использовать „русские“ кавычки.</p>
+<p lang="fr">Il dit : « C’est “super” ! »</p>
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p>Like footnotes.</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
