@@ -22,9 +22,12 @@ jobs:
     name: LaTeX
 
     steps:
-    - name: Install apt packages
-      run: sudo apt-get install epubcheck
-
+    - name: Install epubcheck
+      run: |
+        mkdir /tmp/epubcheck && cd /tmp/epubcheck
+        wget -q https://github.com/w3c/epubcheck/releases/download/v5.1.0/epubcheck-5.1.0.zip
+        unzip -q epubcheck-5.1.0.zip
+        cp -a epubcheck-5.1.0 /usr/share/java/
     - uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v5
