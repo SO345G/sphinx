@@ -1,15 +1,15 @@
 """Test the HTML builder and check output against XPath."""
 import shutil
 import subprocess
+from pathlib import Path
 
 from sphinx.testing.util import SphinxTestApp
 
+TEST_ROOTS = Path(__file__).resolve().parent / 'roots' / 'test-root'
 
-def test_run_epubcheck(tmp_path, rootdir):
-    shutil.copytree(
-        rootdir / 'test-root',
-        tmp_path / 'root',
-    )
+
+def test_run_epubcheck(tmp_path):
+    shutil.copytree(TEST_ROOTS, tmp_path / 'root')
     app_ = SphinxTestApp(
         'epub',
         srcdir=tmp_path / 'root',
