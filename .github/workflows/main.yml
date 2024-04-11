@@ -20,10 +20,11 @@ jobs:
   latex:
     runs-on: ubuntu-latest
     name: LaTeX
-    container:
-      image: ghcr.io/sphinx-doc/sphinx-ci
 
     steps:
+    - name: Install apt packages
+      run: sudo apt-get install epubcheck graphviz openjdk-11-jre-headless
+
     - uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v5
