@@ -7,8 +7,7 @@ from sphinx.testing.util import SphinxTestApp
 
 
 def test_run_epubcheck(tmp_path, rootdir):
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    shutil.copytree((rootdir / 'test-root'), tmp_path)
+    shutil.copytree((rootdir / 'test-root'), tmp_path, dirs_exist_ok=True)
 
     app = SphinxTestApp(
         'epub',
