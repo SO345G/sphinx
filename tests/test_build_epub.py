@@ -18,7 +18,7 @@ def test_run_epubcheck(tmp_path):
 
     try:
         subprocess.run(
-            ('java', '-jar', '/usr/share/java/epubcheck.jar', app_.outdir / 'SphinxTests.epub'),
+            ('java', '-jar', '/usr/share/java/epubcheck-5.1.0/epubcheck.jar', app_.outdir / 'SphinxTests.epub'),
             check=True
         )
     except subprocess.CalledProcessError as exc:
