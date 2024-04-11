@@ -2,15 +2,7 @@ name: CI
 
 on:
   push:
-    paths:
-      - ".github/workflows/main.yml"
-      - "sphinx/**"
-      - "tests/**"
   pull_request:
-    paths:
-      - ".github/workflows/main.yml"
-      - "sphinx/**"
-      - "tests/**"
 
 permissions:
   contents: read
