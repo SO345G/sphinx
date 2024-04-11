@@ -36,7 +36,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install .[test]
     - name: Test with pytest
-      run: python -m pytest -vv --durations 25
+      run: python -m pytest -vv
       env:
         PYTHONWARNINGS: "error"  # treat all warnings as errors
         DO_EPUBCHECK: "1"
