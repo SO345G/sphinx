@@ -14,7 +14,7 @@ def test_run_epubcheck(tmp_path):
         'epub',
         srcdir=tmp_path / 'root',
     )
-    app_.build()
+    app_.build(force_all=True)
 
     try:
         subprocess.run(
