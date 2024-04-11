@@ -46,6 +46,7 @@ jobs:
     - name: Run epubcheck
       run: java -jar /usr/share/java/epubcheck-5.1.0/epubcheck.jar ./tmp/root/_build/epub/SphinxTests.epub
     - uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: epub
         path: ./tmp/root/_build/epub/SphinxTests.epub
