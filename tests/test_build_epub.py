@@ -3,21 +3,12 @@ import shutil
 import subprocess
 
 
-def test_run_epubcheck(make_app, rootdir, sphinx_test_tempdir):
-    kwargs = {}
-
-    # ##### prepare Application params
-
-    testroot = kwargs.pop('testroot', 'root')
-    kwargs['srcdir'] = srcdir = sphinx_test_tempdir / kwargs.get('srcdir', testroot)
-
-    # special support for sphinx/tests
-    if rootdir and not srcdir.exists():
-        testroot_path = rootdir / ('test-' + testroot)
-        shutil.copytree(testroot_path, srcdir)
+def test_run_epubcheck(make_app, rootdir, tmp_path):
+    srcdir = tmp_path / 'root'
+    shutil.copytree(rootdir / 'test-root', srcdir)
     app_ = make_app(
         'epub',
-        **kwargs,
+        srcdir=srcdir,
     )
     app_.build()
 
