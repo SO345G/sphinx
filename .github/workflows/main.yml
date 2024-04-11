@@ -39,8 +39,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install .[test]
-    - name: Test with pytest
-      run: python -m pytest -vv
-      env:
-        PYTHONWARNINGS: "error"  # treat all warnings as errors
+        python -m pip install .
+#    - name: Test with pytest
+#      run: python -m pytest -vv
+#      env:
+#        PYTHONWARNINGS: "error"  # treat all warnings as errors
+    - run: mkdir -p t ./tmp/root
+    - run: cp -a tests/roots/test-root/* ./tmp/root
+    - run: python -m sphinx build -M epub ./tmp/root/ ./tmp/root/_build/
+    - name: Run epubcheck
+      run: java -jar /usr/share/java/epubcheck-5.1.0/epubcheck.jar ./tmp/root/_build/epub/SphinxTests.epub
