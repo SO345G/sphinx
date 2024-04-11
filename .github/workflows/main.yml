@@ -22,6 +22,8 @@ jobs:
     name: LaTeX
 
     steps:
+    - run: echo $JAVA_HOME_11_X64
+    - run: java -version
     - name: Install apt packages
       run: sudo apt-get install epubcheck graphviz openjdk-11-jre-headless
 
