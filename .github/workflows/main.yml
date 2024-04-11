@@ -27,7 +27,8 @@ jobs:
         mkdir /tmp/epubcheck && cd /tmp/epubcheck
         wget -q https://github.com/w3c/epubcheck/releases/download/v5.1.0/epubcheck-5.1.0.zip
         unzip -q epubcheck-5.1.0.zip
-        cp -a epubcheck-5.1.0 /usr/share/java/
+        cp -a epubcheck-5.1.0/epubcheck.jar /usr/share/java/epubcheck.jar
+
     - uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v5
