@@ -193,7 +193,7 @@ def _typing_internal_name(obj: Any) -> str | None:
 
 
 def restify(cls: Any, mode: _RestifyMode = 'fully-qualified-except-typing') -> str:
-    """Convert python class to a reST reference.
+    """Convert a python type-like object to a reST reference.
 
     :param mode: Specify a method how annotations will be stringified.
 
@@ -226,6 +226,10 @@ def restify(cls: Any, mode: _RestifyMode = 'fully-qualified-except-typing') -> s
     # If the mode is 'fully-qualified-except-typing',
     # we use '~' only for the objects in the ``typing`` module.
     module_prefix = '~' if mode == 'smart' or cls_module_is_typing else ''
+
+    # NOTE: if more cases must be added, carefully check that they are placed
+    #       correctly, i.e., check that the cases are from the most precise to
+    #       the least precise case.
 
     try:
         if ismockmodule(cls):
@@ -260,6 +264,9 @@ def restify(cls: Any, mode: _RestifyMode = 'fully-qualified-except-typing') -> s
             # *cls* is defined in ``typing``, and thus ``__args__`` must exist
             return ' | '.join(restify(a, mode) for a in cls.__args__)
         elif inspect.isgenericalias(cls):
+            # A generic alias always has an __origin__, but it is difficult to
+            # use a type guard on inspect.isgenericalias() (ideally, we would
+            # like to use ``TypeIs`` introduced in Python 3.13+).
             cls_name = _typing_internal_name(cls)
 
             if isinstance(cls.__origin__, typing._SpecialForm):
@@ -306,7 +313,7 @@ def restify(cls: Any, mode: _RestifyMode = 'fully-qualified-except-typing') -> s
         elif isinstance(cls, ForwardRef):
             return f':py:class:`{cls.__forward_arg__}`'
         else:
-            # not a class (ex. TypeVar)
+            # not a class (ex. TypeVar) but should have a __name__
             return f':py:obj:`{module_prefix}{cls.__module__}.{cls.__name__}`'
     except (AttributeError, TypeError):
         return inspect.object_description(cls)
@@ -384,12 +391,14 @@ def stringify_annotation(
             # newtypes have correct module info since Python 3.10+
             return module_prefix + f'{annotation_module}.{annotation_name}'
         return annotation_name
+    # mock annotations
     elif ismockmodule(annotation):
         return module_prefix + annotation_name
     elif ismock(annotation):
         return module_prefix + f'{annotation_module}.{annotation_name}'
     elif is_invalid_builtin_class(annotation):
         return module_prefix + _INVALID_BUILTIN_CLASSES[annotation]
+    # special cases
     elif _is_annotated_form(annotation):  # for py39+
         pass
     elif annotation_module == 'builtins' and annotation_qualname:
@@ -400,6 +409,7 @@ def stringify_annotation(
         # PEP 585 generic
         if not args:  # Empty tuple, list, ...
             return repr(annotation)
+
         concatenated_args = ', '.join(stringify_annotation(arg, mode) for arg in args)
         return f'{annotation_qualname}[{concatenated_args}]'
     else:
@@ -423,9 +433,8 @@ def stringify_annotation(
             # handle ForwardRefs
             qualname = annotation_forward_arg
         else:
-            _name = getattr(annotation, '_name', '')
-            if _name:
-                qualname = _name
+            if internal_name := _typing_internal_name(annotation):
+                qualname = internal_name
             elif annotation_qualname:
                 qualname = annotation_qualname
             else:
