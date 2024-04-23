@@ -328,7 +328,10 @@ def test_restify_pep_585():
 def test_restify_Unpack():
     import typing
 
-    from typing_extensions import Unpack as UnpackCompat
+    if sys.version_info[:2] >= (3, 12):
+        from typing import Unpack as UnpackCompat
+    else:
+        from typing_extensions import Unpack as UnpackCompat
 
     class X(typing.TypedDict):
         x: int
@@ -336,7 +339,7 @@ def test_restify_Unpack():
         label: str
 
     # Unpack is considered as typing special form so we always have '~'
-    expect = rf':py:obj:`~{UnpackCompat.__module__}.Unpack`\ [:py:class:`X`]'
+    expect = fr':py:obj:`~{UnpackCompat.__module__}.Unpack`\ [:py:class:`X`]'
     assert restify(UnpackCompat['X'], 'fully-qualified-except-typing') == expect
     assert restify(UnpackCompat['X'], 'smart') == expect
 
@@ -498,7 +501,10 @@ def test_stringify_Annotated():
 def test_stringify_Unpack():
     import typing
 
-    from typing_extensions import Unpack as UnpackCompat
+    if sys.version_info[:2] >= (3, 12):
+        from typing import Unpack as UnpackCompat
+    else:
+        from typing_extensions import Unpack as UnpackCompat
 
     class X(typing.TypedDict):
         x: int
