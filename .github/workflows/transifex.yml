@@ -41,7 +41,6 @@ jobs:
     permissions:
       contents: write  # for peter-evans/create-pull-request to create branch
       pull-requests: write  # for peter-evans/create-pull-request to create a PR
-    if: github.repository_owner == 'sphinx-doc'
     runs-on: ubuntu-latest
 
     steps:
