@@ -5,6 +5,7 @@ on:
   # 22:38 GMT, every Sunday. Chosen to be a random time.
   - cron: "38 22 * * SUN"
   workflow_dispatch:
+  push:
 
 permissions:
   contents: read
