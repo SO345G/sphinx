@@ -1,0 +1,4 @@
+## Babel catalogue errors
+
+* zh_CN: 1 errors
+* ta: 8 errors
