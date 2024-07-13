@@ -171,12 +171,6 @@ def run_compile() -> None:
     """
     log = _get_logger()
 
-    if IS_CI:
-        handler = logging.FileHandler('babel_compile.txt', mode='w', encoding='utf-8')
-        handler.setFormatter(logging.Formatter('%(message)s'))
-        handler.setLevel(logging.ERROR)
-        log.addHandler(handler)
-
     directory = os.path.join('sphinx', 'locale')
     total_errors = {}
 
@@ -240,8 +234,12 @@ def run_compile() -> None:
             # to ensure lines end with ``\n`` rather than ``\r\n``:
             outfile.write(f'Documentation.addTranslations({obj});'.encode())
 
-    for locale, err_count in total_errors.items():
-        log.error('error: %d errors encountered in %r locale.', err_count, locale)
+    if total_errors:
+        _write_pr_body_line('## Babel catalogue errors')
+        _write_pr_body_line('')
+        for locale, err_count in total_errors.items():
+            log.error('error: %d errors encountered in %r locale.', err_count, locale)
+            _write_pr_body_line(f'* {locale}: {err_count} errors')
 
 
 def _get_logger():
@@ -251,6 +249,13 @@ def _get_logger():
     handler.setFormatter(logging.Formatter('%(message)s'))
     log.addHandler(handler)
     return log
+
+
+def _write_pr_body_line(message: str) -> None:
+    if not IS_CI:
+        return
+    with open('babel_compile.txt', 'a', encoding='utf-8') as f:
+        f.write(f'{message}\n')
 
 
 if __name__ == '__main__':
